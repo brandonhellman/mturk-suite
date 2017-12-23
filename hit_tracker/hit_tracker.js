@@ -338,3 +338,62 @@ document.getElementById(`sync`).addEventListener(`click`, async (e) => {
     chrome.runteim
     chrome.runtime.sendMessage({ function: `hitTrackerGetProjected` });
 });
+
+
+function syncAll() {
+    return new Promise(async (resolve) => {
+        const dashboard = await fetchDashboard();
+        const daysToUpdate = await checkDays(dashboard.daily_hit_statistics_overview);
+    });
+}
+
+//syncAll();
+
+function fetchDashboard() {
+    return new Promise(async (resolve) => {
+        (async function fetchLoop() {
+            try {
+                const response = await fetch(`https://worker.mturk.com/dashboard?format=json`, {
+                    credentials: `include`
+                });
+
+                if (response.ok && response.url === `https://worker.mturk.com/dashboard?format=json`) {
+                    const json = await response.json();
+                    resolve(json);
+                }
+                else if (response.url.indexOf(`https://worker.mturk.com/`) === -1) {
+
+                }
+                else {
+                    setTimeout(fetchLoop, 2000);
+                }
+            }
+            catch (error) {
+                setTimeout(fetchLoop, 2000);
+            }
+        })();
+    });
+}
+
+function checkDays(days) {
+    return new Promise((resolve) => {
+        const transaction = hitTrackerDB.transaction([`day`], `readwrite`);
+        const objectStore = transaction.objectStore(`day`);
+        
+        for (const day of days) {
+            const date = day.date.substring(0, 10).replace(/-/g, ``);
+            console.log(date);
+        }
+    });
+}
+
+
+function updateAll() {
+
+}
+
+function updateDay() {
+
+}
+
+

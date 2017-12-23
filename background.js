@@ -99,7 +99,7 @@ chrome.webRequest.onBeforeRequest.addListener((details) => {
     if (match) {
         requestsDB[details.requestId] = {
             tabId: details.tabId,
-            hitSetId: match[1]
+            hit_set_id: match[1]
         };
     }
 }, {
@@ -113,6 +113,7 @@ chrome.webRequest.onCompleted.addListener((details) => {
         const catcher = chrome.extension.getViews().map((o) => o.location.pathname).includes(`/hit_catcher/hit_catcher.html`);
 
         if (catcher && details.url.indexOf(`https://worker.mturk.com/projects/${request.hit_set_id}/tasks`) === -1) {
+            console.log(`sending`);
             setTimeout(() => {
                 chrome.tabs.sendMessage(request.tabId, {
                     hitMissed: request.hit_set_id
@@ -911,7 +912,7 @@ function requesterReviewsUpdate(objectReviews, arrayIds) {
         };
 
         const getReviewsAll = await Promise.all([
-            getReviews(`turkerview`, `https://turkerview.com/api/v1/requesters/?ids=${arrayIds}&from=mts`),
+            getReviews(`turkerview`, `https://api.turkerview.com/api/v1/requesters/?ids=${arrayIds}&from=mts`),
             getReviews(`turkopticon`, `https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${arrayIds}`),
             getReviews(`turkopticon2`, `https://api.turkopticon.info/requesters?rids=${arrayIds}&fields[requesters]=aggregates`)
         ]);

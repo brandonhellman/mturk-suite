@@ -1,4 +1,5 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    console.log(request);
     if (request.hitMissed) {
         hitMissed(request.hitMissed);
     }
@@ -773,6 +774,7 @@ function sendMessage(object) {
 })(`workerID`);
 
 async function hitMissed(hit_set_id) {
+    console.log(`go`)
     await ready({ document: `complete` });
     const react = await require(`reactComponents/alert/Alert`);
 

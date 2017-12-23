@@ -89,9 +89,9 @@ let storage = (async (object) => {
                             match: key,
                             strict: typeof bl.strict === `boolean` ? bl.strict : true,
                         };
-
-                        localStorage.removeItem(`BLOCK_LIST`);
                     }
+                    
+                    localStorage.removeItem(`BLOCK_LIST`);
                 }
                 else {
                     const confirmDelete = confirm(`Do you want to delete your HIT Finder (Legacy) block list?\n\nYou will be asked to import every time you load HIT Finder until it is deleted.`);
@@ -102,7 +102,7 @@ let storage = (async (object) => {
                 }
             }
             catch (error) {
-                alert(`Error while importing include list\n\n${error}`);
+                alert(`Error while importing block list\n\n${error}`);
             }
         }
 
@@ -261,23 +261,26 @@ async function finderRun() {
     };
     Object.keys(params).forEach((key) => url.searchParams.append(key, params[key]));
 
-    const response = await fetch(url, {
-        credentials: `include`
-    });
+    try {
+        const response = await fetch(url, {
+            credentials: `include`
+        });
 
-    if (response.url.indexOf(`https://worker.mturk.com`) === -1) {
-        return finderLoggedOut();
+        if (response.url.indexOf(`https://worker.mturk.com`) === -1) {
+            return finderLoggedOut();
+        }
+        else if (response.ok) {
+            finderProcess(await response.json());
+        }
+        else if (response.status === 429) {
+            document.getElementById(`page-request-errors`).textContent = ++ pageRequestErrors;
+        }
     }
-    else if (response.ok) {
-        finderProcess(await response.json());
+    catch (error) {}
+    finally {
+        document.getElementById(`total-scans`).textContent = ++ totalScans;
+        finderTimeout = setTimeout(finderRun, delay());
     }
-    else if (response.status === 429) {
-        document.getElementById(`page-request-errors`).textContent = ++ pageRequestErrors;
-    }
-
-    document.getElementById(`total-scans`).textContent = ++ totalScans;
-
-    finderTimeout = setTimeout(finderRun, delay());
 }
 
 function finderProcess(json) {
@@ -1412,7 +1415,7 @@ function requesterReviewsUpdate(objectReviews, arrayIds) {
         }
 
         const getReviewsAll = await Promise.all([
-            getReviews(`turkerview`, `https://turkerview.com/api/v1/requesters/?ids=${arrayIds}&from=mts`),
+            getReviews(`turkerview`, `https://api.turkerview.com/api/v1/requesters/?ids=${arrayIds}&from=mts`),
             getReviews(`turkopticon`, `https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${arrayIds}`),
             getReviews(`turkopticon2`, `https://api.turkopticon.info/requesters?rids=${arrayIds}&fields[requesters]=aggregates`)
         ]);
