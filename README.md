@@ -7,7 +7,33 @@ An extension that brings together a large collection of useful tools to assist w
 - Firefox - Coming Soon
 
 # Features
+
+Omnibar & Contect Menus
+- [Searching MTurk](#searching-mturk)
 - [Paste MTurk Worker ID](#paste-mturk-worker-id)
+- [Contact Requester](#contact-requester)
+- [Send to HIT Catcher](#send-to-hit-catcher)
+
+
+MTurk
+- [Auto Accept Checker](#auto-accept-checker)
+- []()
+- []()
+- []()
+- []()
+- []()
+- []()
+- []()
+- []()
+- []()
+- []()
+- []()
+- []()
+
+MTurk Suite
+- []()
+- []()
+- []()
 
 
  ## Searching MTurk
