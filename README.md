@@ -7,15 +7,14 @@ An extension that brings together a large collection of useful tools to assist w
 - Firefox - Coming Soon
 
 # Features
-
-Omnibar & Contect Menus
+**[Omnibar & Contect Menus](#omnibar--contect-menus)**
 - [Searching MTurk](#searching-mturk)
 - [Paste MTurk Worker ID](#paste-mturk-worker-id)
 - [Contact Requester](#contact-requester)
 - [Send to HIT Catcher](#send-to-hit-catcher)
 
-
-MTurk
+---
+**[MTurk](#mturk)**
 - [Auto Accept Checker](#auto-accept-checker)
 - [Confirm Return HIT](#confirm-return-hit)
 - [HIT Exporter](#hit-exporter)
@@ -25,13 +24,16 @@ MTurk
 - [Requester Reviews](#requester-reviews)
 - [Workspace Expander](#workspace-expander)
 
-MTurk Suite
+---
+**[MTurk Suite](#mturk-suite)**
 - [HIT Finder](#hit-finder)
 - [HIT Catcher](#hit-catcher)
 - [HIT Tracker](#hit-tracker)
 
+---
 
-# Features - Omnibar & Contect Menus
+
+# Omnibar & Contect Menus
  ## Searching MTurk
  Lets you search MTurk for HITs from the omnibar.
  
@@ -63,7 +65,7 @@ MTurk Suite
  ---
  
 
-# Features - MTurk
+# MTurk
  ## Auto Accept Checker
  Keeps the auto accept next hit checkbox always checked.
  - Can be enabled/disabled in the options
@@ -146,7 +148,7 @@ MTurk Suite
   - Can be enabled/disabled in the options
 
 
-# Features - MTurk Suite
+# MTurk Suite
  ## HIT Finder
  Find HITs (Documentation coming later)
  
