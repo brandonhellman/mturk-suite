@@ -1,47 +1,137 @@
 # Mturk Suite
-An extension for https://www.mturk.com/ and in the future https://worker.mturk.com/
+An extension that brings together a large collection of useful tools to assist workers on Amazon Mechanical Turk.
+
 
 # Install
 - [Chrome](https://chrome.google.com/webstore/detail/mturk-suite/iglbakfobmoijpbigmlfklckogbefnlf)
-- [Firefox](https://addons.mozilla.org/en-US/firefox/addon/mturk-suite/)
+- Firefox - Coming Soon
 
-# Features - General
-- Right clicking inside an input field gives the option to paste your Worker ID
-- Right clicking highlighted text gives the option to search for it on Mturk
+# Features - Context Menus and Omnibar
+ Adds features to the right click context menus and the omnibar.
 
-# Features - https://www.mturk.com/
-- Today's Projected Earnings displayed on every page and updates when you submit a HIT
-  - Progress bar live updates with TPE and goal is set in the extension dropdown
-- **HIT Export**
-  - Forum export
-  - [TurkerHub](https://turkerhub.com) direct export
-  - [MturkCrowd](http://www.mturkcrowd.com) direct export
-  - Can be toggled on/off in the extension dropdown
-- Turkopticon links and values displayed on hover of TO circle
-- Requester link and auto approval time added to the HIT capsule for HITs
-- **Dashboard**
-  - Shows the changes to twelve different values
-  - Shows what your approval rating will be if all of your pending HITs approve or reject
-  - Shows how many rejections you have to get to drop below 99% and 95% approval rating
-- Dark theme with on/off toggle in the extension dropdown
-- The HIT workspace can be scrolled to and resized to your screen with on/off toggle in the extension dropdown
-- Queue page shows the total value of HITs for that page
-- Automatically accept the next HIT checkbox automatically checked with on/off toggle in the extension dropdown dropdown
-- Contact link added for HITs that you are not qualified for
+ ## Searching MTurk
+ Lets you search MTurk for HITs from the omnibar.
+ ![Omnibar](https://i.gyazo.com/c1143dc3ea73bf00e12fb862a6a223a1.gif)
+ 
+ ---
+ 
+ ## Paste MTurk Worker ID
+ Right clicking inside any input field gives the option to paste your Worker ID.
+ ![Paste MTurk Worker ID](https://i.gyazo.com/8a55584965ad149a9a6ab57853b44535.png)
+ 
+ ---
+ 
+ ## Contact Requester
+ Right clicking a requester link gives the option to contact the requester
+ ![Contact Requester](https://i.gyazo.com/3d5ba989f4806aef95d365757a607452.png)
+ 
+ ---
+ 
+ ## Send to HIT Catcher
+ Right clicking a preview or accept link gives the option to send that HIT to HIT Catcher
+ ![Send to HIT Catcher](https://i.gyazo.com/c4466b78292de69f2fad87b91965c2fb.png)
+ 
+ ---
+ 
 
-# Features - https://worker.mturk.com/
-- Turkopticon
-- Accept Next Checked
-- Workspace
-- Enable Unqualified Filter
-- Queue Count and Value
+# Features - Worker
+ Adds features directly to the https://worker.mturk.com/ website.
 
-# Known Issues Chrome
-- None
+ ## Auto Accept Checker
+ Keeps the auto accept next hit checkbox always checked.
+ - Can be enabled/disabled in the options
+ 
+ 
+ ![Auto Accept Next Checked](https://i.imgur.com/XWHCPBR.png)
+ 
+ 
+ ---
+ ## Confirm Return HIT
+ Prevent accidental returns by adding a prompt when returning a HIT from your queue or HIT page.
+  - Can be enabled/disabled in the options
+  
+  
+ ![Return HIT Warning](https://i.imgur.com/lXZQWBO.png)
+ 
+ 
+ ---
+ ## HIT Exporter
+ Allows you to export HITs as formatted text with short (soon), plain, bbcode, markdown styling and direct export to TurkerHub.com or MTurkCrowd.com if logged into those forums.
+ - Can be enabled/disabled in the options
+ - Appears on search pages and the queue
+ - Popup with all export options if all is selected in the options
+ - Directly exports HIT to the format of choice when a specific on is selected in the options
+ 
+ 
+ ![Export Buttons](https://i.gyazo.com/2ef9ea3d5cbf37f11be87b914ae71314.png)
+ ![Export Popup](https://i.gyazo.com/9faf86c2d46d16fbb787173687052f14.png)
+ 
+ 
+ **Formats**
+ - Short: A single line export with shortened URLs
+ - Plain: No special formatting
+ - BBCode: Uses BBCode formatting, useful for bulletin board forums
+ - Markdown: Uses markdown formatting, useful for sharing on discourse forums and reddit
+ - Turker Hub: Directly export to TurkerHub.com if logged in to the forum
+ - MTurk Crowd: Direct export to MTurkCrowd.com if logged in to the forum
+ 
+ 
+ ---
+ ## HIT Details Enhancer
+ Changes the HIT Details link text to the requester name, changes the requester name inside the popup to a link that searches for their HITs and adds the remaining HIT count to the details bar.
+ - Can be enabled/disabled in the options
+ 
+ 
+ ![HIT Details Bar](https://i.imgur.com/Ce3xGX1.png)
+ 
+  ---
+ ## Queue Info Enhancer
+ Shows you how many HITs you have in your queue along with how much they are worth.
+ - Can be enabled/disabled in the options
+ 
+ 
+ ![Queue Title Text](https://i.gyazo.com/454b0fb82772de6da1076b5e4f79fc56.png)
+ 
+ 
+ ## Rate Limit Reloader
+ Automatically reloads the page if you exceeded the allowable page request rate.
+ - Can be enabled/disabled in the options
+ 
+ 
+ ---
+ ## Rate Limit Reloader
+ Automatically reloads the page if you exceeded the allowable page request rate.
+ - Can be enabled/disabled in the options
+ 
+ 
+ ---
+ ## Requester Reviews
+ Displays requester reviews next to requester names so workers can easily see their ratings.
+ - Can be enabled/disabled in the options
+ - Can show ratings from TurkerView, Turkopticon and Turkopticon 2
+ - Can choose to use all three sites, any combination of the two or one by itself
+ - Appears on search pages, status detail pages and the queue
+ - Color scale based on the averages pay rating for site that have a review
+ 
+ 
+ ![Color Scale](https://i.gyazo.com/cebcbdf7ef4732491af5ffaf93120fed.png)
+ ![Color Scale](https://i.gyazo.com/bcba1e5de572917b40c7323a294daa62.png)
+ 
+ 
+ ---
+ ## Workspace Expander
+ Expands accepted HITs to fill the browser viewport, scrolls to the HIT and focuses it.
+  - Can be enabled/disabled in the options
 
-# Known Issues Firefox
-- Today's Projected Earnings live updating not working until FF v52
 
+# Features - HIT Finder
+Find HITs (Documentation coming later)
 
-# Features
-- 
+# Features - HIT Catcher
+Catch HITs (Documentation coming later)
+
+# Features - HIT Tracker
+Keeps track of all HITs that you work on. (Documentation incomplete)
+
+ - Live projected earnings updating when you submit a HIT
+ - See projected earnings for today, this week and this month
