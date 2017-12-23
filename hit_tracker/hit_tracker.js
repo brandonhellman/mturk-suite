@@ -124,6 +124,12 @@ function displayTodaysInfo(hits) {
     document.getElementById(`returned-count`).textContent = today.returned.count;
     document.getElementById(`returned-value`).textContent = today.returned.value.toMoneyString();
 
+    const requesterTbody = document.getElementById(`requester-tbody`);
+    
+    while (requesterTbody.firstChild) {
+        requesterTbody.removeChild(requesterTbody.firstChild);
+    }
+
     const sorted = Object.keys(requesters).sort((a, b) => requesters[a].reward - requesters[b].reward);
 
     for (let i = sorted.length - 1; i > -1; i --) {
@@ -148,9 +154,10 @@ function displayTodaysInfo(hits) {
         value.textContent = req.value.toMoneyString();
         row.appendChild(value);
 
-        document.getElementById(`requester-tbody`).appendChild(row);
+        requesterTbody.appendChild(row);
     }
 
+    document.getElementById(`tracker-projected-today-count`).textContent = today.submitted.count;
     document.getElementById(`tracker-projected-today-value`).textContent = today.submitted.value.toMoneyString();
 
     chrome.storage.local.set({
@@ -161,10 +168,6 @@ function displayTodaysInfo(hits) {
 
 
 function syncDay(date) {
-    console.time(`syncDay`);
-    const modal = document.getElementById(`sync-modal`);
-    updating = true;
-
     return new Promise(async (resolve) => {
         syncingStarted();
 
@@ -176,15 +179,12 @@ function syncDay(date) {
         await sync(date);
         await saveDay(date);
 
-        sycningEnded();
-        console.timeEnd(`syncDay`);
+        sycningEnded();        
+        resolve();
     });
 }
 
 function syncLast45() {
-    const modal = document.getElementById(`sync-modal`);
-    updating = true;
-
     return new Promise(async (resolve) => {
         syncingStarted();
 
@@ -200,6 +200,7 @@ function syncLast45() {
         }
 
         sycningEnded();
+        resolve();
     });
 }
 
@@ -310,10 +311,10 @@ function checkDays(days) {
                 const value = cursor.value;
                 const now = value.day;
 
-                const pending = now.pending === value.submitted + value.pending;
+                const pending = now.pending === value.submitted;
                 const approved = now.approved === value.paid;
                 const rejected = now.rejected === value.rejected;
-                const submitted = now.submitted === value.submitted + value.approved + value.rejected + value.pending + value.paid;
+                const submitted = now.submitted === value.submitted + value.approved + value.rejected + value.paid;
 
                 if (!approved) {
                     console.log(`paid ${value.date}: ${now.approved} vs ${value.paid}`, value);
@@ -348,12 +349,27 @@ function checkDays(days) {
 function saveDay(date) {
     return new Promise(async (resolve) => {
         const count = await countDay(date);
-        //count.bonuses = count.day.earnings - count.day.approved - count.day.paid;;
 
         const transaction = hitTrackerDB.transaction([`day`], `readwrite`);
         const objectStore = transaction.objectStore(`day`);
 
-        objectStore.put(count);
+        const request = objectStore.get(date);
+
+        request.onsuccess = (event) => {
+            const result = event.target.result
+
+            if (result) {
+                count.day = result.day;
+                count.bonuses = count.day.earnings - count.day.approved - count.day.paid;
+
+                if (count.bonuses > 0) {
+                    console.log(count);
+                }
+            }
+
+            objectStore.put(count);
+        };
+
 
         transaction.oncomplete = (event) => {
             resolve();
@@ -366,16 +382,16 @@ function countDay(date) {
     return new Promise((resolve) => {
         const object = {
             date: date,
-            
+
             assigned: 0,  
             returned: 0, 
             abandoned: 0, 
-             
+
             paid: 0,
             approved: 0,
             rejected: 0,
             submitted: 0,
-            
+
             earnings: 0,
             bonuses: 0
         };
@@ -524,6 +540,7 @@ function loggedOut() {
         enqueue: true,
         voiceName: `Google US English`
     });
+
     sycningEnded();
 }
 
@@ -684,10 +701,10 @@ function mturkDateString() {
 
 document.getElementById(`sync-today`).addEventListener(`click`, async (e) => {
     await syncDay(mturkDate());
-    
+
     getTodaysInfo();
     getTrackerInfo();
-    
+
     chrome.runtime.sendMessage({
         function: `hitTrackerGetProjected`
     });
@@ -695,16 +712,28 @@ document.getElementById(`sync-today`).addEventListener(`click`, async (e) => {
 
 document.getElementById(`sync-last-45-days`).addEventListener(`click`, async (e) => {
     await syncLast45();
-    
+
     getTodaysInfo();
     getTrackerInfo();
-    
+
     chrome.runtime.sendMessage({
         function: `hitTrackerGetProjected`
     });
 });
 
+(function updateTheme() {
+    const theme = document.getElementById(`theme`);
 
+    chrome.storage.local.get([`themes`], (keys) => {
+        theme.href = `/bootstrap/css/${keys.themes.mts}.min.css`;
+
+        chrome.storage.onChanged.addListener((changes) => {
+            if (changes.themes) {
+                theme.href = `/bootstrap/css/${changes.themes.newValue.mts}.min.css`;
+            }
+        });
+    });
+})();
 
 
 

@@ -19,7 +19,7 @@ chrome.contextMenus.create({
         const requesterId = match ? match[1] : null;
 
         if (requesterId) {
-            window.open(`https://www.mturk.com/mturk/contact?requesterId=${requesterId}`);
+            window.open(`https://worker.mturk.com/contact_requester/assignment_messages/new?requester_id=${requesterId}`);
         }
     }
 });
