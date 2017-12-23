@@ -17,25 +17,21 @@ Omnibar & Contect Menus
 
 MTurk
 - [Auto Accept Checker](#auto-accept-checker)
-- []()
-- []()
-- []()
-- []()
-- []()
-- []()
-- []()
-- []()
-- []()
-- []()
-- []()
-- []()
+- [Confirm Return HIT](#confirm-return-hit)
+- [HIT Exporter](#hit-exporter)
+- [HIT Details Enhancer](#hit-details-enhancer)
+- [Queue Info Enhancer](#queue-info-enhancer)
+- [Rate Limit Reloader](#rate-limit-reloader)
+- [Requester Reviews](#requester-reviews)
+- [Workspace Expander](#workspace-expander)
 
 MTurk Suite
-- []()
-- []()
-- []()
+- [HIT Finder](#hit-finder)
+- [HIT Catcher](#hit-catcher)
+- [HIT Tracker](#hit-tracker)
 
 
+# Features - Omnibar & Contect Menus
  ## Searching MTurk
  Lets you search MTurk for HITs from the omnibar.
  
@@ -67,6 +63,7 @@ MTurk Suite
  ---
  
 
+# Features - MTurk
  ## Auto Accept Checker
  Keeps the auto accept next hit checkbox always checked.
  - Can be enabled/disabled in the options
@@ -123,11 +120,6 @@ MTurk Suite
  ![Queue Title Text](https://i.gyazo.com/454b0fb82772de6da1076b5e4f79fc56.png)
  
  
- ## Rate Limit Reloader
- Automatically reloads the page if you exceeded the allowable page request rate.
- - Can be enabled/disabled in the options
- 
- 
  ---
  ## Rate Limit Reloader
  Automatically reloads the page if you exceeded the allowable page request rate.
@@ -154,15 +146,16 @@ MTurk Suite
   - Can be enabled/disabled in the options
 
 
-# Features - HIT Finder
-Find HITs (Documentation coming later)
-
-# Features - HIT Catcher
-Catch HITs (Documentation coming later)
-
-# Features - HIT Tracker
-Keeps track of all HITs that you work on. (Documentation incomplete)
-
+# Features - MTurk Suite
+ ## HIT Finder
+ Find HITs (Documentation coming later)
+ 
+ ## HIT Catcher
+ Catch HITs (Documentation coming later)
+ 
+ ## HIT Tracker
+ Keeps track of all HITs that you work on. (Documentation incomplete)
+ 
  - Live projected earnings updating when you submit a HIT
  - See projected earnings for today
  - See projected earnings this week
