@@ -1,3 +1,9 @@
+Object.assign(Number.prototype, {
+    toMoneyString() {
+        return `$${this.toFixed(2).toLocaleString(`en-US`, { minimumFractionDigits: 2 })}`;
+    }
+});
+
 let hitTrackerDB, updating = false;
 
 (() => {
@@ -6,6 +12,7 @@ let hitTrackerDB, updating = false;
     open.onsuccess = (e) => {
         hitTrackerDB = e.target.result;
         getTodaysInfo();
+        getTrackerInfo();
     };
     open.onupgradeneeded = (e) => {
         alert(`Something went wrong, please reload MTS`);
@@ -144,198 +151,48 @@ function displayTodaysInfo(hits) {
         document.getElementById(`requester-tbody`).appendChild(row);
     }
 
-    document.getElementById(`projected`).textContent = today.submitted.value.toMoneyString();
+    document.getElementById(`tracker-projected-today-value`).textContent = today.submitted.value.toMoneyString();
 
     chrome.storage.local.set({
         earnings: today.submitted.value
     });
 }
 
-function updateDay(date) {
-    return new Promise(async (resolve, reject) => {
-        updating = true;
 
-        syncModalUpdate(date, 0, 0);
-
-        const modal = document.getElementById(`sync-modal`);
-
-        $(modal).modal({ backdrop: `static`, keyboard: false });
-
-        await syncQueue(await getQueue());
-        await syncDay(date);
-
-        updating = false;
-
-        $(modal).modal(`hide`);
-
-        resolve();
-    });
-}
 
 function syncDay(date) {
-    return new Promise(async (resolve, reject) => {
-        const syncData = {}
-        const fetchDate = [date.slice(0, 4), date.slice(4,6), date.slice(6,8)].join(`-`);
-
-        (async function syncDayLoop(page) {
-            const response = await fetch(`https://worker.mturk.com/status_details/${fetchDate}?page_number=${page}&format=json`, {
-                credentials: `include`
-            });
-
-            if (response.ok) {
-                const json = await response.json();
-
-                if (json.num_results > 0) {
-                    syncModalUpdate(date, page, json.total_num_results);
-
-                    const transaction = hitTrackerDB.transaction([`hit`], `readwrite`);
-                    const objectStore = transaction.objectStore(`hit`);
-
-                    for (const hit of json.results) {
-                        const request = objectStore.get(hit.hit_id);
-
-                        request.onsuccess = (event) => {
-                            const result = event.target.result
-
-                            if (result) {
-                                for (const prop in result) {
-                                    hit[prop] = result[prop];
-                                }
-                            }
-
-                            hit.date = date;
-                            objectStore.put(hit);
-                        };
-                    }
-
-                    transaction.oncomplete = (e) => {
-                        return syncDayLoop(++ page)
-                    }
-                }
-                else {
-                    resolve();
-                }
-            }
-            else {
-                return setTimeout(syncDayLoop, 2000, page);
-            }
-        })(1);
-    });
-}
-
-function syncModalUpdate(date, page, hits) {
-    if (date) {
-        document.getElementById(`sync-date`).textContent = [date.slice(0, 4), date.slice(4, 6), date.slice(6, 8)].join(`-`);
-    }
-    if (page) {
-        document.getElementById(`sync-page-current`).textContent = page;
-    }
-    if (hits) {
-        document.getElementById(`sync-page-total`).textContent = Math.ceil(hits / 20);
-        document.getElementById(`sync-hits-total`).textContent = hits;
-    }    
-}
-
-function getQueue() {
-    return new Promise(async (resolve, reject) => {
-        const response = await fetch(`https://worker.mturk.com/tasks?format=json`, { credentials: `include` });
-
-        if (response.ok) {
-            const json = await response.json();
-            resolve(json);
-        }
-        else {
-            reject();
-        }
-    });
-}
-
-function syncQueue(queue) {
-    return new Promise(async (resolve) => {
-        const transaction = hitTrackerDB.transaction([`hit`], `readwrite`);
-        const objectStore = transaction.objectStore(`hit`);
-        const index = objectStore.index(`state`);
-        const only = IDBKeyRange.only(`Assigned`);
-
-        const hit_ids = queue.tasks.map((o) => o.task_id);
-
-        if (hit_ids.length) {
-            index.openCursor(only).onsuccess = (event) => {
-                const cursor = event.target.result;
-
-                if (cursor) {
-                    if (!hit_ids.includes(cursor.value.hit_id)) {
-                        cursor.value.state = `Abandoned`;
-                        cursor.update(cursor.value);
-                    }
-
-                    cursor.continue();
-                }
-            };
-        }
-        else {
-            index.openCursor(only).onsuccess = (event) => {
-                const cursor = event.target.result;
-
-                if (cursor) {                            
-                    cursor.value.state = `Abandoned`
-                    cursor.update(cursor.value);
-                    cursor.continue();
-                }
-            };
-        }
-
-        transaction.oncomplete = (event) => {
-            resolve();
-        };
-    });
-}
-
-function mturkDate() {
-    function dst() {
-        const today = new Date();
-        const year = today.getFullYear();
-        let start = new Date(`March 14, ${year} 02:00:00`);
-        let end = new Date(`November 07, ${year} 02:00:00`);
-        let day = start.getDay();
-        start.setDate(14 - day);
-        day = end.getDay();
-        end.setDate(7 - day);
-        return (today >= start && today < end) ? true : false;
-    }
-
-    const given = new Date();
-    const utc = given.getTime() + (given.getTimezoneOffset() * 60000);
-    const offset = dst() === true ? `-7` : `-8`;
-    const amz = new Date(utc + (3600000 * offset));
-    const day = (amz.getDate()) < 10 ? `0` + (amz.getDate()).toString() : (amz.getDate()).toString();
-    const month = (amz.getMonth() + 1) < 10 ? `0` + (amz.getMonth() + 1).toString() : ((amz.getMonth() + 1)).toString();
-    const year = (amz.getFullYear()).toString();
-    return year + month + day;
-}
-
-Object.assign(Number.prototype, {
-    toMoneyString() {
-        return `$${this.toFixed(2).toLocaleString(`en-US`, { minimumFractionDigits: 2 })}`;
-    }
-});
-
-document.getElementById(`sync`).addEventListener(`click`, async (e) => {
-    await updateDay(mturkDate());
-    getTodaysInfo();
-    chrome.runtime.sendMessage({ function: `hitTrackerGetProjected` });
-});
-
-
-function syncAll() {
+    console.time(`syncDay`);
     const modal = document.getElementById(`sync-modal`);
     updating = true;
 
     return new Promise(async (resolve) => {
         syncingStarted();
 
-        const dashboard = await fetchDashboard();
-        const daysToUpdate = await checkDays(dashboard.daily_hit_statistics_overview);
+        const dash = await fetchDashboard();
+        const days = dash.daily_hit_statistics_overview.reduce((acc, cV) => { acc[cV.date.substring(0, 10).replace(/-/g, ``)] = cV; return acc; }, {});
+
+        await updateDashboard(days);
+
+        await sync(date);
+        await saveDay(date);
+
+        sycningEnded();
+        console.timeEnd(`syncDay`);
+    });
+}
+
+function syncLast45() {
+    const modal = document.getElementById(`sync-modal`);
+    updating = true;
+
+    return new Promise(async (resolve) => {
+        syncingStarted();
+
+        const dash = await fetchDashboard();
+        const days = dash.daily_hit_statistics_overview.reduce((acc, cV) => { acc[cV.date.substring(0, 10).replace(/-/g, ``)] = cV; return acc; }, {});
+
+        await updateDashboard(days);
+        const daysToUpdate = await checkDays(days);
 
         for (const date of daysToUpdate) {
             await sync(date);
@@ -345,8 +202,6 @@ function syncAll() {
         sycningEnded();
     });
 }
-
-//syncAll();
 
 function fetchQueue(date) {
     syncingUpdated(date, `fetching queue`);
@@ -391,7 +246,7 @@ function fetchDashboard(date) {
                     resolve(json);
                 }
                 else if (response.url.indexOf(`https://worker.mturk.com/`) === -1) {
-                    throw `You are logged out!`;
+                    return loggedOut();
                 }
                 else {
                     setTimeout(fetchLoop, 2000);
@@ -404,26 +259,88 @@ function fetchDashboard(date) {
     });
 }
 
-
-function checkDays(days) {
-    syncingUpdated(null, `checking days`);
-
+function updateDashboard(days) {
     return new Promise((resolve) => {
-        const dates = [`20171221`, `20171220`]//[`20171221`, `20171220`, `20171219`, `20171218`, `20171217`];//days.map((o) => o.date.substring(0, 10).replace(/-/g, ``));
         const transaction = hitTrackerDB.transaction([`day`], `readwrite`);
         const objectStore = transaction.objectStore(`day`);
-        const bound = IDBKeyRange.bound(dates[dates.length - 1], dates[0]);
+
+        for (const day in days) {
+            const request = objectStore.get(day);
+
+            request.onsuccess = (event) => {
+                const result = event.target.result || {
+                    date: day,
+                    assigned: 0,  
+                    returned: 0, 
+                    abandoned: 0, 
+                    submitted: 0, 
+                    approved: 0, 
+                    rejected: 0, 
+                    pending: 0,
+                    paid: 0,
+                    earnings: 0,
+                    bonuses: 0
+                };
+
+                result.day = days[day];
+                objectStore.put(result);
+            };
+        }
+
+        transaction.oncomplete = (event) => {
+            resolve();
+        }
+    });
+}
+
+function checkDays(days) {
+    syncingUpdated(null, `checking last 45 days`);
+
+    const daysArray = Object.keys(days).sort();
+
+    return new Promise((resolve) => {
+        const transaction = hitTrackerDB.transaction([`day`], `readwrite`);
+        const objectStore = transaction.objectStore(`day`);
+        const bound = IDBKeyRange.bound(daysArray[0], daysArray[daysArray.length - 1]);
 
         objectStore.openCursor(bound).onsuccess = (event) => {
-            const cursor = event.target.result; console.log(cursor);
+            const cursor = event.target.result;
 
             if (cursor) {
-                console.log(cursor);
+                const value = cursor.value;
+                const now = value.day;
+
+                const pending = now.pending === value.submitted + value.pending;
+                const approved = now.approved === value.paid;
+                const rejected = now.rejected === value.rejected;
+                const submitted = now.submitted === value.submitted + value.approved + value.rejected + value.pending + value.paid;
+
+                if (!approved) {
+                    console.log(`paid ${value.date}: ${now.approved} vs ${value.paid}`, value);
+                }
+                else if (!pending) {
+                    console.log(`pending ${value.date}: ${now.pending} vs ${(value.submitted + value.pending)}`, value);
+                }
+                else if (!rejected) {
+                    console.log(`rejected ${value.date}: ${now.rejected} vs ${value.rejected}`, value);
+                }
+                else if (!submitted) {
+                    console.log(`submitted ${value.date}: ${now.submitted} vs ${(value.submitted + value.approved + value.rejected + value.pending + value.paid)}`, value);
+                }
+                else {
+                    const i = daysArray.indexOf(value.date);
+
+                    if (i !== -1) {
+                        daysArray.splice(i, 1);
+                    }
+                }
+
+                cursor.continue();
             }
         };
 
         transaction.oncomplete = (event) => {
-            resolve(dates);
+            resolve(daysArray);
         };
     });
 }
@@ -431,51 +348,36 @@ function checkDays(days) {
 function saveDay(date) {
     return new Promise(async (resolve) => {
         const count = await countDay(date);
-        console.log(count);
-        
+        //count.bonuses = count.day.earnings - count.day.approved - count.day.paid;;
+
         const transaction = hitTrackerDB.transaction([`day`], `readwrite`);
         const objectStore = transaction.objectStore(`day`);
-        
+
         objectStore.put(count);
 
         transaction.oncomplete = (event) => {
             resolve();
         };
-        
     });
 }
-
-const sampleHit = {
-    hit_id: String,
-    requester_feedback: String,
-    requester_id: String,
-    requester_name: String,
-    reward: {
-        amount_in_dollars: Number,
-        currency_code: String
-    },
-    state: String,
-    title: String,
-
-    date: String,
-    source: String,
-    answer: Object
-};
 
 
 function countDay(date) {
     return new Promise((resolve) => {
         const object = {
             date: date,
+            
             assigned: 0,  
             returned: 0, 
             abandoned: 0, 
-            submitted: 0, 
-            approved: 0, 
-            rejected: 0, 
-            pending: 0,
+             
             paid: 0,
-            earnings: 0
+            approved: 0,
+            rejected: 0,
+            submitted: 0,
+            
+            earnings: 0,
+            bonuses: 0
         };
 
         const transaction = hitTrackerDB.transaction([`hit`], `readonly`);
@@ -488,15 +390,19 @@ function countDay(date) {
 
             if (cursor) {
                 const state = cursor.value.state.toLowerCase();
-                
+
                 object[state] ++;
-                object.earnings += cursor.value.reward.amount_in_dollars;
+
+                if (state === `paid` || `approved`) {
+                    object.earnings += cursor.value.reward.amount_in_dollars;
+                }
 
                 cursor.continue();
             }
         };
 
         transaction.oncomplete = (event) => {
+            object.earnings = Number(object.earnings.toFixed(2));
             resolve(object);
         };
     });
@@ -567,6 +473,10 @@ function sync(date) {
                                 }
                             }
 
+                            if (hit.state === `Approved` && hit.reward.amount_in_dollars == 0) {
+                                hit.state = `Paid`;
+                            }
+
                             hit.date = date;
                             objectStore.put(hit);
                         };
@@ -602,7 +512,6 @@ function syncingStarted() {
 function syncingUpdated(date, message) {
     document.getElementById(`sync-date`).textContent = date ? [date.slice(0, 4), date.slice(4, 6), date.slice(6, 8)].join(`-`) : null;
     document.getElementById(`sync-message`).textContent = message ? message : null;
-    console.log(date, message);
 }
 
 function sycningEnded() {
@@ -610,17 +519,190 @@ function sycningEnded() {
     $(document.getElementById(`sync-modal`)).modal(`hide`);
 }
 
+function loggedOut() {
+    chrome.tts.speak(`Attention, you are logged out of MTurk.`, {
+        enqueue: true,
+        voiceName: `Google US English`
+    });
+    sycningEnded();
+}
 
-//View Pending: Submitted
-//View Paid: Paid
+function getTrackerInfo() {
+    const transaction = hitTrackerDB.transaction([`hit`], `readonly`);
+    const objectStore = transaction.objectStore(`hit`);
+    const indexDate = objectStore.index(`date`);
+    const indexState = objectStore.index(`state`);
+    const onlyApproved = IDBKeyRange.only(`Approved`);
+    const onlySubmitted = IDBKeyRange.only(`Submitted`);
+
+    let approvedCount = 0, approvedValue = 0;
+    indexState.openCursor(onlyApproved).onsuccess = (event) => {
+        const cursor = event.target.result;
+
+        if (cursor) {
+            approvedCount ++;
+            approvedValue += cursor.value.reward.amount_in_dollars
+            cursor.continue();
+        }
+        else {
+            document.getElementById(`tracker-approved-count`).textContent = approvedCount;
+            document.getElementById(`tracker-approved-value`).textContent = approvedValue.toMoneyString();
+        }
+    };
+
+    let submittedValue = 0, submittedCount = 0;
+    indexState.openCursor(onlySubmitted).onsuccess = (event) => {
+        const cursor = event.target.result;
+
+        if (cursor) {
+            submittedCount ++;
+            submittedValue += cursor.value.reward.amount_in_dollars
+            cursor.continue();
+        }
+        else {
+            document.getElementById(`tracker-pending-count`).textContent = submittedCount;
+            document.getElementById(`tracker-pending-value`).textContent = submittedValue.toMoneyString();
+        }
+    };
+
+    const week = getWeek(), month = getMonth();
+    const boundWeek = IDBKeyRange.bound(week.start, week.end);
+    const boundMonth = IDBKeyRange.bound(month.start, month.end);
+
+    let weekCount = 0, weekValue = 0; console.time(`boundWeek`);
+    indexDate.openCursor(boundWeek).onsuccess = (event) => {
+        const cursor = event.target.result;
+
+        if (cursor) {
+            if (cursor.value.state.match(/Submitted|Pending|Approved|Paid/)) {
+                weekCount ++;
+                weekValue += cursor.value.reward.amount_in_dollars;
+            }
+            cursor.continue();
+        }
+        else {
+            document.getElementById(`tracker-projected-week-count`).textContent = weekCount;
+            document.getElementById(`tracker-projected-week-value`).textContent = weekValue.toMoneyString();
+
+            console.timeEnd(`boundWeek`);
+        }
+    };
+
+    let monthCount = 0, monthValue = 0; console.time(`boundMonth`);
+    indexDate.openCursor(boundMonth).onsuccess = (event) => {
+        const cursor = event.target.result;
+
+        if (cursor) {
+            if (cursor.value.state.match(/Submitted|Pending|Approved|Paid/)) {
+                monthCount ++;
+                monthValue += cursor.value.reward.amount_in_dollars
+            }
+            cursor.continue();
+        }
+        else {
+            document.getElementById(`tracker-projected-month-count`).textContent = monthCount;
+            document.getElementById(`tracker-projected-month-value`).textContent = monthValue.toMoneyString();
+
+            console.timeEnd(`boundMonth`);
+        }
+    };
+
+    transaction.oncomplete = (event) => {
+        document.getElementById(`tracker-pending-value`).textContent = submittedValue.toMoneyString();
+
+    }
+}
 
 
+function getWeek() {
+    const today = mturkDateString();
+    const month = (today.getMonth() + 1) < 10 ? `0` + (today.getMonth() + 1).toString() : ((today.getMonth() + 1)).toString();
+    const year = (today.getFullYear()).toString();
+    const date = new Date(today);
+
+    return {
+        start: year + month + (date.getDate() - date.getDay()),
+        end: year + month + (date.getDate() - date.getDay() + 6),
+    }
+}
+
+function getMonth() {
+    const today = mturkDateString();
+    const month = (today.getMonth() + 1) < 10 ? `0` + (today.getMonth() + 1).toString() : ((today.getMonth() + 1)).toString();
+    const year = (today.getFullYear()).toString();
+    const date = new Date(today);
 
 
+    return {
+        start: year + month + `01`,
+        end: mturkDate(),
+    }
+}
 
+function mturkDate() {
+    function dst() {
+        const today = new Date();
+        const year = today.getFullYear();
+        let start = new Date(`March 14, ${year} 02:00:00`);
+        let end = new Date(`November 07, ${year} 02:00:00`);
+        let day = start.getDay();
+        start.setDate(14 - day);
+        day = end.getDay();
+        end.setDate(7 - day);
+        return (today >= start && today < end) ? true : false;
+    }
 
+    const given = new Date();
+    const utc = given.getTime() + (given.getTimezoneOffset() * 60000);
+    const offset = dst() === true ? `-7` : `-8`;
+    const amz = new Date(utc + (3600000 * offset));
+    const day = (amz.getDate()) < 10 ? `0` + (amz.getDate()).toString() : (amz.getDate()).toString();
+    const month = (amz.getMonth() + 1) < 10 ? `0` + (amz.getMonth() + 1).toString() : ((amz.getMonth() + 1)).toString();
+    const year = (amz.getFullYear()).toString();
+    return year + month + day;
+}
 
+function mturkDateString() {
+    function dst() {
+        const today = new Date();
+        const year = today.getFullYear();
+        let start = new Date(`March 14, ${year} 02:00:00`);
+        let end = new Date(`November 07, ${year} 02:00:00`);
+        let day = start.getDay();
+        start.setDate(14 - day);
+        day = end.getDay();
+        end.setDate(7 - day);
+        return (today >= start && today < end) ? true : false;
+    }
 
+    const given = new Date();
+    const utc = given.getTime() + (given.getTimezoneOffset() * 60000);
+    const offset = dst() === true ? `-7` : `-8`;
+    const amz = new Date(utc + (3600000 * offset));
+    return amz;
+}
+
+document.getElementById(`sync-today`).addEventListener(`click`, async (e) => {
+    await syncDay(mturkDate());
+    
+    getTodaysInfo();
+    getTrackerInfo();
+    
+    chrome.runtime.sendMessage({
+        function: `hitTrackerGetProjected`
+    });
+});
+
+document.getElementById(`sync-last-45-days`).addEventListener(`click`, async (e) => {
+    await syncLast45();
+    
+    getTodaysInfo();
+    getTrackerInfo();
+    
+    chrome.runtime.sendMessage({
+        function: `hitTrackerGetProjected`
+    });
+});
 
 
 

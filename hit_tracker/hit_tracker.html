@@ -12,14 +12,22 @@
         <nav class="navbar navbar-light bg-primary">
             <span class="navbar-brand mb-0 text-white">Mturk Suite - HIT Tracker</span>
             <div class="float-right">
-                <button class="btn btn-secondary" id="sync">Sync</button>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Sync HIT Tracker
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <button id="sync-today" class="dropdown-item" type="button">Sync Today Only</button>
+                        <button id="sync-last-45-days" class="dropdown-item" type="button">Sync Last 45 Days</button>
+                    </div>
+                </div>
             </div>
         </nav>
 
         <div class="p-1">
             <ul class="nav nav-pills nav-justified" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#today" data-toggle="tab">Today</a>
+                    <a class="nav-link active" href="#today" data-toggle="tab">Overview</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#history" data-toggle="tab">History</a>
@@ -28,68 +36,106 @@
 
             <div class="tab-content">
                 <div class="tab-pane active" id="today" role="tabpanel">
-                    <div class="text-center my-1">
-                        <b>Today's Projected Earnings: <span id="projected" class="text-success">$0.00</span></b>
-                    </div>
-                    <table class="table table-striped table-bordered table-sm">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th class="text-center" style="width: 30%">HITs</th>
-                                <th class="text-center" style="width: 30%">Reward</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Today's <u>Assigned</u> HITs</td>
-                                <td id="assigned-count" class="text-center">0</td>
-                                <td id="assigned-value" class="text-center">$0.00</td>
-                            </tr>
-                            <tr>
-                                <td>Today's <u>Submitted</u> HITs</td>
-                                <td id="submitted-count" class="text-center">0</td>
-                                <td id="submitted-value" class="text-center">$0.00</td>
-                            </tr>
-                            <tr>
-                                <td>Today's <u>Approved</u> HITs</td>
-                                <td id="approved-count" class="text-center">0</td>
-                                <td id="approved-value" class="text-center">$0.00</td>
-                            </tr>
-                            <tr>
-                                <td>Today's <u>Rejected</u> HITs</td>
-                                <td id="rejected-count" class="text-center">0</td>
-                                <td id="rejected-value" class="text-center">$0.00</td>
-                            </tr>
-                            <tr>
-                                <td>Today's <u>Pending</u> HITs</td>
-                                <td id="pending-count" class="text-center">0</td>
-                                <td id="pending-value" class="text-center">$0.00</td>
-                            </tr>
-                            <tr>
-                                <td>Today's <u>Returned</u> HITs</td>
-                                <td id="returned-count" class="text-center">0</td>
-                                <td id="returned-value" class="text-center">$0.00</td>
-                            </tr>
-                            <!--
-<tr>
-<td>Today's <u>Bonuses</u> <span class="badge badge-pill badge-danger">Broken</span></td> 
-<td class="text-center"></td>
-<td id="bonus-reward" class="text-center">$0.00</td>
-</tr>
--->
-                        </tbody>
-                    </table>
 
-                    <table class="table table-striped table-bordered table-sm">
-                        <thead>
-                            <tr>
-                                <th>Requester</th>
-                                <th>HITs</th>
-                                <th>Reward</th>
-                            </tr>
-                        </thead>
-                        <tbody id="requester-tbody"></tbody>
-                    </table>
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h3 class="text-center text-primary">Today's Overview</h3>
+                                <table class="table table-striped table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th class="text-center">HITs</th>
+                                            <th class="text-center">Reward</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Today's <u>Assigned</u> HITs</td>
+                                            <td id="assigned-count" class="text-center">-</td>
+                                            <td id="assigned-value" class="text-center">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Today's <u>Submitted</u> HITs</td>
+                                            <td id="submitted-count" class="text-center">-</td>
+                                            <td id="submitted-value" class="text-center">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Today's <u>Approved</u> HITs</td>
+                                            <td id="approved-count" class="text-center">-</td>
+                                            <td id="approved-value" class="text-center">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Today's <u>Rejected</u> HITs</td>
+                                            <td id="rejected-count" class="text-center">-</td>
+                                            <td id="rejected-value" class="text-center">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Today's <u>Pending</u> HITs</td>
+                                            <td id="pending-count" class="text-center">-</td>
+                                            <td id="pending-value" class="text-center">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Today's <u>Returned</u> HITs</td>
+                                            <td id="returned-count" class="text-center">-</td>
+                                            <td id="returned-value" class="text-center">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h3 class="text-center text-primary">Tracker Overview</h3>
+                                <table class="table table-striped table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th class="text-center">HITs</th>
+                                            <th class="text-center">Reward</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Projected Earnings Today</td>
+                                            <td id="tracker-projected-today-count" class="text-center">-</td>
+                                            <td id="tracker-projected-today-value" class="text-center">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Projected Earnings This Week</td>
+                                            <td id="tracker-projected-week-count" class="text-center">-</td>
+                                            <td id="tracker-projected-week-value" class="text-center">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Projected Earnings This Month</td>
+                                            <td id="tracker-projected-month-count" class="text-center">-</td>
+                                            <td id="tracker-projected-month-value" class="text-center">-</td>
+                                        </tr>
+                                        <tr><td>&nbsp;</td></tr>
+                                        <tr>
+                                            <td>Pending Earnings</td>
+                                            <td id="tracker-pending-count" class="text-center">-</td>
+                                            <td id="tracker-pending-value" class="text-center">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Approved Waiting Payment</td>
+                                            <td id="tracker-approved-count" class="text-center">-</td>
+                                            <td id="tracker-approved-value" class="text-center">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <table class="table table-striped table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Requester</th>
+                                    <th>HITs</th>
+                                    <th>Reward</th>
+                                </tr>
+                            </thead>
+                            <tbody id="requester-tbody"></tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="tab-pane" id="history" role="tabpanel">
