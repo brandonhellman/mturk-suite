@@ -166,7 +166,7 @@ function updateDay(date) {
 
         updating = false;
 
-        $(modal).modal('hide');
+        $(modal).modal(`hide`);
 
         resolve();
     });
@@ -255,47 +255,35 @@ function syncQueue(queue) {
         const transaction = hitTrackerDB.transaction([`hit`], `readwrite`);
         const objectStore = transaction.objectStore(`hit`);
         const index = objectStore.index(`state`);
-        const acceptedRange = IDBKeyRange.only(`Accepted`);
-        const assignedRange = IDBKeyRange.only(`Assigned`);
+        const only = IDBKeyRange.only(`Assigned`);
 
-        index.openCursor(acceptedRange).onsuccess = (event) => {
-            const cursor = event.target.result;
+        const hit_ids = queue.tasks.map((o) => o.task_id);
 
-            if (cursor) {
-                cursor.value.state = `Assigned`;
-                cursor.update(cursor.value);
-                cursor.continue();
-            }
-            else {
-                const hit_ids = queue.tasks.map((o) => o.task_id);
+        if (hit_ids.length) {
+            index.openCursor(only).onsuccess = (event) => {
+                const cursor = event.target.result;
 
-                if (hit_ids.length) {
-                    index.openCursor(assignedRange).onsuccess = (event) => {
-                        const cursor = event.target.result;
+                if (cursor) {
+                    if (!hit_ids.includes(cursor.value.hit_id)) {
+                        cursor.value.state = `Abandoned`;
+                        cursor.update(cursor.value);
+                    }
 
-                        if (cursor) {
-                            if (!hit_ids.includes(cursor.value.hit_id)) {
-                                cursor.value.state = `Abandoned`;
-                                cursor.update(cursor.value);
-                            }
-
-                            cursor.continue();
-                        }
-                    };
+                    cursor.continue();
                 }
-                else {
-                    index.openCursor(assignedRange).onsuccess = (event) => {
-                        const cursor = event.target.result;
+            };
+        }
+        else {
+            index.openCursor(only).onsuccess = (event) => {
+                const cursor = event.target.result;
 
-                        if (cursor) {                            
-                            cursor.value.state = `Abandoned`
-                            cursor.update(cursor.value);
-                            cursor.continue();
-                        }
-                    };
+                if (cursor) {                            
+                    cursor.value.state = `Abandoned`
+                    cursor.update(cursor.value);
+                    cursor.continue();
                 }
-            }
-        };
+            };
+        }
 
         transaction.oncomplete = (event) => {
             resolve();
@@ -335,34 +323,47 @@ Object.assign(Number.prototype, {
 document.getElementById(`sync`).addEventListener(`click`, async (e) => {
     await updateDay(mturkDate());
     getTodaysInfo();
-    chrome.runteim
     chrome.runtime.sendMessage({ function: `hitTrackerGetProjected` });
 });
 
 
 function syncAll() {
+    const modal = document.getElementById(`sync-modal`);
+    updating = true;
+
     return new Promise(async (resolve) => {
+        syncingStarted();
+
         const dashboard = await fetchDashboard();
         const daysToUpdate = await checkDays(dashboard.daily_hit_statistics_overview);
+
+        for (const date of daysToUpdate) {
+            await sync(date);
+            await saveDay(date);
+        }
+
+        sycningEnded();
     });
 }
 
 //syncAll();
 
-function fetchDashboard() {
-    return new Promise(async (resolve) => {
+function fetchQueue(date) {
+    syncingUpdated(date, `fetching queue`);
+
+    return new Promise((resolve) => {
         (async function fetchLoop() {
             try {
-                const response = await fetch(`https://worker.mturk.com/dashboard?format=json`, {
+                const response = await fetch(`https://worker.mturk.com/tasks?format=json`, {
                     credentials: `include`
                 });
 
-                if (response.ok && response.url === `https://worker.mturk.com/dashboard?format=json`) {
+                if (response.ok && response.url === `https://worker.mturk.com/tasks?format=json`) {
                     const json = await response.json();
                     resolve(json);
                 }
                 else if (response.url.indexOf(`https://worker.mturk.com/`) === -1) {
-
+                    //we are logged out here
                 }
                 else {
                     setTimeout(fetchLoop, 2000);
@@ -375,25 +376,305 @@ function fetchDashboard() {
     });
 }
 
-function checkDays(days) {
-    return new Promise((resolve) => {
-        const transaction = hitTrackerDB.transaction([`day`], `readwrite`);
-        const objectStore = transaction.objectStore(`day`);
-        
-        for (const day of days) {
-            const date = day.date.substring(0, 10).replace(/-/g, ``);
-            console.log(date);
-        }
+function fetchDashboard(date) {
+    syncingUpdated(date, `fetching dashboard`);
+
+    return new Promise(async (resolve) => {
+        (async function fetchLoop() {
+            try {
+                const response = await fetch(`https://worker.mturk.com/dashboard?format=json`, {
+                    credentials: `include`
+                });
+
+                if (response.ok && response.url === `https://worker.mturk.com/dashboard?format=json`) {
+                    const json = await response.json();
+                    resolve(json);
+                }
+                else if (response.url.indexOf(`https://worker.mturk.com/`) === -1) {
+                    throw `You are logged out!`;
+                }
+                else {
+                    setTimeout(fetchLoop, 2000);
+                }
+            }
+            catch (error) {
+                setTimeout(fetchLoop, 2000);
+            }
+        })();
     });
 }
 
 
-function updateAll() {
+function checkDays(days) {
+    syncingUpdated(null, `checking days`);
 
+    return new Promise((resolve) => {
+        const dates = [`20171221`, `20171220`]//[`20171221`, `20171220`, `20171219`, `20171218`, `20171217`];//days.map((o) => o.date.substring(0, 10).replace(/-/g, ``));
+        const transaction = hitTrackerDB.transaction([`day`], `readwrite`);
+        const objectStore = transaction.objectStore(`day`);
+        const bound = IDBKeyRange.bound(dates[dates.length - 1], dates[0]);
+
+        objectStore.openCursor(bound).onsuccess = (event) => {
+            const cursor = event.target.result; console.log(cursor);
+
+            if (cursor) {
+                console.log(cursor);
+            }
+        };
+
+        transaction.oncomplete = (event) => {
+            resolve(dates);
+        };
+    });
 }
 
-function updateDay() {
+function saveDay(date) {
+    return new Promise(async (resolve) => {
+        const count = await countDay(date);
+        console.log(count);
+        
+        const transaction = hitTrackerDB.transaction([`day`], `readwrite`);
+        const objectStore = transaction.objectStore(`day`);
+        
+        objectStore.put(count);
 
+        transaction.oncomplete = (event) => {
+            resolve();
+        };
+        
+    });
 }
+
+const sampleHit = {
+    hit_id: String,
+    requester_feedback: String,
+    requester_id: String,
+    requester_name: String,
+    reward: {
+        amount_in_dollars: Number,
+        currency_code: String
+    },
+    state: String,
+    title: String,
+
+    date: String,
+    source: String,
+    answer: Object
+};
+
+
+function countDay(date) {
+    return new Promise((resolve) => {
+        const object = {
+            date: date,
+            assigned: 0,  
+            returned: 0, 
+            abandoned: 0, 
+            submitted: 0, 
+            approved: 0, 
+            rejected: 0, 
+            pending: 0,
+            paid: 0,
+            earnings: 0
+        };
+
+        const transaction = hitTrackerDB.transaction([`hit`], `readonly`);
+        const objectStore = transaction.objectStore(`hit`);
+        const index = objectStore.index(`date`);
+        const only = IDBKeyRange.only(date);
+
+        index.openCursor(only).onsuccess = (event) => {
+            const cursor = event.target.result;
+
+            if (cursor) {
+                const state = cursor.value.state.toLowerCase();
+                
+                object[state] ++;
+                object.earnings += cursor.value.reward.amount_in_dollars;
+
+                cursor.continue();
+            }
+        };
+
+        transaction.oncomplete = (event) => {
+            resolve(object);
+        };
+    });
+}
+
+function syncPrepareDay(date) {
+    syncingUpdated(date, `preparing sync`);
+
+    return new Promise(async (resolve) => {
+        const queue = await fetchQueue();
+        const hit_ids = queue.tasks.map((o) => o.task_id);
+
+        const transaction = hitTrackerDB.transaction([`hit`], `readwrite`);
+        const objectStore = transaction.objectStore(`hit`);
+        const index = objectStore.index(`date`);
+        const only = IDBKeyRange.only(date);
+
+        index.openCursor(only).onsuccess = (event) => {
+            const cursor = event.target.result;
+
+            if (cursor) {
+                if (cursor.value.state.match(/Accepted|Submitted/) || (cursor.value.state === `Assigned` && !hit_ids.includes(cursor.value.hit_id))) {
+                    cursor.value.state = `Abandoned`;
+                    cursor.update(cursor.value);
+                }
+                cursor.continue();
+            }
+        };
+
+        transaction.oncomplete = (event) => {
+            resolve();
+        }
+    });
+}
+
+function sync(date) {
+    return new Promise(async (resolve, reject) => {
+        await syncPrepareDay(date);
+
+        const fetchDate = [date.slice(0, 4), date.slice(4,6), date.slice(6,8)].join(`-`);
+
+        (async function fetchLoop(page) {
+            const url = `https://worker.mturk.com/status_details/${fetchDate}?page_number=${page}&format=json`;
+            const response = await fetch(url, {
+                credentials: `include`
+            });
+
+            if (response.ok && response.url === url) {
+                const json = await response.json();
+
+                if (json.num_results > 0) {
+                    syncingUpdated(date, `Updating page ${page} of ${Math.ceil(json.total_num_results / 20)} for ${json.total_num_results} HITs`);
+
+                    const transaction = hitTrackerDB.transaction([`hit`], `readwrite`);
+                    const objectStore = transaction.objectStore(`hit`);
+
+                    for (const hit of json.results) {
+                        const request = objectStore.get(hit.hit_id);
+
+                        request.onsuccess = (event) => {
+                            const result = event.target.result
+
+                            if (result) {
+                                for (const prop in result) {
+                                    if (prop !== `state`) {
+                                        hit[prop] = result[prop] ? result[prop] : hit[prop];
+                                    }
+                                }
+                            }
+
+                            hit.date = date;
+                            objectStore.put(hit);
+                        };
+                    }
+
+                    transaction.oncomplete = (e) => {
+                        return fetchLoop(++ page)
+                    }
+                }
+                else {
+                    resolve();
+                }
+            }
+            else if (response.url.indexOf(`https://worker.mturk.com/`) === -1) {
+                throw `You are logged out!`;
+            }
+            else {
+                return setTimeout(fetchLoop, 2000, page);
+            }
+        })(1);
+    });
+}
+
+function syncingStarted() {    
+    updating = true;
+
+    $(document.getElementById(`sync-modal`)).modal({
+        backdrop: `static`,
+        keyboard: false
+    });
+}
+
+function syncingUpdated(date, message) {
+    document.getElementById(`sync-date`).textContent = date ? [date.slice(0, 4), date.slice(4, 6), date.slice(6, 8)].join(`-`) : null;
+    document.getElementById(`sync-message`).textContent = message ? message : null;
+    console.log(date, message);
+}
+
+function sycningEnded() {
+    updating = false;
+    $(document.getElementById(`sync-modal`)).modal(`hide`);
+}
+
+
+//View Pending: Submitted
+//View Paid: Paid
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

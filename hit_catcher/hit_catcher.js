@@ -516,14 +516,14 @@ async function catcherRun(forcedId) {
         const adjustedDelay = nextCatch - new Date().getTime();
         return adjustedDelay > 0 ? adjustedDelay : 1;
     }
-    
+
     clearTimeout(catcher.timeout);
 
     if (catcher.paused.status === false && catcher.ids.length > 0) {
         const id = typeof forcedId === `string` && catcher.ids.includes(forcedId) === true ? forcedId : catcher.ids[catcher.index = catcher.index >= catcher.ids.length -1 ? 0 : catcher.index + 1];
         const watcher = storage.watchers[id];
 
-        const response = await fetch(`https://worker.mturk.com/projects/${id}/tasks/accept_random`, {
+        const response = await fetch(`https://worker.mturk.com/projects/${id}/tasks/accept_random?format=json`, {
             credentials: `include`
         });
 
@@ -532,24 +532,34 @@ async function catcherRun(forcedId) {
 
             const status = response.status;
 
-            if (status === 200) {
-                const json = await response.json();
+            if (response.ok && response.url.indexOf(`tasks`) !== -1) {
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, `text/html`);
+                const json = JSON.parse(doc.querySelector(`[data-react-class="require('reactComponents/common/ShowModal')['default']"]`).dataset.reactProps);
 
-                if (json.project) {
-                    watcher.project = json.project;
-                    if (typeof json.assignment_id === `string`) {
-                        watcher.caught = watcher.caught > 0 ? watcher.caught + 1 : 1;
-                        watcherCaught(watcher);
-                    } else {
-                        return catcherCaptchaFound();
-                    }
-
-                } else if (json.results) {
-
-                } else if (json.tasks) {
+                watcher.project = watcher.project ? watcher.project : {
+                    requester_name: json.modalOptions.requesterName,
+                    requester_id: json.modalOptions.contactRequesterUrl.match(/requester_id.+?=([0-9A-Z]+)/) ? json.modalOptions.contactRequesterUrl.match(/requester_id.+?=([0-9A-Z]+)/)[1] : null,
+                    title: json.modalOptions.projectTitle,
+                    hit_set_id: response.url.match(/projects\/([A-Z0-9]+)\/tasks/) ? response.url.match(/projects\/([A-Z0-9]+)\/tasks/)[1] : null,
+                    monetary_reward: {
+                        amount_in_dollars: json.modalOptions.monetaryReward.amountInDollars
+                    },
+                    assignment_duration_in_seconds: json.modalOptions.assignmentDurationInSeconds,
+                    project_requirements: [{qualification_type: { name: `Unknown` }, comparator: `Unknown`, qualification_values: [``]}]
 
                 }
-            } else if (status === 429) {
+
+                if (response.url.indexOf(`assignment_id=`)) {
+                    watcher.caught = watcher.caught > 0 ? watcher.caught + 1 : 1;
+                    watcherCaught(watcher);
+                } else {
+                    return catcherCaptchaFound();
+                }
+
+            }
+            else if (status === 429) {
                 watcher.pre = watcher.pre > 0 ? watcher.pre + 1 : 1;
             }
 
@@ -576,14 +586,14 @@ function catcherPauseOn(reason) {
 
 function catcherPauseOff(reason) {
     const paused = catcher.paused.status;
-    
+
     if (reason === undefined || reason === paused.reason) {
         paused.status = false;
         paused.reason = null;
 
         const element = document.getElementById(`pause`);
         element.className = element.className.replace(`btn-danger`, `btn-default`);
-        
+
         bootbox.hideAll();
         catcherRun();
     }

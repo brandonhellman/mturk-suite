@@ -257,7 +257,8 @@ async function finderRun() {
         page_size: storage.finder.filter.page_size,
         'filters[masters]': storage.finder.filter.masters,
         'filters[qualified]': storage.finder.filter.qualified,
-        'filters[min_reward]': storage.finder.filter.min_reward
+        'filters[min_reward]': storage.finder.filter.min_reward,
+        format: `json`
     };
     Object.keys(params).forEach((key) => url.searchParams.append(key, params[key]));
 
@@ -275,10 +276,11 @@ async function finderRun() {
         else if (response.status === 429) {
             document.getElementById(`page-request-errors`).textContent = ++ pageRequestErrors;
         }
-    }
-    catch (error) {}
-    finally {
+        
         document.getElementById(`total-scans`).textContent = ++ totalScans;
+        finderTimeout = setTimeout(finderRun, delay());
+    }
+    catch (error) {
         finderTimeout = setTimeout(finderRun, delay());
     }
 }
