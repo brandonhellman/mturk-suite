@@ -579,7 +579,7 @@ function sendMessage(object) {
 
     const error = document.getElementsByClassName(`error-page`);
 
-    if (error.length) {
+    if (error.length && error[0].textContent.indexOf(`You have exceeded`) !== -1) {
         setTimeout(window.location.reload.bind(window.location), 1000);
     }
 })(`rateLimitReloader`);
