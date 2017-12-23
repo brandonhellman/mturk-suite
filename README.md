@@ -11,18 +11,24 @@ An extension that brings together a large collection of useful tools to assist w
 
  ## Searching MTurk
  Lets you search MTurk for HITs from the omnibar.
+ 
+ 
  ![Omnibar](https://i.gyazo.com/c1143dc3ea73bf00e12fb862a6a223a1.gif)
  
  ---
  
  ## Paste MTurk Worker ID
  Right clicking inside any input field gives the option to paste your Worker ID.
+ 
+ 
  ![Paste MTurk Worker ID](https://i.gyazo.com/8a55584965ad149a9a6ab57853b44535.png)
  
  ---
  
  ## Contact Requester
  Right clicking a requester link gives the option to contact the requester
+ 
+ 
  ![Contact Requester](https://i.gyazo.com/3d5ba989f4806aef95d365757a607452.png)
  
  ---
