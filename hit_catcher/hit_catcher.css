@@ -1,0 +1,240 @@
+/********** Bootstrap Primary Change **********/
+.bg-primary {
+  background-color: #222222 !important;
+}
+
+.btn-primary {
+  color: #FFFFFF !important;
+  border-color: #222222 !important;
+  background-color: #222222 !important;
+}
+
+.btn-primary:hover {
+  color: #FFFFFF !important;
+  border-color: #444444 !important;
+  background-color: #444444 !important;
+}
+
+.panel-primary {
+  border-width: 1px !important;
+  border-color: #222222 !important;
+}
+
+.panel-primary > .panel-heading {
+  color: #FFFFFF !important;
+  border-width: 1px !important;
+  border-color: #222222 !important;
+  background-color: #222222 !important;
+}
+
+.card-outline-primary {
+  border-color: #222222;
+}
+
+.card-header-primary {
+  color: #FFFFFF;
+  background-color: #222222;
+}
+/**********************************************/
+
+/********** Checkbox Styling **********/
+.form-group {
+  margin-bottom: 0px !important;
+}
+
+.form-group input[type="checkbox"] {
+  display: none;
+}
+
+.form-group input[type="checkbox"] + .btn-group > label span {
+  width: 20px;
+}
+
+.form-group input[type="checkbox"] + .btn-group > label span:first-child {
+  display: none;
+}
+
+.form-group input[type="checkbox"] + .btn-group > label span:last-child {
+  display: inline-block;
+}
+
+.form-group input[type="checkbox"]:checked + .btn-group > label span:first-child {
+  display: inline-block;
+}
+
+.form-group input[type="checkbox"]:checked + .btn-group > label span:last-child {
+  display: none;   
+}
+/**************************************/
+
+.panel, .panel-top {
+  margin-bottom: 5px !important;
+}
+
+.card-inverse {
+  background-color: #222222 !important;
+}
+
+.card-header {
+  padding: 0px 3px;
+}
+
+#hits .card-header {
+  line-height: 1.1;
+}
+
+.card-block {
+  padding: .25rem;
+}
+
+.card {
+  margin-top: 2px;
+}
+
+.card-hit {
+  border: 0 !important;
+}
+
+.btn-group-xxs > .btn,
+.btn-xxs {
+  padding: 1px 2px !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  border-radius: 3px !important;
+}
+
+.glyphicon-question-sign {
+  font-size: 10px;
+  padding-top: 2px;
+}
+
+.glyphicon-cog {
+  cursor: pointer;
+  font-size: 10px;
+  padding-top: 2px;
+}
+
+.glyphicon-remove {
+  cursor: pointer;
+  font-size: 10px;
+  padding-top: 2px;
+ /* padding-right: 2px;*/
+}
+
+.modal-content {
+  color: #FFFFFF;
+  background-color: #222222;
+}
+
+.modal-header, .modal-footer {
+  border-color: rgba(255,255,255,.2);;
+}
+
+.input-group-sm {
+  width: 100%;
+  margin: 3px;
+}
+
+
+.btn-default:hover {
+    color: #333;
+    background-color: #d4d4d4;
+    border-color: #8c8c8c;
+}
+
+.btn-default {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+}
+
+.btn-default.active, .btn-default:active, .open>.dropdown-toggle.btn-default {
+  color: #333;
+  background-color: #e6e6e6;
+  border-color: #adadad;
+}
+
+body {
+  background-color: #444444;
+}
+
+select {
+  width: 100%;
+}
+
+
+.input-group-xs {
+  width: 120px;
+}
+
+.input-group-xs .input-group-addon {
+  padding: 1px 2px !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  border-radius: 3px !important;
+  height: 20px;
+}
+
+.input-group-xs .form-control {
+  height: 20px;
+  padding: 0;
+}
+
+.selected {
+  border: 2px solid yellow !important;
+}
+
+.modal-content {
+  box-shadow: 0px 0px 30px 15px rgba(0, 0, 0, 1);
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+  .col-sm-4 {
+    padding-right: 2px;
+    padding-left: 2px;
+  }
+  
+  .col-sm-4:nth-child(3n + 1) {
+    padding-left: 15px;
+  }
+  
+  .col-sm-4:nth-child(3n) {
+    padding-right: 15px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .col-md-3 {
+    padding-right: 2px;
+    padding-left: 2px;
+  }
+  
+  .col-md-3:nth-child(4n + 1) {
+    padding-left: 15px;
+  }
+  
+  .col-md-3:nth-child(4n) {
+    padding-right: 15px;
+  }
+}
+
+@media (min-width: 992px) {
+  .col-lg-2 {
+    padding-right: 2px;
+    padding-left: 2px;
+  }
+  
+  .col-lg-2:nth-child(6n+ 1) {
+    padding-left: 15px;
+  }
+  
+  .col-lg-2:nth-child(6n) {
+    padding-right: 15px;
+  }
+}
+
+.modal-title {
+  font-size: 1em;
+  font-weight: normal;
+  float: left;
+}

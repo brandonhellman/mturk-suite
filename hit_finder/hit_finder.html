@@ -1,0 +1,704 @@
+<html>
+
+    <head>
+        <title>MTS - HIT Finder</title>
+
+        <!-- Cascading Style Sheets -->
+        <link id="theme" href="/bootstrap/css/default.min.css" rel="stylesheet">
+        <link href="/bootstrap4/css/glyphicons.css" rel="stylesheet">
+        <link href="/hit_finder/hit_finder.css" rel="stylesheet">
+
+        <!-- Scripts -->
+        <script src="/js/jquery-3.2.1.min.js"></script>
+        <script src="/js/tether.min.js"></script>
+        <script src="/js/bootstrap-v4.0.0.min.js"></script>
+    </head>
+
+    <body style="padding: 3px;">
+        <div>
+            <button id="find" class="btn btn-xxs btn-outline-success ml-1">
+                Find HITs
+                <input id="finder-speed" type="number" class="input-xxs" step="100" min="500" value="1000">
+                ms
+            </button>
+
+            <button type="button" class="btn btn-xxs btn-primary ml-1" id="optionsModal">Options</button>
+            <button type="button" class="btn btn-xxs btn-primary ml-1" id="blockListModal">Block List</button>
+            <button type="button" class="btn btn-xxs btn-primary ml-1" id="includeListModal">Include List</button>
+        </div>
+
+        <div id="included-card" class="card" style="display: none;">
+            <div class="card-header bg-primary text-white" style="word-wrap: break-word;">
+                <b>Include List Matches</b>
+            </div>
+
+            <div class="card-block">
+                <table class="table table-striped table-extra-condensed table-bordered">
+                    <tbody id="included"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <div id="found-card" class="card">
+                <div class="card-header bg-primary text-white" style="word-wrap: break-word;">
+                    <b>Found HITs</b> <small id="hits-found"></small>
+                    <span class="float-right" style="font-size: 70%;">
+                        <b>Total Scans: </b><span id="total-scans">0</span> | <b>PRE: </b><span id="page-request-errors">0</span>
+                    </span>
+                </div>
+
+                <div class="card-block">
+                    <table class="table table-striped table-extra-condensed table-bordered">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Requester</th>
+                                <th>Title</th>
+                                <th class="text-center">HITs</th>
+                                <th class="text-center">Accept</th>
+                                <th class="text-center">M</th>
+                            </tr>
+                        </thead>
+                        <tbody id="found"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div id="logged-card" class="card">
+            <div class="card-header bg-primary text-white" style="word-wrap: break-word;">
+                <b>Logged HITs</b> <small id="updated"></small>
+                <span class="float-right" style="font-size: 70%;">
+                    <b>HITs Logged: </b><span id="hits-logged">0</span>
+                </span>
+            </div>
+
+            <div class="card-block">
+                <table class="table table-striped table-extra-condensed table-bordered">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Requester</th>
+                            <th>Title</th>
+                            <th class="text-center">Time</th>
+                            <th class="text-center">Accept</th>
+                            <th class="text-center">M</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logged"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- HIT Info -->
+        <div class="modal" tabindex="-1" id="hit-info-modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b class="col-4">HIT Information</b>
+                        <small id="hit-info-time" class="col-8 text-muted overflow"></small>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div><b>Title: </b><span id="hit-info-title" /></div>
+                            <div><b>Requester: </b><span id="hit-info-requester" /></div>
+                            <div><b>Reward: </b><span id="hit-info-reward" /></div>
+                            <div><b>Duration: </b><span id="hit-info-duration" /></div>
+                            <div><b>Available: </b><span id="hit-info-available" /></div>
+                            <div><b>Description: </b><span id="hit-info-description" /></div>
+                            <div><b>Requirements: </b><span id="hit-info-requirements" /></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="container">
+                            <button id="hit-info-block-requester" class="btn btn-sm btn-danger">Block Requester</button>
+                            <button id="hit-info-block-hit" class="btn btn-sm btn-danger">Block HIT</button>
+                            <button id="hit-info-include-requester" class="btn btn-sm btn-success">Include Requester</button>
+                            <button id="hit-info-include-hit" class="btn btn-sm btn-success">Include HIT</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="hit-export-modal" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b class="col-3">Share HIT</b>
+                        <small id="hit-export-info" class="col-9 text-muted overflow"></small>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div id="hit-export-buttons" class="row">
+                                <div class="col-6 mb-2">
+                                    <button class="btn btn-primary w-100" id="hit-export-short">Short</button>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <button class="btn btn-primary w-100" id="hit-export-plain">Plain</button>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <button class="btn btn-primary w-100" id="hit-export-bbcode">BBCode</button>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <button class="btn btn-primary w-100" id="hit-export-markdown">Markdown</button>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <button class="btn btn-primary w-100" id="hit-export-turkerhub">Turker Hub</button>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <button class="btn btn-primary w-100" id="hit-export-mturkcrowd">Mturk Crowd</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alarm Modal -->
+        <div class="modal" tabindex="-1" id="alarm-modal" data-keyboard="false" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b>Alarm</b>
+                    </div>
+                    <div class="modal-body">
+                        <h1 class="text-center">Alarm is active!</h1>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="alarm-off" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block List Modal -->
+        <div class="modal" tabindex="-1" id="block-list-modal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b>Block List</b>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body"></div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" id="blockListImport">Import</button>
+                        <button class="btn btn-secondary" id="blockListExport">Export</button>
+                        <button class="btn btn-primary" id="blockListAddModal">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block List Add Modal -->
+        <div id="block-list-add-modal" class="modal">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b>Add To Block List</b>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="input-group">
+                            <span class="input-group-addon">Name</span>
+                            <input id="block-list-add-name" class="form-control" type="text" placeholder="Nickname">
+                        </div>
+                        <br>
+                        <div class="input-group">
+                            <span class="input-group-addon">Match</span>
+                            <input id="block-list-add-match" class="form-control" type="text" placeholder="What to match">
+                        </div>
+                        <br>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label">
+                                <input id="block-list-add-strict" class="form-check-input" type="radio" name="block-list-add-type" value="strict">
+                                Strict
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="radio" name="block-list-add-type" value="loose">
+                                Loose
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="block-list-add-save" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block List Edit Modal -->
+        <div class="modal" tabindex="-1" id="block-list-edit-modal">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b>Edit Block List Item</b>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="input-group">
+                            <span class="input-group-addon">Name</span>
+                            <input id="block-list-edit-name" type="text" class="form-control">
+                        </div>
+                        <br>
+                        <div class="input-group">
+                            <span class="input-group-addon">Match</span>
+                            <input id="block-list-edit-match" type="text" class="form-control" disabled>
+                        </div>
+                        <br>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label">
+                                <input id="block-list-edit-strict" class="form-check-input" type="radio" name="block-list-edit-strict" value="strict">
+                                Strict
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="radio" name="block-list-edit-strict" value="loose">
+                                Loose
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-danger" id="block-list-edit-delete">Delete</button>
+                        <button class="btn btn-primary" id="block-list-edit-save">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Include List Modal -->
+        <div class="modal" tabindex="-1" id="include-list-modal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b>Include List</b>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body"></div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" id="includeListImport">Import</button>
+                        <button class="btn btn-secondary" id="includeListExport">Export</button>
+                        <button class="btn btn-primary" id="includeListAddModal">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Include List Add Modal -->
+        <div class="modal" tabindex="-1" id="include-list-add-modal">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b>Add To Include List</b>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="input-group">
+                            <span class="input-group-addon">Name</span>
+                            <input id="include-list-add-name" type="text" class="form-control" placeholder="Nickname">
+                        </div>
+                        <br>
+                        <div class="input-group">
+                            <span class="input-group-addon">Match</span>
+                            <input id="include-list-add-match" type="text" class="form-control" placeholder="What to match">
+                        </div>
+                        <br>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label">
+                                <input id="include-list-add-strict" class="form-check-input" type="radio" name="include-list-add-strict" value="strict">
+                                Strict
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="radio" name="include-list-add-strict" value="loose">
+                                Loose
+                            </label>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="form-check col-6 text-left">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox" id="include-list-add-sound">
+                                    Sound
+                                </label>
+                            </div>
+                            <div class="form-check col-6 text-left">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox" id="include-list-add-alarm">
+                                    Alarm
+                                </label>
+                            </div>
+                            <div class="form-check col-6 text-left">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox" id="include-list-add-notification">
+                                    Notification
+                                </label>
+                            </div>
+                            <div class="form-check col-6 text-left">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox" id="include-list-add-pushbullet">
+                                    Pushbullet
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="include-list-add-save">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Include List Edit Modal -->
+        <div class="modal" tabindex="-1" id="include-list-edit-modal">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b>Edit Include List Item</b>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="input-group">
+                            <span class="input-group-addon">Name</span>
+                            <input id="include-list-edit-name" type="text" class="form-control">
+                        </div>
+                        <br>
+                        <div class="input-group">
+                            <span class="input-group-addon">Match</span>
+                            <input id="include-list-edit-match" type="text" class="form-control" disabled>
+                        </div>
+                        <br>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label">
+                                <input id="include-list-edit-strict" class="form-check-input" type="radio" name="include-list-edit-strict" value="strict">
+                                Strict
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="radio" name="include-list-edit-strict" value="loose">
+                                Loose
+                            </label>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="form-check col-6 text-left">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox" id="include-list-edit-sound">
+                                    Sound
+                                </label>
+                            </div>
+                            <div class="form-check col-6 text-left">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox" id="include-list-edit-alarm">
+                                    Alarm
+                                </label>
+                            </div>
+                            <div class="form-check col-6 text-left">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox" id="include-list-edit-notification">
+                                    Notification
+                                </label>
+                            </div>
+                            <div class="form-check col-6 text-left">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox" id="include-list-edit-pushbullet">
+                                    Pushbullet
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-danger" id="include-list-edit-delete">Delete</button>
+                        <button class="btn btn-primary" id="include-list-edit-save">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="options-modal" class="modal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b>Options</b>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <div class="card-header bg-primary text-white">Search Filters</div>
+                            <div class="card-block container">
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <label class="small mb-0">Sort by</label>
+                                        <select id="finder-filter-sort" class="custom-select w-100">
+                                            <option value="updated_asc">Creation date: oldest first</option>
+                                            <option value="updated_desc" selected>Creation date: newest first</option>
+                                            <option value="reward_asc">Reward amount: lowest first</option>
+                                            <option value="reward_desc">Reward amount: highest first</option>
+                                            <option value="num_hits_asc">HITs: least first</option>
+                                            <option value="num_hits_desc">HITs: most first</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <label class="small mb-0">Page Size</label>
+                                        <input id="finder-filter-page_size" type="number" class="form-control" step="1" min="1" max="100" value="25">
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <label class="small mb-0">Minimum Reward</label>
+                                        <input id="finder-filter-min_reward" type="number" class="form-control" step=".01" min="0" value="0.00">
+                                    </div>
+
+                                    <div class="col-6">
+                                        <label class="small mb-0">Minimum HITs Available</label>
+                                        <input id="finder-filter-min_available" type="number" class="form-control" step="1" min="0" value="0">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="small mb-0">HITs that</div>
+                                        <label class="custom-control custom-checkbox" data-toggle="tooltip" title="" data-original-title="Use reviews from https://turkerview.com/.">
+                                            <input id="finder-filter-qualified" type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-indicator"></span>
+                                            <span class="custom-control-description">I'm qualified to work on</span>
+                                        </label>
+                                    </div>
+                                    <div class="col">
+                                        <div>&nbsp;</div>
+                                        <label class="custom-control custom-checkbox" data-toggle="tooltip" title="" data-original-title="Use reviews from https://turkerview.com/.">
+                                            <input id="finder-filter-masters" type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-indicator"></span>
+                                            <span class="custom-control-description">Require Masters Qualification</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="card-header bg-primary text-white">Notification Settings</div>
+                            <div class="card-block container">
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <label class="small mb-0">New HIT Sound</label>
+                                        <select id="finder-notifications-new_sound" class="custom-select w-100">
+                                            <option value="none">None</option>
+                                            <option value="sound_1" selected>Sound 1</option>
+                                            <option value="sound_2">Sound 2</option>
+                                            <option value="sound_3">Sound 3</option>
+                                            <option value="sound_4">Sound 4</option>
+                                            <option value="sound_5">Sound 5</option>
+                                            <option value="sound_6">Sound 6</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <label class="small mb-0">Match Notification Delay (minutes)</label>
+                                        <input id="finder-notifications-delay" type="number" class="form-control" step="1" min="1" value="60">
+                                    </div>
+
+                                    <div class="col-6">
+                                        <label class="small mb-0">Include Match Sound</label>
+                                        <select id="finder-notifications-included_sound" class="custom-select w-100">
+                                            <option value="voice" selected>Voice</option>
+                                            <option value="sound_1">Sound 1</option>
+                                            <option value="sound_2">Sound 2</option>
+                                            <option value="sound_3">Sound 3</option>
+                                            <option value="sound_4">Sound 4</option>
+                                            <option value="sound_5">Sound 5</option>
+                                            <option value="sound_6">Sound 6</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <label class="small mb-0">Pushbullet</label>
+                                        <select id="finder-notifications-pushbullet-state" class="custom-select w-100">
+                                            <option value="on">On</option>
+                                            <option value="off" selected>Off</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <label class="small mb-0">Access Token</label>
+                                        <input id="finder-notifications-pushbullet-token" type="text" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6 offset-3">
+                                        <button id="alarm-on" class="btn btn-danger w-100">Alarm</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button class="btn btn-primary" id="options-save">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="review-modal" class="modal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b class="col-4">Reviews</b>
+                        <small id="review-who" class="col-8 text-muted overflow"></small>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container-fluid">
+                            <div class="row small text-nowrap">
+                                <div id="review-turkerview" class="col-3">
+                                    <h5><a id="review-turkerview-link" class="text-primary font-weight-bold" target="_blank">Turkerview</a></h5>
+                                    <div id="review-turkerview-review">
+                                        <div class="row">
+                                            <div class="col">Hourly</div>
+                                            <div id="review-turkerview-ratings-hourly" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Pay</div>
+                                            <div id="review-turkerview-ratings-pay" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Fast</div>
+                                            <div id="review-turkerview-ratings-fast" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Comm</div>
+                                            <div id="review-turkerview-ratings-comm" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Rejections</div>
+                                            <div id="review-turkerview-rejections" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">ToS</div>
+                                            <div id="review-turkerview-tos" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Blocks</div>
+                                            <div id="review-turkerview-blocks" class="col"></div>
+                                        </div>
+                                    </div>
+                                    <div id="review-turkerview-no-reviews">
+                                        No Reviews
+                                    </div>
+                                </div>
+                                <div id="review-turkopticon" class="col-3">
+                                    <h5><a id="review-turkopticon-link" class="text-primary font-weight-bold" target="_blank">Turkopticon</a></h5>
+                                    <div id="review-turkopticon-review">
+                                        <div class="row">
+                                            <div class="col">Pay</div>
+                                            <div id="review-turkopticon-attrs-pay" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Fast</div>
+                                            <div id="review-turkopticon-attrs-fast" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Comm</div>
+                                            <div id="review-turkopticon-attrs-comm" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Fair</div>
+                                            <div id="review-turkopticon-attrs-fair" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Reviews</div>
+                                            <div id="review-turkopticon-reviews" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">ToS</div>
+                                            <div id="review-turkopticon-tos_flags" class="col"></div>
+                                        </div>
+                                    </div>
+                                    <div id="review-turkopticon-no-reviews">
+                                        No Reviews
+                                    </div>
+                                </div>
+                                <div id="review-turkopticon2" class="col-6">
+                                    <h5><a id="review-turkopticon2-link" class="text-primary font-weight-bold" target="_blank">Turkopticon 2</a> <small>(Recent/All)</small></h5>
+                                    <div id="review-turkopticon2-review">
+                                        <div class="row">
+                                            <div class="col">Hourly</div>
+                                            <div id="review-turkopticon2-recent-reward" class="col"></div>
+                                            <div id="review-turkopticon2-all-reward" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Pending</div>
+                                            <div id="review-turkopticon2-recent-pending" class="col"></div>
+                                            <div id="review-turkopticon2-all-pending" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Response</div>
+                                            <div id="review-turkopticon2-recent-comm" class="col"></div>
+                                            <div id="review-turkopticon2-all-comm" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Recommend</div>
+                                            <div id="review-turkopticon2-recent-recommend" class="col"></div>
+                                            <div id="review-turkopticon2-all-recommend" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Rejected</div>
+                                            <div id="review-turkopticon2-recent-rejected" class="col"></div>
+                                            <div id="review-turkopticon2-all-rejected" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">ToS</div>
+                                            <div id="review-turkopticon2-recent-tos" class="col"></div>
+                                            <div id="review-turkopticon2-all-tos" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Broken</div>
+                                            <div id="review-turkopticon2-recent-broken" class="col"></div>
+                                            <div id="review-turkopticon2-all-broken" class="col"></div>
+                                        </div>
+                                    </div>
+                                    <div id="review-turkopticon2-no-reviews">
+                                        No Reviews
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+
+    <script src="/hit_finder/hit_finder.js"></script>
+
+</html>

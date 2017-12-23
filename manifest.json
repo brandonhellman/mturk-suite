@@ -1,0 +1,74 @@
+{
+    "manifest_version": 2,
+    
+    "name": "MTurk Suite",
+    
+    "version": "2.0.0",
+    
+    "description": "Enchances Mechanical Turk to increase your efficiency and earnings.",
+    
+    "icons": {
+        "16": "media/icon_16.png",
+        "128": "media/icon_128.png"
+    },
+
+    "browser_action": {
+        "default_icon": "media/icon_128.png",
+        "default_title": "MTurk Suite",
+        "default_popup": "popup/popup.html"
+    },
+
+    "author": "Kadauchi",
+    
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": true
+    },
+    
+    "content_scripts": [
+        {
+            "matches": ["https://worker.mturk.com/*"],
+            "js": ["worker/worker.js"],
+            "run_at": "document_start",
+            "all_frames": true
+        }
+    ],
+
+    "incognito": "split",
+    
+    "minimum_chrome_version": "61",
+    
+    "offline_enabled": true,
+    
+    "omnibox": {
+        "keyword" : "mturk"
+    },
+    
+    "options_page": "options/options.html",
+    
+    "permissions": [
+        "tts",
+        "tabs",
+        "activeTab",
+        "storage",
+        "webRequest",
+        "webRequestBlocking",
+        "contextMenus",
+        "notifications",
+        "clipboardWrite",
+        "*://*.mturk.com/*",
+        "*://*.turkerhub.com/*",
+        "*://*.mturkcrowd.com/*"
+    ],
+    
+    "short_name": "MTS",
+    
+    "externally_connectable": {
+        "matches": [
+            "https://www.mturk.com/*",
+            "https://worker.mturk.com/*",
+            "https://turkerhub.com/*",
+            "http://www.mturkcrowd.com/*"
+        ]
+    }
+}
