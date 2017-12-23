@@ -509,7 +509,7 @@ const catcher = {
 let timer = 0;
 
 async function catcherRun(forcedId) {
-    const start = new Date().getTime(); console.log(`Delay: ${start - timer}ms`); timer = start;
+    const start = new Date().getTime();
 
     function delay() {
         const nextCatch = start + storage.hitCatcher.speed;

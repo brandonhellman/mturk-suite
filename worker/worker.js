@@ -1,6 +1,7 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log(request);
-    if (request.hitMissed) hitMissed(request.hitMissed);
+    if (request.hitMissed) {
+        hitMissed(request.hitMissed);
+    }
 });
 
 const storage = new Object;
@@ -73,9 +74,7 @@ function ready(object) {
 
                 return resolve();
             }
-        } catch (error) {
-            console.warn(`[MTurk Suite]`, error);
-        }
+        } catch (error) {}
     });
 }
 
@@ -87,7 +86,7 @@ function require() {
             });
 
             for (const value of arguments) {
-                const element = document.querySelector(`[data-react-class="require('${value}')['default']"]`);
+                const element = document.querySelector(`[data-react-class="require('${value}')['default']"]`) || document.querySelector(`[data-react-class="require('${value}')['PureAlert']"]`);
 
                 if (element !== null) {
                     return resolve({
@@ -97,11 +96,8 @@ function require() {
                 }
             }
 
-            console.log(arguments);
             throw `Could not resolve require('${arguments}') `;
-        } catch (error) {
-            console.warn(`[MTurk Suite]`, error);
-        }
+        } catch (error) {}
     });
 }
 
@@ -224,8 +220,6 @@ function sendMessage(object) {
 
             element.replaceWith(group);
         }
-
-
     }
 })(`hitCatcher`);
 
@@ -400,9 +394,15 @@ function sendMessage(object) {
     span.textContent = `Earnings: `;
 
     const link = document.createElement(`a`);
-    link.href = chrome.runtime.getURL(`hit_menu/hit_menu.html`);
-    link.target = `_blank`;
+    link.href = `#`;
     link.textContent = storage.earnings.toMoneyString();
+    link.addEventListener(`click`, (e) => {
+        e.preventDefault();
+        
+        chrome.runtime.sendMessage({
+            function: `openTracker`
+        });
+    });
 
     const spacer = document.createElement(`span`);
     spacer.textContent = ` | `;
@@ -446,7 +446,7 @@ function sendMessage(object) {
                 return (today >= start && today < end) ? true : false;
             }
 
-            const accepted = new Date(Date.now() - (number * 1000)); console.log(accepted);
+            const accepted = new Date(Date.now() - (number * 1000));
             const utc = accepted.getTime() + (accepted.getTimezoneOffset() * 60000);
             const offset = dst() === true ? `-7` : `-8`;
             const amz = new Date(utc + (3600000 * offset));
@@ -457,8 +457,6 @@ function sendMessage(object) {
 
             return date;
         })(timer.reactProps.originalTimeToCompleteInSeconds - timer.reactProps.timeRemainingInSeconds);
-
-        console.log(mturkDate);
 
         const message = {
             function: `hitTrackerUpdate`,
@@ -772,6 +770,39 @@ function sendMessage(object) {
 
 async function hitMissed(hit_set_id) {
     await ready({ document: `complete` });
+    const react = await require(`reactComponents/alert/Alert`);
+
+    const once = document.createElement(`button`);
+    once.className = `btn btn-primary`;
+    once.textContent = `Once`;
+    once.style.marginLeft = `5px`;
+    once.addEventListener(`click`, (event) => {
+        chrome.runtime.sendMessage({
+            hitCatcher: {
+                id: hit_set_id, 
+                name: ``,
+                once: true,
+                sound: true
+            }
+        });
+    });
+    react.element.getElementsByTagName(`h3`)[0].appendChild(once);
+
+    const panda = document.createElement(`button`);
+    panda.className = `btn btn-primary`;
+    panda.textContent = `Panda`;
+    panda.style.marginLeft = `5px`;
+    panda.addEventListener(`click`, (event) => {
+        chrome.runtime.sendMessage({
+            hitCatcher: {
+                id: hit_set_id, 
+                name: ``,
+                once: false,
+                sound: false
+            }
+        });
+    });
+    react.element.getElementsByTagName(`h3`)[0].appendChild(panda);
 }
 
 Object.assign(Number.prototype, {
@@ -783,13 +814,9 @@ Object.assign(Number.prototype, {
 chrome.runtime.sendMessage({ hitCatcher: `loggedIn` });
 
 (async (fnName) => {
-    console.time(fnName);
-
     const react = await require(`reactComponents/common/CopyText`);
 
     chrome.storage.local.set({
         workerID: react.reactProps.textToCopy
     });
-
-    console.timeEnd(fnName);
 })(`workerID`);

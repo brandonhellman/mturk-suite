@@ -83,6 +83,7 @@ function storageThemes(object) {
     const themesMturk = document.getElementById(`themes-mturk`);
 
     theme.href = `/bootstrap/css/${storage.themes.mts}.min.css`;
+    themesMts.value = storage.themes.mts;
 
     themes.addEventListener(`change`, (e) => {
         storage.themes.mts = themesMts.value;
@@ -97,7 +98,6 @@ function storageThemes(object) {
 }
 
 chrome.storage.local.get([`exports`, `reviews`, `scripts`, `themes`], (keys) => {
-    console.log(keys);
     storageExports(keys.exports);
     storageReviews(keys.reviews);
     storageScripts(keys.scripts);

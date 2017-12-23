@@ -639,7 +639,7 @@ async function hitExportMTurkCrowd(arguments, request, sender, sendResponse) {
     }
 
     try {
-        const dailyThreads = await fetch(`http://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`, {
+        const dailyThreads = await fetch(`https://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`, {
             credentials: `include`
         });
         const dailyThreadsDOM = new DOMParser().parseFromString(await dailyThreads.text(), `text/html`);
@@ -649,7 +649,7 @@ async function hitExportMTurkCrowd(arguments, request, sender, sendResponse) {
         if (xfToken.length > 0 && xfToken[0].value.length > 0) {
             const newestThread = Math.max(...[...dailyThreadsDOM.querySelectorAll(`li[id^="thread-"]`)].map(element => Number(element.id.replace(/[^0-9.]/g, ``))));
 
-            const checkPosts = await fetch(`http://www.mturkcrowd.com/api.php?action=getPosts&thread_id=${newestThread}&order_by=post_date`, {
+            const checkPosts = await fetch(`https://www.mturkcrowd.com/api.php?action=getPosts&thread_id=${newestThread}&order_by=post_date`, {
                 credentials: `include`
             });
 
@@ -662,7 +662,7 @@ async function hitExportMTurkCrowd(arguments, request, sender, sendResponse) {
                 }
             }
 
-            const postHIT = await fetch(`http://www.mturkcrowd.com/threads/${newestThread}/add-reply`, {
+            const postHIT = await fetch(`https://www.mturkcrowd.com/threads/${newestThread}/add-reply`, {
                 method: `post`,
                 body: new URLSearchParams(`_xfToken=${xfToken[0].value}&message_html=${await messageHtml(hit)}`),
                 credentials: `include`
@@ -940,6 +940,42 @@ chrome.contextMenus.create({
     }
 });
 
+chrome.contextMenus.create({
+    title: `HIT Catcher - Once`,
+    contexts: [`link`],
+    targetUrlPatterns: [`https://worker.mturk.com/projects/*/tasks*`],
+    onclick (info, tab) {
+        const hit_set_id = info.linkUrl.match(/projects\/([A-Z0-9]+)\/tasks/)[1];
+
+        chrome.runtime.sendMessage({
+            hitCatcher: {
+                id: hit_set_id, 
+                name: ``,
+                once: true,
+                sound: true
+            }
+        });
+    }
+});
+
+chrome.contextMenus.create({
+    title: `HIT Catcher - Panda`,
+    contexts: [`link`],
+    targetUrlPatterns: [`https://worker.mturk.com/projects/*/tasks*`],
+    onclick (info, tab) {
+        const hit_set_id = info.linkUrl.match(/projects\/([A-Z0-9]+)\/tasks/)[1];
+
+        chrome.runtime.sendMessage({
+            hitCatcher: {
+                id: hit_set_id, 
+                name: ``,
+                once: false,
+                sound: false
+            }
+        });
+    }
+});
+
 //********** HIT Tracker **********//
 let hitTrackerDB;
 
@@ -1040,7 +1076,7 @@ function hitTrackerGetProjected() {
     const objectStore = transaction.objectStore(`hit`);
     const index = objectStore.index(`date`);
     const range = IDBKeyRange.only(mturkDate());
-    
+
     index.openCursor(range).onsuccess = (event) => {
         const cursor = event.target.result;
 
@@ -1060,6 +1096,10 @@ function hitTrackerGetProjected() {
             earnings: projected
         });
     };
+}
+
+function openTracker() {
+    chrome.tabs.create({ url: chrome.runtime.getURL(`hit_tracker/hit_tracker.html`) });
 }
 
 function mturkDate() {
@@ -1187,9 +1227,9 @@ chrome.webRequest.onCompleted.addListener((details) => {
 }, [`responseHeaders`]);
 
 chrome.omnibox.onInputChanged.addListener((text, suggest) => {
-  chrome.omnibox.setDefaultSuggestion({
-    description: 'Search Mechanical Turk for %s'
-  });
+    chrome.omnibox.setDefaultSuggestion({
+        description: 'Search Mechanical Turk for %s'
+    });
 });
 
 chrome.omnibox.onInputEntered.addListener((text) => {

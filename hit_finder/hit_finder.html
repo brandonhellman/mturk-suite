@@ -41,8 +41,10 @@
 
         <div>
             <div id="found-card" class="card">
-                <div class="card-header bg-primary text-white" style="word-wrap: break-word;">
-                    <b>Found HITs</b> <small id="hits-found"></small>
+                <div id="found-card-header" class="card-header bg-primary text-white" style="word-wrap: break-word;">
+                    <span class="glyphicon glyphicon-resize-small small">
+                    </span><b>Found HITs</b>
+                    <small id="hits-found"></small>
                     <span class="float-right" style="font-size: 70%;">
                         <b>Total Scans: </b><span id="total-scans">0</span> | <b>PRE: </b><span id="page-request-errors">0</span>
                     </span>
@@ -65,10 +67,12 @@
                 </div>
             </div>
         </div>
-        
+
         <div id="logged-card" class="card">
-            <div class="card-header bg-primary text-white" style="word-wrap: break-word;">
-                <b>Logged HITs</b> <small id="updated"></small>
+            <div id="logged-card-header" class="card-header bg-primary text-white" style="word-wrap: break-word;">
+                <span class="glyphicon glyphicon-resize-small small"></span>
+                <b>Logged HITs</b>
+                <small id="updated"></small>
                 <span class="float-right" style="font-size: 70%;">
                     <b>HITs Logged: </b><span id="hits-logged">0</span>
                 </span>

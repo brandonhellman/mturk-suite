@@ -1,7 +1,6 @@
 /*
-Requester review modal
-hide include list matches when all deleted
-toggle all 3 sections
+requester review modal redesign for md breakpoint
+change hit export buttons to behave like on Worker
 */
 
 Object.assign(String.prototype, {
@@ -41,7 +40,7 @@ Object.assign(Number.prototype, {
 
 const paused = new Object(), finderDB = new Object(), reviewsDB = new Object(), includeAlerted = new Array(), includePushbulleted = new Array();
 
-let timer = 0, totalScans = 0, pageRequestErrors = 0;
+let totalScans = 0, pageRequestErrors = 0;
 let alarm = false, alarmAudio = null, alarmRunning = false, finderTimeout = null;
 
 let storage = (async (object) => {
@@ -244,7 +243,7 @@ async function finderRun() {
         return;
     }
 
-    const start = new Date().getTime(); console.log(`Delay: ${start - timer}ms`); timer = start;
+    const start = new Date().getTime();
 
     function delay() {
         const nextCatch = start + Number(storage.finder.speed);
@@ -1417,7 +1416,7 @@ function requesterReviewsUpdate(objectReviews, arrayIds) {
         ]);
 
         for (const item of getReviewsAll) {
-            if (item.length > 0) {
+            if (item & item.length > 0) {
                 const site = item[0];
                 const reviews = item[1];
 
@@ -1516,32 +1515,19 @@ function toClipBoard(string) {
     return copy ? true : false;
 }
 
-function copyTextToClipboard(string) {
-    const textarea = document.createElement(`textarea`);
-    textarea.textContent = string;
-    document.body.appendChild(textarea);
+document.getElementById(`found-card-header`).addEventListener(`click`, toggleVisibility);
+document.getElementById(`logged-card-header`).addEventListener(`click`, toggleVisibility);
 
-    textarea.focus();
-    textarea.select();
-    document.execCommand(`copy`);
-
-    //document.body.removeChild(textarea);
-}
-
-function COPY_TO_CLIP (string, message) {
-    $(`body`).append(`<textarea id="clipboard" style="opacity: 1;" selected>${string}</textarea>`);
-    $(`#clipboard`).select();
-    //    document.execCommand(`Copy`);
-    //    $(`#clipboard`).remove();
-    // alert(message);
-}
-
-function copyTextToClipboard1(text) {
-    var copyFrom = document.createElement("textarea");
-    copyFrom.textContent = text;
-    var body = document.getElementsByTagName('body')[0];
-    body.appendChild(copyFrom);
-    copyFrom.select();
-    document.execCommand('copy');
-    body.removeChild(copyFrom);
+function toggleVisibility(e) {
+    const el = e.target.closest(`.card`).firstElementChild; console.log(el);
+    const elParent = el.nextElementSibling;
+    
+    if ([...el.firstElementChild.classList].includes(`glyphicon-resize-small`)) {
+        el.firstElementChild.classList.replace(`glyphicon-resize-small`, `glyphicon-resize-full`);
+    }
+    else {
+        el.firstElementChild.classList.replace(`glyphicon-resize-full`, `glyphicon-resize-small`);
+    }
+    
+    elParent.style.display = elParent.style.display === `none` ? `` : `none`;
 }
