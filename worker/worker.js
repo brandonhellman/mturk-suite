@@ -398,7 +398,7 @@ function sendMessage(object) {
     link.textContent = storage.earnings.toMoneyString();
     link.addEventListener(`click`, (e) => {
         e.preventDefault();
-        
+
         chrome.runtime.sendMessage({
             function: `openTracker`
         });
@@ -577,9 +577,9 @@ function sendMessage(object) {
 (async (fnName) => {
     await ready({ enabled: fnName, document: `interactive` });
 
-    const error = document.getElementById(`error`);
+    const error = document.getElementsByClassName(`error-page`);
 
-    if (error !== null) {
+    if (error.length) {
         setTimeout(window.location.reload.bind(window.location), 1000);
     }
 })(`rateLimitReloader`);
@@ -587,7 +587,10 @@ function sendMessage(object) {
 (async (fnName) => {
     await ready({ enabled: fnName });
 
-    const react = await require(`reactComponents/hitSetTable/HitSetTable`, `reactComponents/taskQueueTable/TaskQueueTable`);
+    const react = await require(
+        `reactComponents/hitSetTable/HitSetTable`,
+        `reactComponents/taskQueueTable/TaskQueueTable`,
+        `reactComponents/hitStatusDetailsTable/HitStatusDetailsTable`);
 
     const objectReviews = await sendMessage({
         function: `requesterReviewsGet`,
@@ -600,7 +603,6 @@ function sendMessage(object) {
 
     for (let i = 0; i < hitRows.length; i++) {
         const hit = react.reactProps.bodyData[i].project ? react.reactProps.bodyData[i].project : react.reactProps.bodyData[i];
-        const requester = hitRows[i].getElementsByClassName(`requester-column`)[0];
 
         const review = objectReviews[hit.requester_id];
         const tv = review.turkerview;
@@ -676,7 +678,7 @@ function sendMessage(object) {
                 } else {
                     template = `No Reviews`;
                 }
-                return `<div class="col-xs-4" style="width: 150px;"><h2><a class="text-primary" href="https://turkerview.com/requesters/${hit.requester_id}" target="_blank">TurkerView</a></h2>${template}</div>`;
+                return `<div class="col-xs-4" style="width: 150px;"><h2><a class="text-primary" href="https://turkerview.com/requesters/${hit.requester_id}" target="_blank">TurkerView</a></h2>${template}<div><a href="https://turkerview.com/review.php?rname=${encodeURIComponent(hit.requester_name)}&rid=${hit.requester_id}&title=${hit.title}" target="_blank">Review on TV</a></div></div>`;
             }
             return ``;
         })(review.turkerview);
@@ -697,7 +699,7 @@ function sendMessage(object) {
                 } else {
                     template = `No Reviews`;
                 }
-                return `<div class="col-xs-4" style="width: 150px;"><h2><a class="text-primary" href="https://turkopticon.ucsd.edu/${hit.requester_id}" target="_blank">Turkopticon</a></h2>${template}</div>`;
+                return `<div class="col-xs-4" style="width: 150px;"><h2><a class="text-primary" href="https://turkopticon.ucsd.edu/${hit.requester_id}" target="_blank">Turkopticon</a></h2>${template}<div class="col-xs-12">&nbsp;</div><div><a href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${hit.requester_id}&requester[amzn_name]=${encodeURIComponent(hit.requester_name)}" target="_blank">Review on TO</a></div></div>`;
             }
             return ``;
         })(review.turkopticon);
@@ -725,25 +727,27 @@ function sendMessage(object) {
                 } else {
                     template = `No Reviews`;
                 }
-                return `<div class="col-xs-4" style="width: 225px;"><h2><a class="text-primary" href="https://turkopticon.info/requesters/${hit.requester_id}" target="_blank">Turkopticon 2</a></h2>${template}</div>`;
+                return `<div class="col-xs-4" style="width: 225px;"><h2><a class="text-primary" href="https://turkopticon.info/requesters/${hit.requester_id}" target="_blank">Turkopticon 2</a></h2>${template}<div><a href="https://turkopticon.info/reviews/new?name=${encodeURIComponent(hit.requester_name)}&rid=${hit.requester_id}" target="_blank">Review on TO2</a></div></div>`;
             }
             return ``;
         })(review.turkopticon2);
 
-        const button = document.createElement(`button`);
-        button.className = `btn btn-default btn-sm fa fa-user ${reviewClass ? reviewClass : ``}`;
-        button.dataset.toggle = `popover`;
-        button.style.marginRight = `5px`;
-        button.addEventListener(`click`, (event) => {
-            event.target.closest(`.desktop-row`).click();
-        });
-        requester.prepend(button);
+        for (const el of hitRows[i].getElementsByClassName(`expand-button`)) {
+            const button = document.createElement(`button`);
+            button.className = `btn btn-default btn-sm fa fa-user ${reviewClass ? reviewClass : ``}`;
+            button.dataset.toggle = `popover`;
+            button.style.marginRight = `5px`;
+            button.addEventListener(`click`, (event) => {
+                event.target.closest(`.desktop-row`).click();
+            });
 
-        const script = document.createElement(`script`);
-        script.textContent = `$(document.currentScript).parent().popover({ html: true, trigger: 'hover focus', title: '${hit.requester_name} [${hit.requester_id}]', content: '<div class="container">${turkerview + turkopticon + turkopticon2}</div>' });`;
-        button.appendChild(script);
+            const script = document.createElement(`script`);
+            script.textContent = `$(document.currentScript).parent().popover({ html: true, trigger: 'hover focus', title: '${hit.requester_name} [${hit.requester_id}]', content: '<div class="container">${turkerview + turkopticon + turkopticon2}</div>' });`;
+            button.appendChild(script);
 
-        hitRows[i].getElementsByClassName(`expand-button`)[0].style.display = `none`;
+            el.parentElement.insertBefore(button, el);
+            el.style.display = `none`;
+        }
     }
 
     const style = document.createElement(`style`);

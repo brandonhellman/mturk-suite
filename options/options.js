@@ -104,4 +104,8 @@ chrome.storage.local.get([`exports`, `reviews`, `scripts`, `themes`], (keys) => 
     storageThemes(keys.themes);
 });
 
-$(`[data-toggle="tooltip"]`).tooltip();
+$(`[data-toggle="tooltip"]`).tooltip({
+    delay: {
+        show: 500
+    }
+});

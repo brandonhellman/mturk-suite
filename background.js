@@ -1,9 +1,144 @@
+//********** Context Menus **********//
+chrome.contextMenus.create({
+    title: `Paste Mturk Worker ID`,
+    contexts: [`editable`],
+    onclick(info, tab) {
+        chrome.tabs.executeScript(tab.id, {
+            code: `elem = document.activeElement; elem.value += '${storage.workerID}'; elem.dispatchEvent(new Event('change', { bubbles: true }));`,
+            frameId: info.frameId,
+        });
+    }
+});
+
+chrome.contextMenus.create({
+    title: `Contact Requester`,
+    contexts: [`link`],
+    targetUrlPatterns: [`https://worker.mturk.com/requesters/*`],
+    onclick(info, tab) {
+        const match = info.linkUrl.match(/([A-Z0-9]+)/);
+        const requesterId = match ? match[1] : null;
+
+        if (requesterId) {
+            window.open(`https://www.mturk.com/mturk/contact?requesterId=${requesterId}`);
+        }
+    }
+});
+
+chrome.contextMenus.create({
+    title: `HIT Catcher - Once`,
+    contexts: [`link`],
+    targetUrlPatterns: [`https://worker.mturk.com/projects/*/tasks*`],
+    onclick (info, tab) {
+        const match = info.linkUrl.match(/projects\/([A-Z0-9]+)\/tasks/);
+        const hitSetId = match ? match[1] : null;
+
+        if (hitSetId) {
+            chrome.runtime.sendMessage({
+                hitCatcher: {
+                    id: hitSetId, 
+                    name: ``,
+                    once: true,
+                    sound: true
+                }
+            });
+        }
+    }
+});
+
+chrome.contextMenus.create({
+    title: `HIT Catcher - Panda`,
+    contexts: [`link`],
+    targetUrlPatterns: [`https://worker.mturk.com/projects/*/tasks*`],
+    onclick (info, tab) {
+        const match = info.linkUrl.match(/projects\/([A-Z0-9]+)\/tasks/);
+        const hitSetId = match ? match[1] : null;
+
+        if (hitSetId){
+            chrome.runtime.sendMessage({
+                hitCatcher: {
+                    id: hitSetId, 
+                    name: ``,
+                    once: false,
+                    sound: false
+                }
+            });
+        }
+    }
+});
+
+//********** Omnibox **********//
+chrome.omnibox.onInputChanged.addListener((text, suggest) => {
+    chrome.omnibox.setDefaultSuggestion({
+        description: 'Search Mechanical Turk for %s'
+    });
+});
+
+chrome.omnibox.onInputEntered.addListener((text) => {
+    chrome.tabs.getSelected(null, (tab) => {
+        chrome.tabs.update(tab.id, {
+            url: `https://worker.mturk.com/?filters%5Bsearch_term%5D=${encodeURIComponent(text)}`
+        });
+    });
+});
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.function !== undefined && window[request.function] instanceof Function) {
-        window[request.function](request.arguments, request, sender, sendResponse);
+    const func = request.function;
+    
+    if (func && window[func] instanceof Function) {
+        window[func](request.arguments, request, sender, sendResponse);
         return true;
     }
 });
+
+//********** Web Requests **********//
+let requestsDB = {}, doNotRedirect = false;
+
+chrome.webRequest.onBeforeRequest.addListener((details) => {
+    const match = details.url.match(/https:\/\/worker.mturk.com\/projects\/([A-Z0-9]+)\/tasks\/accept_random/);
+
+    if (match) {
+        requestsDB[details.requestId] = {
+            tabId: details.tabId,
+            hitSetId: match[1]
+        };
+    }
+}, {
+    urls: [`https://worker.mturk.com/projects/*/tasks/accept_random*`], types: [`main_frame`]
+}, [`requestBody`]);
+
+chrome.webRequest.onCompleted.addListener((details) => {
+    const request = requestsDB[details.requestId];
+
+    if (request) {
+        const catcher = chrome.extension.getViews().map((o) => o.location.pathname).includes(`/hit_catcher/hit_catcher.html`);
+
+        if (catcher && details.url.indexOf(`https://worker.mturk.com/projects/${request.hit_set_id}/tasks`) === -1) {
+            setTimeout(() => {
+                chrome.tabs.sendMessage(request.tabId, {
+                    hitMissed: request.hit_set_id
+                });
+            }, 250);
+        }
+    }
+}, {
+    urls: [`https://worker.mturk.com/*`], types: [`main_frame`]
+}, [`responseHeaders`]);
+
+chrome.webRequest.onBeforeRequest.addListener((details) => {
+    if (doNotRedirect === true) {
+        let url = details.url;
+
+        if (url.indexOf(`doNotRedirect=true`) === -1) {
+            const hash = (url.indexOf(`#`) === -1) ? url.length : url.indexOf('#');
+            const symbol = (url.indexOf(`?`) === -1) ? `?` : `&`;
+            const redirectUrl = url.substring(0, hash) + symbol + `doNotRedirect=true` + url.substring(hash);
+            return { redirectUrl: redirectUrl };
+        }
+    }
+}, {
+    urls: [`https://www.mturk.com/*`]
+}, [`blocking`]);
+
 
 async function hitExportShort(arguments, request, sender, sendResponse) {
     new Notification(`HIT Export Failed!`, {
@@ -776,7 +911,7 @@ function requesterReviewsUpdate(objectReviews, arrayIds) {
         };
 
         const getReviewsAll = await Promise.all([
-            getReviews(`turkerview`, `https://turkerview.com/api/v1/requesters/?ids=${arrayIds}`),
+            getReviews(`turkerview`, `https://turkerview.com/api/v1/requesters/?ids=${arrayIds}&from=mts`),
             getReviews(`turkopticon`, `https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${arrayIds}`),
             getReviews(`turkopticon2`, `https://api.turkopticon.info/requesters?rids=${arrayIds}&fields[requesters]=aggregates`)
         ]);
@@ -915,67 +1050,6 @@ const storage = new Object();
     });
 })();
 
-//********** Context Menus **********//
-chrome.contextMenus.create({
-    title: `Paste Mturk Worker ID`,
-    contexts: [`editable`],
-    onclick(info, tab) {
-        chrome.tabs.executeScript(tab.id, {
-            code: `elem = document.activeElement; elem.value += '${storage.workerID}'; elem.dispatchEvent(new Event('change', { bubbles: true }));`,
-            frameId: info.frameId,
-        });
-    }
-});
-
-chrome.contextMenus.create({
-    title: `Contact Requester`,
-    contexts: [`link`],
-    targetUrlPatterns: [`https://worker.mturk.com/requesters/*`],
-    onclick(info, tab) {
-        const requesterId = info.linkUrl.match(/([A-Z0-9]+)/) ? info.linkUrl.match(/([A-Z0-9]+)/)[1] : null;
-
-        if (requesterId) {
-            window.open(`https://www.mturk.com/mturk/contact?requesterId=${requesterId}`);
-        }
-    }
-});
-
-chrome.contextMenus.create({
-    title: `HIT Catcher - Once`,
-    contexts: [`link`],
-    targetUrlPatterns: [`https://worker.mturk.com/projects/*/tasks*`],
-    onclick (info, tab) {
-        const hit_set_id = info.linkUrl.match(/projects\/([A-Z0-9]+)\/tasks/)[1];
-
-        chrome.runtime.sendMessage({
-            hitCatcher: {
-                id: hit_set_id, 
-                name: ``,
-                once: true,
-                sound: true
-            }
-        });
-    }
-});
-
-chrome.contextMenus.create({
-    title: `HIT Catcher - Panda`,
-    contexts: [`link`],
-    targetUrlPatterns: [`https://worker.mturk.com/projects/*/tasks*`],
-    onclick (info, tab) {
-        const hit_set_id = info.linkUrl.match(/projects\/([A-Z0-9]+)\/tasks/)[1];
-
-        chrome.runtime.sendMessage({
-            hitCatcher: {
-                id: hit_set_id, 
-                name: ``,
-                once: false,
-                sound: false
-            }
-        });
-    }
-});
-
 //********** HIT Tracker **********//
 let hitTrackerDB;
 
@@ -989,45 +1063,25 @@ let hitTrackerDB;
     open.onupgradeneeded = (event) => {
         hitTrackerDB = event.target.result;
 
-        const hitObjectStore = hitTrackerDB.createObjectStore(`hit`, { keyPath: `hit_id` });
+        const hitObjectStore = hitTrackerDB.createObjectStore(`hit`, {
+            keyPath: `hit_id`
+        });
 
         for (const value of [`requester_id`, `requester_name`, `state`, `title`, `date`]) {
-            hitObjectStore.createIndex(value, value, { unique: false });
+            hitObjectStore.createIndex(value, value, {
+                unique: false
+            });
         }
 
-        const dayObjectStore = hitTrackerDB.createObjectStore(`day`, { keyPath: `date` });
+        const dayObjectStore = hitTrackerDB.createObjectStore(`day`, {
+            keyPath: `date`
+        });
 
         for (const value of [`assigned`, `returned`, `abandoned`, `submitted`, `approved`, `rejected`, `pending`, `earnings`]) {
-            dayObjectStore.createIndex(value, value, { unique: false });
+            dayObjectStore.createIndex(value, value, {
+                unique: false
+            });
         }
-
-        const sampleHit = {
-            hit_id: String,
-            requester_feedback: String,
-            requester_id: String,
-            requester_name: String,
-            reward: {
-                amount_in_dollars: Number,
-                currency_code: String
-            },
-            state: String,
-            title: String,
-
-            date: String,
-            source: String,
-            answer: Object
-        };
-
-        const sampleDay = {
-            accepted: Number,  
-            returned: Number, 
-            abandoned: Number, 
-            submitted: Number, 
-            approved: Number, 
-            rejected: Number, 
-            pending: Number, 
-            earnings: Number
-        };
     };
 })();
 
@@ -1176,66 +1230,5 @@ function copyTextToClipboard(string) {
     document.body.removeChild(textarea);
 }
 
-let doNotRedirect = false;
 
-chrome.webRequest.onBeforeRequest.addListener((details) => {
-    if (doNotRedirect === true) {
-        let url = details.url;
 
-        if (url.indexOf(`doNotRedirect=true`) === -1) {
-            const hash = (url.indexOf(`#`) === -1) ? url.length : url.indexOf('#');
-            const symbol = (url.indexOf(`?`) === -1) ? `?` : `&`;
-            const redirectUrl = url.substring(0, hash) + symbol + `doNotRedirect=true` + url.substring(hash);
-            return { redirectUrl: redirectUrl };
-        }
-    }
-}, {
-    urls: [`https://www.mturk.com/*`]
-}, [`blocking`]);
-
-let requestsDB = new Object();
-
-chrome.webRequest.onBeforeRequest.addListener((details) => {
-    const match = details.url.match(/https:\/\/worker.mturk.com\/projects\/([A-Z0-9]+)\/tasks\/accept_random/);
-
-    if (match) {
-        requestsDB[details.requestId] = {
-            tabId: details.tabId,
-            hit_set_id: match[1]
-        }
-    }
-}, {
-    urls: [`https://worker.mturk.com/projects/*/tasks/accept_random*`], types: [`main_frame`]
-}, [`requestBody`]);
-
-chrome.webRequest.onCompleted.addListener((details) => {
-    const request = requestsDB[details.requestId];
-
-    if (request) {
-        const catcher = chrome.extension.getViews().map((o) => o.location.pathname).includes(`/hit_catcher/hit_catcher.html`);
-
-        if (catcher && details.url.indexOf(`https://worker.mturk.com/projects/${request.hit_set_id}/tasks`) === -1) {
-            setTimeout(() => {
-                chrome.tabs.sendMessage(request.tabId, {
-                    hitMissed: request.hit_set_id
-                });
-            }, 250);
-        }
-    }
-}, {
-    urls: [`https://worker.mturk.com/*`], types: [`main_frame`]
-}, [`responseHeaders`]);
-
-chrome.omnibox.onInputChanged.addListener((text, suggest) => {
-    chrome.omnibox.setDefaultSuggestion({
-        description: 'Search Mechanical Turk for %s'
-    });
-});
-
-chrome.omnibox.onInputEntered.addListener((text) => {
-    chrome.tabs.getSelected(null, (tab) => {
-        chrome.tabs.update(tab.id, {
-            url: `https://worker.mturk.com/?filters%5Bsearch_term%5D=${encodeURIComponent(text)}`
-        });
-    });
-});

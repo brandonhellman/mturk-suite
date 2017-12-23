@@ -8,10 +8,9 @@
         <link href="/bootstrap4/css/glyphicons.css" rel="stylesheet">
         <link href="/hit_finder/hit_finder.css" rel="stylesheet">
 
-        <!-- Scripts -->
-        <script src="/js/jquery-3.2.1.min.js"></script>
-        <script src="/js/tether.min.js"></script>
-        <script src="/js/bootstrap-v4.0.0.min.js"></script>
+        <script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
+        <script src="/bootstrap/js/popper.min.js"></script>
+        <script src="/bootstrap/js/bootstrap.min.js"></script>
     </head>
 
     <body style="padding: 3px;">
@@ -172,7 +171,7 @@
                         <h1 class="text-center">Alarm is active!</h1>
                     </div>
                     <div class="modal-footer">
-                        <button id="alarm-off" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button id="alarm-off" class="btn btn-danger" data-dismiss="modal">Alarm Off</button>
                     </div>
                 </div>
             </div>
@@ -220,13 +219,15 @@
                         </div>
                         <br>
                         <div class="form-check form-check-inline">
-                            <label class="form-check-label">
+                            <label class="form-check-label" data-toggle="tooltip" style="cursor: help;"
+                                   title="Matches only if the term exactly matches the requester id, requester name, group id or hit title">
                                 <input id="block-list-add-strict" class="form-check-input" type="radio" name="block-list-add-type" value="strict">
                                 Strict
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <label class="form-check-label">
+                            <label class="form-check-label" data-toggle="tooltip" style="cursor: help;"
+                                   title="Matches if the term is contained anywhere in the requester id, requester name, group id or hit title">
                                 <input class="form-check-input" type="radio" name="block-list-add-type" value="loose">
                                 Loose
                             </label>
@@ -261,13 +262,15 @@
                         </div>
                         <br>
                         <div class="form-check form-check-inline">
-                            <label class="form-check-label">
+                            <label class="form-check-label" data-toggle="tooltip" style="cursor: help;"
+                                   title="Matches only if the term exactly matches the requester id, requester name, group id or hit title">
                                 <input id="block-list-edit-strict" class="form-check-input" type="radio" name="block-list-edit-strict" value="strict">
                                 Strict
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <label class="form-check-label">
+                            <label class="form-check-label" data-toggle="tooltip" style="cursor: help;"
+                                   title="Matches if the term is contained anywhere in the requester id, requester name, group id or hit title">
                                 <input class="form-check-input" type="radio" name="block-list-edit-strict" value="loose">
                                 Loose
                             </label>
@@ -323,13 +326,15 @@
                         </div>
                         <br>
                         <div class="form-check form-check-inline">
-                            <label class="form-check-label">
+                            <label class="form-check-label" data-toggle="tooltip" style="cursor: help;"
+                                   title="Matches only if the term exactly matches the requester id, requester name, group id or hit title">
                                 <input id="include-list-add-strict" class="form-check-input" type="radio" name="include-list-add-strict" value="strict">
                                 Strict
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <label class="form-check-label">
+                            <label class="form-check-label" data-toggle="tooltip" style="cursor: help;"
+                                   title="Matches if the term is contained anywhere in the requester id, requester name, group id or hit title">
                                 <input class="form-check-input" type="radio" name="include-list-add-strict" value="loose">
                                 Loose
                             </label>
@@ -337,25 +342,29 @@
                         <br>
                         <div class="row">
                             <div class="form-check col-6 text-left">
-                                <label class="form-check-label">
+                                <label class="form-check-label" data-toggle="tooltip" style="cursor: help;"
+                                       title="Plays the sound selected under options if matched">
                                     <input class="form-check-input" type="checkbox" id="include-list-add-sound">
                                     Sound
                                 </label>
                             </div>
                             <div class="form-check col-6 text-left">
-                                <label class="form-check-label">
+                                <label class="form-check-label" data-toggle="tooltip" style="cursor: help;"
+                                       title="Plays a loud alarm if matched and enabled under options">
                                     <input class="form-check-input" type="checkbox" id="include-list-add-alarm">
                                     Alarm
                                 </label>
                             </div>
                             <div class="form-check col-6 text-left">
-                                <label class="form-check-label">
+                                <label class="form-check-label" data-toggle="tooltip" style="cursor: help;"
+                                       title="Shows a desktop notification that you can preview or accept the HIT from if matched">
                                     <input class="form-check-input" type="checkbox" id="include-list-add-notification">
                                     Notification
                                 </label>
                             </div>
                             <div class="form-check col-6 text-left">
-                                <label class="form-check-label">
+                                <label class="form-check-label" data-toggle="tooltip" style="cursor: help;"
+                                       title="Sends you a Pushbullet message if matched and enabled under options">
                                     <input class="form-check-input" type="checkbox" id="include-list-add-pushbullet">
                                     Pushbullet
                                 </label>
@@ -391,13 +400,15 @@
                         </div>
                         <br>
                         <div class="form-check form-check-inline">
-                            <label class="form-check-label">
+                            <label class="form-check-label" style="cursor: help;"
+                                   title="Matches only if the term exactly matches the requester id, requester name, group id or hit title">
                                 <input id="include-list-edit-strict" class="form-check-input" type="radio" name="include-list-edit-strict" value="strict">
                                 Strict
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <label class="form-check-label">
+                            <label class="form-check-label" style="cursor: help;"
+                                   title="Matches if the term is contained anywhere in the requester id, requester name, group id or hit title">
                                 <input class="form-check-input" type="radio" name="include-list-edit-strict" value="loose">
                                 Loose
                             </label>
@@ -405,25 +416,29 @@
                         <br>
                         <div class="row">
                             <div class="form-check col-6 text-left">
-                                <label class="form-check-label">
+                                <label class="form-check-label" style="cursor: help;"
+                                       title="Plays the sound selected under options if matched">
                                     <input class="form-check-input" type="checkbox" id="include-list-edit-sound">
                                     Sound
                                 </label>
                             </div>
                             <div class="form-check col-6 text-left">
-                                <label class="form-check-label">
+                                <label class="form-check-label" style="cursor: help;"
+                                       title="Plays a loud alarm if matched and enabled under options">
                                     <input class="form-check-input" type="checkbox" id="include-list-edit-alarm">
                                     Alarm
                                 </label>
                             </div>
                             <div class="form-check col-6 text-left">
-                                <label class="form-check-label">
+                                <label class="form-check-label" style="cursor: help;"
+                                       title="Shows a desktop notification that you can preview or accept the HIT from if matched">
                                     <input class="form-check-input" type="checkbox" id="include-list-edit-notification">
                                     Notification
                                 </label>
                             </div>
                             <div class="form-check col-6 text-left">
-                                <label class="form-check-label">
+                                <label class="form-check-label" style="cursor: help;"
+                                       title="Sends you a Pushbullet message if matched and enabled under options">
                                     <input class="form-check-input" type="checkbox" id="include-list-edit-pushbullet">
                                     Pushbullet
                                 </label>
@@ -449,7 +464,9 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <div class="card-header bg-primary text-white">Search Filters</div>
+                            <div class="card-header bg-primary text-white">
+                                Search Filters
+                            </div>
                             <div class="card-block container">
                                 <div class="row mb-2">
                                     <div class="col-6">
@@ -483,7 +500,7 @@
                                 <div class="row">
                                     <div class="col">
                                         <div class="small mb-0">HITs that</div>
-                                        <label class="custom-control custom-checkbox" data-toggle="tooltip" title="" data-original-title="Use reviews from https://turkerview.com/.">
+                                        <label class="custom-control custom-checkbox">
                                             <input id="finder-filter-qualified" type="checkbox" class="custom-control-input">
                                             <span class="custom-control-indicator"></span>
                                             <span class="custom-control-description">I'm qualified to work on</span>
@@ -491,7 +508,7 @@
                                     </div>
                                     <div class="col">
                                         <div>&nbsp;</div>
-                                        <label class="custom-control custom-checkbox" data-toggle="tooltip" title="" data-original-title="Use reviews from https://turkerview.com/.">
+                                        <label class="custom-control custom-checkbox">
                                             <input id="finder-filter-masters" type="checkbox" class="custom-control-input">
                                             <span class="custom-control-indicator"></span>
                                             <span class="custom-control-description">Require Masters Qualification</span>
@@ -506,7 +523,10 @@
                             <div class="card-block container">
                                 <div class="row mb-2">
                                     <div class="col-6">
-                                        <label class="small mb-0">New HIT Sound</label>
+                                        <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
+                                               title="Sound to play when a new HIT is found">
+                                            New HIT Sound
+                                        </label>
                                         <select id="finder-notifications-new_sound" class="custom-select w-100">
                                             <option value="none">None</option>
                                             <option value="sound_1" selected>Sound 1</option>
@@ -521,12 +541,18 @@
 
                                 <div class="row mb-2">
                                     <div class="col-6">
-                                        <label class="small mb-0">Match Notification Delay (minutes)</label>
+                                        <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
+                                               title="How long in minutes before the include list with match a specific HIT">
+                                            Match Notification Delay
+                                        </label>
                                         <input id="finder-notifications-delay" type="number" class="form-control" step="1" min="1" value="60">
                                     </div>
 
                                     <div class="col-6">
-                                        <label class="small mb-0">Include Match Sound</label>
+                                        <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
+                                               title="Sound to play when an include list match is found">
+                                            Include Match Sound
+                                        </label>
                                         <select id="finder-notifications-included_sound" class="custom-select w-100">
                                             <option value="voice" selected>Voice</option>
                                             <option value="sound_1">Sound 1</option>
@@ -541,7 +567,10 @@
 
                                 <div class="row mb-3">
                                     <div class="col-6">
-                                        <label class="small mb-0">Pushbullet</label>
+                                        <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
+                                               title="Send a message to pushbullet when an include list match is found">
+                                            Pushbullet
+                                        </label>
                                         <select id="finder-notifications-pushbullet-state" class="custom-select w-100">
                                             <option value="on">On</option>
                                             <option value="off" selected>Off</option>
@@ -549,7 +578,10 @@
                                     </div>
 
                                     <div class="col-6">
-                                        <label class="small mb-0">Access Token</label>
+                                        <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
+                                               title="Your pushbullet access token">
+                                            Access Token
+                                        </label>
                                         <input id="finder-notifications-pushbullet-token" type="text" class="form-control">
                                     </div>
                                 </div>

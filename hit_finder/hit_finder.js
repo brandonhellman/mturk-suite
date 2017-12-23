@@ -620,8 +620,10 @@ function alarmOn () {
 }
 
 function alarmOff () {
-    alarmAudio.pause();
-    alarmAudio.currentTime = 0;
+    if (alarmAudio) {
+        alarmAudio.pause();
+        alarmAudio.currentTime = 0; 
+    }
 
     alarm = false;
     alarmRunning = false;
@@ -717,7 +719,7 @@ function hitInfoModal(hit) {
     }
 
     function blockHitEvent() {
-        blockListAddModal({ name: hit.requester_name, match: hit.requester_id });
+        blockListAddModal({ name: hit.title, match: hit.hit_set_id });
     }
 
     function includeRequesterEvent() {
@@ -725,7 +727,7 @@ function hitInfoModal(hit) {
     }
 
     function includeHitEvent() {
-        includeListAddModal({ name: hit.requester_name, match: hit.requester_id });
+        includeListAddModal({ name: hit.title, match: hit.hit_set_id });
     }
 
     blockRequester.addEventListener(`click`, blockRequesterEvent);
@@ -1410,13 +1412,13 @@ function requesterReviewsUpdate(objectReviews, arrayIds) {
         }
 
         const getReviewsAll = await Promise.all([
-            getReviews(`turkerview`, `https://turkerview.com/api/v1/requesters/?ids=${arrayIds}`),
+            getReviews(`turkerview`, `https://turkerview.com/api/v1/requesters/?ids=${arrayIds}&from=mts`),
             getReviews(`turkopticon`, `https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${arrayIds}`),
             getReviews(`turkopticon2`, `https://api.turkopticon.info/requesters?rids=${arrayIds}&fields[requesters]=aggregates`)
         ]);
 
         for (const item of getReviewsAll) {
-            if (item & item.length > 0) {
+            if (item && item.length > 0) {
                 const site = item[0];
                 const reviews = item[1];
 
@@ -1521,13 +1523,19 @@ document.getElementById(`logged-card-header`).addEventListener(`click`, toggleVi
 function toggleVisibility(e) {
     const el = e.target.closest(`.card`).firstElementChild; console.log(el);
     const elParent = el.nextElementSibling;
-    
+
     if ([...el.firstElementChild.classList].includes(`glyphicon-resize-small`)) {
         el.firstElementChild.classList.replace(`glyphicon-resize-small`, `glyphicon-resize-full`);
     }
     else {
         el.firstElementChild.classList.replace(`glyphicon-resize-full`, `glyphicon-resize-small`);
     }
-    
+
     elParent.style.display = elParent.style.display === `none` ? `` : `none`;
 }
+
+$(`[data-toggle="tooltip"]`).tooltip({
+    delay: {
+        show: 500
+    }
+});
