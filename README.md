@@ -6,8 +6,9 @@ An extension that brings together a large collection of useful tools to assist w
 - [Chrome](https://chrome.google.com/webstore/detail/mturk-suite/iglbakfobmoijpbigmlfklckogbefnlf)
 - Firefox - Coming Soon
 
-# Features - Context Menus and Omnibar
- Adds features to the right click context menus and the omnibar.
+# Features
+- [Paste MTurk Worker ID](#paste-mturk-worker-id)
+
 
  ## Searching MTurk
  Lets you search MTurk for HITs from the omnibar.
@@ -39,9 +40,6 @@ An extension that brings together a large collection of useful tools to assist w
  
  ---
  
-
-# Features - Worker
- Adds features directly to the https://worker.mturk.com/ website.
 
  ## Auto Accept Checker
  Keeps the auto accept next hit checkbox always checked.
@@ -140,4 +138,6 @@ Catch HITs (Documentation coming later)
 Keeps track of all HITs that you work on. (Documentation incomplete)
 
  - Live projected earnings updating when you submit a HIT
- - See projected earnings for today, this week and this month
+ - See projected earnings for today
+ - See projected earnings this week
+ - See projected earnings this month
