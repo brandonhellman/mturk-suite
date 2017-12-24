@@ -396,14 +396,6 @@ function watcherUpdate(watcher) {
         .getElementsByClassName(`stats`)[0]
         .textContent = `Caught: ${caught > 0 ? caught : 0}; Searched: ${searched > 0 ? searched : 0}; PRE: ${pre > 0 ? pre : 0};`
     ;
-
-    /*
-    document
-        .getElementById(id)
-        .getElementsByClassName(`adv-stats`)[0]
-        .textContent = `¢${(((caught > 0 ? searched : 0) * (watcher.project ? obj.reward.replace(/[^0-9]/g, ``) : 0)) / obj.searched).toFixed(4)} per search`
-    ;
-    */
 }
 
 function watcherCatchToggle(watcher) {
