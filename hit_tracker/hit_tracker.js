@@ -586,7 +586,7 @@ function getTrackerInfo() {
     const boundWeek = IDBKeyRange.bound(week.start, week.end);
     const boundMonth = IDBKeyRange.bound(month.start, month.end);
 
-    let weekCount = 0, weekValue = 0; console.time(`boundWeek`);
+    let weekCount = 0, weekValue = 0;
     indexDate.openCursor(boundWeek).onsuccess = (event) => {
         const cursor = event.target.result;
 
@@ -600,12 +600,10 @@ function getTrackerInfo() {
         else {
             document.getElementById(`tracker-projected-week-count`).textContent = weekCount;
             document.getElementById(`tracker-projected-week-value`).textContent = weekValue.toMoneyString();
-
-            console.timeEnd(`boundWeek`);
         }
     };
 
-    let monthCount = 0, monthValue = 0; console.time(`boundMonth`);
+    let monthCount = 0, monthValue = 0;
     indexDate.openCursor(boundMonth).onsuccess = (event) => {
         const cursor = event.target.result;
 
@@ -619,8 +617,6 @@ function getTrackerInfo() {
         else {
             document.getElementById(`tracker-projected-month-count`).textContent = monthCount;
             document.getElementById(`tracker-projected-month-value`).textContent = monthValue.toMoneyString();
-
-            console.timeEnd(`boundMonth`);
         }
     };
 
