@@ -83,7 +83,7 @@ chrome.omnibox.onInputEntered.addListener((text) => {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const func = request.function;
-    
+
     if (func && window[func] instanceof Function) {
         window[func](request.arguments, request, sender, sendResponse);
         return true;
@@ -1153,6 +1153,55 @@ function hitTrackerGetProjected() {
     };
 }
 
+function hitTrackerGetCounts(arguments, request, sender, sendResponse) {
+    const transaction = hitTrackerDB.transaction([`hit`], `readonly`);
+    const objectStore = transaction.objectStore(`hit`);
+    const requesterIndex = objectStore.index(`requester_id`);
+    const titleIndex = objectStore.index(`title`);
+
+    const counts = {};
+
+    for (const item of arguments.requester_id) {
+        counts[item] = {};
+
+        const range = IDBKeyRange.only(item);
+        
+        requesterIndex.openCursor(range).onsuccess = (event) => {
+            const cursor = event.target.result;
+
+            if (cursor) {
+                const value = cursor.value;
+                const state = value.state
+                const count = counts[item][state];
+                counts[item][state] = count ? count + 1 : 1;
+                cursor.continue();
+            }
+        };
+    }
+    
+    for (const item of arguments.title) {
+        counts[item] = {};
+
+        const range = IDBKeyRange.only(item);
+        
+        titleIndex.openCursor(range).onsuccess = (event) => {
+            const cursor = event.target.result;
+
+            if (cursor) {
+                const value = cursor.value;
+                const state = value.state
+                const count = counts[item][state];
+                counts[item][state] = count ? count + 1 : 1;
+                cursor.continue();
+            }
+        };
+    }
+    
+    transaction.oncomplete = (event) => {
+        sendResponse(counts);
+    };
+}
+
 function openTracker() {
     chrome.tabs.create({ url: chrome.runtime.getURL(`hit_tracker/hit_tracker.html`) });
 }
@@ -1230,6 +1279,15 @@ function copyTextToClipboard(string) {
 
     document.body.removeChild(textarea);
 }
+
+
+
+
+
+
+
+
+
 
 
 
