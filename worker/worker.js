@@ -40,7 +40,6 @@
 })();
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log(request);
     if (request.hitMissed) {
         hitMissed(request.hitMissed);
     }
@@ -554,7 +553,6 @@ function sendMessage(object) {
     await ready({ enabled: fnName, matches: [`/tasks*`] });
 
     const react = await require(`reactComponents/taskQueueTable/TaskQueueTable`);
-    console.log(react);
 
     const hits = react.reactProps.bodyData.reduce((accumulator, currentValue) => {
         const hit = currentValue;
@@ -631,8 +629,6 @@ function sendMessage(object) {
                     }
                 });
             }
-            console.log(assignment_id)
-
         }
     });
 })(`hitTracker`);
@@ -902,7 +898,6 @@ function sendMessage(object) {
 })(`workerID`);
 
 async function hitMissed(hit_set_id) {
-    console.log(`go`)
     await ready({ document: `complete` });
     const react = await require(`reactComponents/alert/Alert`);
 

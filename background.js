@@ -113,7 +113,6 @@ chrome.webRequest.onCompleted.addListener((details) => {
         const catcher = chrome.extension.getViews().map((o) => o.location.pathname).includes(`/hit_catcher/hit_catcher.html`);
 
         if (catcher && details.url.indexOf(`https://worker.mturk.com/projects/${request.hit_set_id}/tasks`) === -1) {
-            console.log(`sending`);
             setTimeout(() => {
                 chrome.tabs.sendMessage(request.tabId, {
                     hitMissed: request.hit_set_id
@@ -1096,7 +1095,6 @@ function hitTrackerUpdate(arguments) {
 
     const objectStore = hitTrackerDB.transaction([`hit`], `readwrite`).objectStore(`hit`);
     objectStore.put(hit);
-    console.log(`hitTrackerUpdate`, hit);
 }
 
 function hitTrackerSubmitted(arguments) {

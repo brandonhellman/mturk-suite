@@ -125,7 +125,7 @@ function displayTodaysInfo(hits) {
     document.getElementById(`returned-value`).textContent = today.returned.value.toMoneyString();
 
     const requesterTbody = document.getElementById(`requester-tbody`);
-    
+
     while (requesterTbody.firstChild) {
         requesterTbody.removeChild(requesterTbody.firstChild);
     }
@@ -316,19 +316,7 @@ function checkDays(days) {
                 const rejected = now.rejected === value.rejected;
                 const submitted = now.submitted === value.submitted + value.approved + value.rejected + value.paid;
 
-                if (!approved) {
-                    console.log(`paid ${value.date}: ${now.approved} vs ${value.paid}`, value);
-                }
-                else if (!pending) {
-                    console.log(`pending ${value.date}: ${now.pending} vs ${(value.submitted + value.pending)}`, value);
-                }
-                else if (!rejected) {
-                    console.log(`rejected ${value.date}: ${now.rejected} vs ${value.rejected}`, value);
-                }
-                else if (!submitted) {
-                    console.log(`submitted ${value.date}: ${now.submitted} vs ${(value.submitted + value.approved + value.rejected + value.pending + value.paid)}`, value);
-                }
-                else {
+                if (approved && pending && rejected && submitted) {
                     const i = daysArray.indexOf(value.date);
 
                     if (i !== -1) {
@@ -361,10 +349,6 @@ function saveDay(date) {
             if (result) {
                 count.day = result.day;
                 count.bonuses = count.day.earnings - count.day.approved - count.day.paid;
-
-                if (count.bonuses > 0) {
-                    console.log(count);
-                }
             }
 
             objectStore.put(count);
