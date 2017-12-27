@@ -84,6 +84,7 @@ function storageThemes(object) {
 
     theme.href = `/bootstrap/css/${storage.themes.mts}.min.css`;
     themesMts.value = storage.themes.mts;
+    themesMturk.value = storage.themes.mturk;
 
     themes.addEventListener(`change`, (e) => {
         storage.themes.mts = themesMts.value;

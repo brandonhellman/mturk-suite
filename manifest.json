@@ -70,5 +70,9 @@
             "https://turkerhub.com/*",
             "http://www.mturkcrowd.com/*"
         ]
-    }
+    },
+    
+    "web_accessible_resources": [
+        "bootstrap/css/*"
+    ]
 }

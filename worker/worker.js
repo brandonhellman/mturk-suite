@@ -1,3 +1,44 @@
+(function updateTheme() {
+    chrome.storage.local.get([`themes`], (keys) => {        
+        if (keys.themes.mturk !== `default`) {
+            const el = document.getElementById(`mturk-theme`);
+            const href = chrome.extension.getURL(`bootstrap/css/${keys.themes.mturk}.worker.css`);
+
+            if (el) {
+                
+                el.href = href
+            }
+            else {
+                const theme = document.createElement(`link`);
+                theme.id = `mturk-theme`;
+                theme.rel = 'stylesheet';
+                theme.href = href;
+                theme.type = `text/css`;
+                (document.head||document.documentElement).appendChild(theme);
+            }
+        }
+
+        chrome.storage.onChanged.addListener((changes) => {
+            if (changes.themes) {
+                const el = document.getElementById(`mturk-theme`);
+                const href = chrome.extension.getURL(`bootstrap/css/${changes.themes.newValue.mturk}.worker.css`);
+
+                if (el) {
+                    el.href = href
+                }
+                else {
+                    const theme = document.createElement(`link`);
+                    theme.id = `mturk-theme`;
+                    theme.rel = `stylesheet`;
+                    theme.href = href;
+                    theme.type = `text/css`;
+                    document.getElementsByTagName(`head`)[0].appendChild(theme);
+                }
+            }
+        });
+    });
+})();
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log(request);
     if (request.hitMissed) {
@@ -917,7 +958,7 @@ chrome.runtime.sendMessage({ hitCatcher: `loggedIn` });
 
 (async (fnName) => {
     await ready({ enabled: fnName });
-    
+
     const react = await require(`reactComponents/hitSetTable/HitSetTable`, `reactComponents/taskQueueTable/TaskQueueTable`);
     const reactProps = react.reactProps;
 
@@ -941,15 +982,13 @@ chrome.runtime.sendMessage({ hitCatcher: `loggedIn` });
         arguments: trackerCompareValues
     });
 
-    console.log(counts);
-    
     function countPopover(counts) {
         let template = ``;
-        
+
         for (const key in counts) {
             template += `<div class="row">${key}: ${counts[key]}</div>`
         }
-            
+
         return template === `` ? `No Work Found` : template;
     }
 
@@ -959,7 +998,7 @@ chrome.runtime.sendMessage({ hitCatcher: `loggedIn` });
 
     for (let i = 0; i < hitRows.length; i ++) {
         const hit = reactProps.bodyData[i].project || reactProps.bodyData[i];
-        const trackerR = counts[hit.requester_id]; console.log(trackerR, hit.requester_id)
+        const trackerR = counts[hit.requester_id];
         const trackerT = counts[hit.title];
 
         const appR = trackerR.Paid || trackerR.Approved;
@@ -980,11 +1019,11 @@ chrome.runtime.sendMessage({ hitCatcher: `loggedIn` });
         const appT = trackerT.Paid  || trackerT.Approved;
         const rejT = trackerT.Rejected;
         const lenT = Object.keys(trackerT).length;
-        
+
         const title = document.createElement(`span`);
         title.className = `btn btn-sm fa ${appT ? `fa-check btn-success` : rejT ? `fa-exclamation btn-info` : `fa-${lenT ? `question` : `minus`} btn-secondary`}`;
         title.style.marginRight = `5px`;
-        
+
         const titleScript = document.createElement(`script`);
         titleScript.textContent = `$(document.currentScript).parent().popover({ html: true, trigger: 'hover', title: '${hit.title}', content: '<div class="container">${countPopover(trackerT)}</div>' });`;
         title.appendChild(titleScript);
@@ -992,7 +1031,7 @@ chrome.runtime.sendMessage({ hitCatcher: `loggedIn` });
         const titleEl = hitRows[i].getElementsByClassName(`project-name-column`)[0].lastChild;
         titleEl.parentElement.insertBefore(title, titleEl)
     }
-    
+
     const style = document.createElement(`style`);
     style.innerHTML = `.popover { max-width: 1000px; }`;
     document.head.appendChild(style);
