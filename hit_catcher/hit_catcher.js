@@ -1,3 +1,17 @@
+(function updateTheme() {
+    const theme = document.getElementById(`theme`);
+
+    chrome.storage.local.get([`themes`], (keys) => {
+        theme.href = `/bootstrap/css/${keys.themes.mts}.min.css`;
+
+        chrome.storage.onChanged.addListener((changes) => {
+            if (changes.themes) {
+                theme.href = `/bootstrap/css/${changes.themes.newValue.mts}.min.css`;
+            }
+        });
+    });
+})();
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const hitCatcher = request.hitCatcher;
 
@@ -235,8 +249,8 @@ function watcherDraw(watcher) {
     card.appendChild(cardHeader);
 
     const headerRight = document.createElement(`div`);
-    headerRight.className = `float-right`;
-    headerRight.style = `position: relative; left: 3px; background-color: #444; height: 100%;`;
+    headerRight.className = `float-right bg-primary text-white`;
+    headerRight.style = `position: relative; left: 3px;`;
     cardHeader.appendChild(headerRight);
 
     const moveRight = document.createElement(`span`);
@@ -265,8 +279,8 @@ function watcherDraw(watcher) {
     headerIcons.appendChild(remove);
 
     const headerLeft = document.createElement(`div`);
-    headerLeft.className = `float-left`;
-    headerLeft.style = `position: relative; left: -3px; background-color: #444;`;
+    headerLeft.className = `float-left bg-primary text-white`;
+    headerLeft.style = `position: relative; left: -3px;`;
     cardHeader.appendChild(headerLeft);
 
     const moveLeft = document.createElement(`span`);
@@ -282,7 +296,7 @@ function watcherDraw(watcher) {
     cardHeader.appendChild(name);
 
     const cardBlock = document.createElement(`div`);
-    cardBlock.className = `cardBlock`;
+    cardBlock.className = `card-block border border-top-0 border-primary`;
     card.appendChild(cardBlock);
 
     const cardText = document.createElement(`div`);
@@ -299,7 +313,7 @@ function watcherDraw(watcher) {
     div.appendChild(stats);
 
     const catchToggle = document.createElement(`button`);
-    catchToggle.className = `catch btn btn-xxs btn-default`;
+    catchToggle.className = `catch btn btn-xxs btn-default mr-1`;
     catchToggle.textContent = `Catch`;
     catchToggle.addEventListener(`click`, (event) => {
         watcherCatchToggle(watcher);

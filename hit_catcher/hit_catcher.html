@@ -4,16 +4,14 @@
         <meta charset="utf-8">
         <title>HIT Catcher</title>
 
-        <!-- Scripts -->
-        <script src="../jquery-3.1.1.min.js"></script>
-        <script src="../bootstrap4/js/tether.min.js"></script>
-        <script src="../bootstrap4/js/bootstrap.min.js"></script>
-        <script src="../bootstrap4/js/bootbox.min.js"></script>
+        <link id="theme" href="/bootstrap/css/default.min.css" rel="stylesheet">
+        <link href="/bootstrap/css/glyphicons.css" rel="stylesheet" media="screen">
+        <link href="hit_catcher.css" rel="stylesheet" media="screen">
 
-        <!-- Cascading Style Sheets -->
-        <link href="../bootstrap4/css/bootstrap.min.css" rel="stylesheet">
-        <link href="../bootstrap4/css/glyphicons.css" rel="stylesheet">
-        <link href="hit_catcher.css" rel="stylesheet" media="screen">  
+        <script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
+        <script src="/bootstrap/js/popper.min.js"></script>
+        <script src="/bootstrap/js/bootstrap.min.js"></script>
+        <script src="/bootstrap/js/bootbox.min.js"></script>
     </head>
     <body style="padding: 3px;">
         <!-- Buttons -->
@@ -28,9 +26,6 @@
             </div>
 
             <button id="pause" type="button" class="btn btn-xxs btn-default">Pause</button>
-            <!--<button id="run-hf" type="button" class="btn btn-xxs btn-default" data-toggle="tooltip" data-container="body" data-placement="bottom"
-                    title="When this is enabled HIT Catcher will continue running even if all watcher are off. This is to feed data to HIT Finder when no watcher are active to save page requests. Do not have HIT Finder running on www when this is enabled.">
-                Run HF</button>-->
             <button id="add-watcher" type="button" class="btn btn-xxs btn-primary">Add Watcher</button>
             <button id="advanced_settings" class="btn btn-xxs btn-primary">Advanced Settings</button>
 
@@ -164,6 +159,6 @@
         </div>
 
     </body>
-    
+
     <script src="hit_catcher.js"></script>
 </html>
