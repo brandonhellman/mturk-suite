@@ -12,6 +12,35 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 
+.accept-qualify-container a.btn.work-btn:visited {
+    color: black;
+}
+
+.mturk-searchbox .search-button-holder,
+.accept-qualify-container a.btn.work-btn,
+.hit-set-table-row:hover .accept-qualify-container a.btn.work-btn:visited {
+    color: white;
+    border: 1px solid #2C3E50;
+    background-color: #2C3E50;
+}
+
+
+.supportive-label {
+    border-left: 1px solid #2C3E50;
+}
+
+.searchbox-form .search-icon-svg .outer-ring {
+    fill: white;
+}
+
+.accept-qualify-container a.btn.work-btn:hover,
+.hit-set-table-row:hover .accept-qualify-container a.btn.work-btn:visited.active,
+.hit-set-table-row:hover .accept-qualify-container a.btn.work-btn:visited:active {
+    color: white;
+    border: 1px solid #1a252f !important;
+    background-color: #1e2b37 !important;
+}
+
 .fa.fa-copy,
 .copy-container:hover .copyable-content,
 .active.nav-item > a.nav-link,

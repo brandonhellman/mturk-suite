@@ -12,6 +12,90 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 
+.mturk-searchbox .search-button-holder,
+.accept-qualify-container a.btn.work-btn,
+.hit-set-table-row:hover .accept-qualify-container a.btn.work-btn:visited {
+    color: white;
+    border: 1px solid #375a7f;
+    background-color: #375a7f;
+}
+
+.supportive-label {
+    border-left: 1px solid #375a7f;
+}
+
+.searchbox-form .search-icon-svg .outer-ring {
+    fill: white;
+}
+
+.accept-qualify-container a.btn.work-btn:hover,
+.hit-set-table-row:hover .accept-qualify-container a.btn.work-btn:visited.active,
+.hit-set-table-row:hover .accept-qualify-container a.btn.work-btn:visited:active {
+    color: white;
+    border: 1px solid #2b4764 !important;
+    background-color: #2b4764  !important;
+}
+
+.fa.fa-copy,
+.copy-container:hover .copyable-content,
+.active.nav-item > a.nav-link,
+.navbar-nav > .nav-item > a.nav-link:hover,
+.navbar-nav > .active.nav-item > a.nav-link:hover,
+.nav-link {
+    color: #00bc8c;
+}
+
+
+input,
+#hit-wrapper,
+#filter .modal-body,
+.popover-title,
+.project-details,
+.report-task-popup {
+    color: black;
+}
+
+.accept-qualify-container a.btn.work-btn:visited {
+    color: black;
+    border: 1px solid #DDDDDD;
+    background-color: #eeeeee;
+}
+
+.me-bar,
+.sticky-footer {
+    background-color: #222;
+}
+
+
+.hit-set-table-row.user-not-qualified,
+.hit-set-table-row.user-not-qualified.expanded {
+    background-color: #222;
+    opacity: .5;
+}
+
+
+.mturk-table,
+.table-row,
+.daily_hit_statuses {
+ 	color: white;   
+}
+
+.mturk-table {
+ 	color: white;   
+}
+
+.mturk-table tbody tr:hover td {
+ 	background-color: #111;   
+}
+
+.table-row:hover, .table-row.expanded,
+.hit-set-table-row.user-not-qualified:hover {
+    background-color: #111;
+}
+
+.qualifications-list .qualification-row:nth-child(odd) {
+    background: rgba(0,0,0, 0.5);
+}
 /*
   --blue: #375a7f;
   --indigo: #6610f2;
@@ -36,58 +120,6 @@
   --dark: #303030;
 */
 
-/* MTurk */
-#hit-wrapper,
-#filter .modal-body,
-.popover-title,
-.project-details,
-.report-task-popup {
-    color: black;
-}
-
-.me-bar {
-    background-color: #222;
-}
-
-.fa.fa-copy,
-.copy-container:hover .copyable-content,
-.active.nav-item > a.nav-link,
-.navbar-nav > .nav-item > a.nav-link:hover,
-.navbar-nav > .active.nav-item > a.nav-link:hover {
-    color: #00bc8c;
-}
-
-.hit-set-table-row.user-not-qualified,
-.hit-set-table-row.user-not-qualified.expanded {
-    background-color: #222;
-    opacity: .5;
-}
-
-.mturk-table,
-.table-row,
-.daily_hit_statuses {
- 	color: white;   
-}
-
-.mturk-table {
- 	color: white;   
-}
-
-.mturk-table tbody tr:hover td {
- 	background-color: #111;   
-}
-
-
-.table-row:hover, .table-row.expanded,
-.hit-set-table-row.user-not-qualified:hover {
-    background-color: #111;
-}
-
-.qualifications-list .qualification-row:nth-child(odd) {
-    background: rgba(0,0,0, 0.5);
-}
-
-/* Bootswatch */
 body {
   color: #fff;
   background-color: #222;
