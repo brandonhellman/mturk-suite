@@ -5,7 +5,6 @@
             const href = chrome.extension.getURL(`bootstrap/css/${keys.themes.mturk}.worker.css`);
 
             if (el) {
-                
                 el.href = href
             }
             else {
