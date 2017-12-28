@@ -91,10 +91,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 //********** Web Requests **********//
-let requestsDB = {}, doNotRedirect = false;
+let requestsDB = {};
 
 chrome.webRequest.onBeforeRequest.addListener((details) => {
-    const match = details.url.match(/https:\/\/worker.mturk.com\/projects\/([A-Z0-9]+)\/tasks\/accept_random/);
+    const match = details.url.match(/https:\/\/worker.mturk.com\/projects\/([A-Z0-9]+)\/tasks/);
 
     if (match) {
         requestsDB[details.requestId] = {
@@ -103,7 +103,7 @@ chrome.webRequest.onBeforeRequest.addListener((details) => {
         };
     }
 }, {
-    urls: [`https://worker.mturk.com/projects/*/tasks/accept_random*`], types: [`main_frame`]
+    urls: [`https://worker.mturk.com/projects/*/tasks*`], types: [`main_frame`]
 }, [`requestBody`]);
 
 chrome.webRequest.onCompleted.addListener((details) => {
@@ -124,19 +124,27 @@ chrome.webRequest.onCompleted.addListener((details) => {
     urls: [`https://worker.mturk.com/*`], types: [`main_frame`]
 }, [`responseHeaders`]);
 
-chrome.webRequest.onBeforeRequest.addListener((details) => {
-    if (doNotRedirect === true) {
-        let url = details.url;
 
-        if (url.indexOf(`doNotRedirect=true`) === -1) {
-            const hash = (url.indexOf(`#`) === -1) ? url.length : url.indexOf('#');
-            const symbol = (url.indexOf(`?`) === -1) ? `?` : `&`;
-            const redirectUrl = url.substring(0, hash) + symbol + `doNotRedirect=true` + url.substring(hash);
-            return { redirectUrl: redirectUrl };
-        }
+let rememberFilter = ``;
+
+chrome.webRequest.onCompleted.addListener((details) => {
+    const url = details.url;
+    
+    if (!url.match(/format=json|\.json/)) {
+        rememberFilter = new URL(url).search;
     }
 }, {
-    urls: [`https://www.mturk.com/*`]
+    urls: [`https://worker.mturk.com/?*`, `https://worker.mturk.com/projects*`], types: [`main_frame`]
+}, [`responseHeaders`]);
+
+chrome.webRequest.onBeforeRequest.addListener((details) => {
+    if (storage.scripts.rememberFilter) {
+        return {
+            redirectUrl: details.url + rememberFilter
+        };
+    }
+}, {
+    urls: [`https://worker.mturk.com/`, `https://worker.mturk.com/projects`], types: [`main_frame`]
 }, [`blocking`]);
 
 
@@ -1003,8 +1011,8 @@ const storage = new Object();
 
     ((object) => {
         const scripts = [
-            `autoAcceptChecker`, `confirmReturnHIT`, `dashboardEnhancer`, `hitExporter`, `hitTracker`,
-            `hitDetailsEnhancer`, `queueInfoEnhancer`, `rateLimitReloader`, `requesterReviews`, `workspaceExpander`
+            `autoAcceptChecker`, `confirmReturnHIT`, `dashboardEnhancer`, `hitExporter`, `hitTracker`, `hitDetailsEnhancer`,
+            `queueInfoEnhancer`, `rateLimitReloader`, `rememberFilter`, `requesterReviews`, `workspaceExpander`
         ];
 
         storage.scripts = new Object();
@@ -1163,7 +1171,7 @@ function hitTrackerGetCounts(arguments, request, sender, sendResponse) {
         counts[item] = {};
 
         const range = IDBKeyRange.only(item);
-        
+
         requesterIndex.openCursor(range).onsuccess = (event) => {
             const cursor = event.target.result;
 
@@ -1176,12 +1184,12 @@ function hitTrackerGetCounts(arguments, request, sender, sendResponse) {
             }
         };
     }
-    
+
     for (const item of arguments.title) {
         counts[item] = {};
 
         const range = IDBKeyRange.only(item);
-        
+
         titleIndex.openCursor(range).onsuccess = (event) => {
             const cursor = event.target.result;
 
@@ -1194,7 +1202,7 @@ function hitTrackerGetCounts(arguments, request, sender, sendResponse) {
             }
         };
     }
-    
+
     transaction.oncomplete = (event) => {
         sendResponse(counts);
     };
