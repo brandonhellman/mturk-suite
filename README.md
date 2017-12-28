@@ -7,7 +7,7 @@ An extension that brings together a large collection of useful tools to assist w
 - Firefox - Coming Soon
 
 # Features
-**[Omnibar & Contect Menus](#omnibar--contect-menus)**
+**[Omnibar & Context Menus](#omnibar--context-menus)**
 - [Searching MTurk](#searching-mturk)
 - [Paste MTurk Worker ID](#paste-mturk-worker-id)
 - [Contact Requester](#contact-requester)
@@ -21,6 +21,7 @@ An extension that brings together a large collection of useful tools to assist w
 - [HIT Details Enhancer](#hit-details-enhancer)
 - [Queue Info Enhancer](#queue-info-enhancer)
 - [Rate Limit Reloader](#rate-limit-reloader)
+- [Remember Filter](#remember-filter)
 - [Requester Reviews](#requester-reviews)
 - [Workspace Expander](#workspace-expander)
 
@@ -33,7 +34,7 @@ An extension that brings together a large collection of useful tools to assist w
 ---
 
 
-# Omnibar & Contect Menus
+# Omnibar & Context Menus
  ## Searching MTurk
  Lets you search MTurk for HITs from the omnibar.
  
@@ -125,6 +126,12 @@ An extension that brings together a large collection of useful tools to assist w
  ---
  ## Rate Limit Reloader
  Automatically reloads the page if you exceeded the allowable page request rate.
+ - Can be enabled/disabled in the options
+ 
+ 
+ ---
+ ## Remember Filter
+ Remembers what filter you chose so you don't have to reset it each time you want to search for HITs.
  - Can be enabled/disabled in the options
  
  
