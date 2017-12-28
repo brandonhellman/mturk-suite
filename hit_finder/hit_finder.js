@@ -1328,7 +1328,7 @@ chrome.notifications.onButtonClicked.addListener((id, btn) => {
         window.open(`https://worker.mturk.com/projects/${id}/tasks`);
     }
     if (btn === 1) {
-        window.open(`https://worker.mturk.com/projects/${id}/tasks`);
+        window.open(`https://worker.mturk.com/projects/${id}/tasks/accept_random`);
     }
 
     chrome.notifications.clear(id);
