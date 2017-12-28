@@ -28,6 +28,10 @@
     fill: white;
 }
 
+.primary-color {
+    color: #375a7f;
+}
+
 .accept-qualify-container a.btn.work-btn:hover,
 .hit-set-table-row:hover .accept-qualify-container a.btn.work-btn:visited.active,
 .hit-set-table-row:hover .accept-qualify-container a.btn.work-btn:visited:active {
