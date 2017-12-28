@@ -19,6 +19,7 @@ An extension that brings together a large collection of useful tools to assist w
 - [Confirm Return HIT](#confirm-return-hit)
 - [HIT Exporter](#hit-exporter)
 - [HIT Details Enhancer](#hit-details-enhancer)
+- [Pagination Last Page](#pagination-last-page)
 - [Queue Info Enhancer](#queue-info-enhancer)
 - [Rate Limit Reloader](#rate-limit-reloader)
 - [Remember Filter](#remember-filter)
@@ -114,7 +115,16 @@ An extension that brings together a large collection of useful tools to assist w
  
  ![HIT Details Bar](https://i.imgur.com/Ce3xGX1.png)
  
-  ---
+ 
+ ---
+ ## Pagination Last Page
+ Adds a link to the last page for all pagination.
+ - Can be enabled/disabled in the options
+ 
+ 
+ 
+ 
+ ---
  ## Queue Info Enhancer
  Shows you how many HITs you have in your queue along with how much they are worth.
  - Can be enabled/disabled in the options
