@@ -122,6 +122,7 @@ An extension that brings together a large collection of useful tools to assist w
  - Can be enabled/disabled in the options
  
  
+ ![Pagination Last Page](https://i.gyazo.com/dabbe01a45581f9b38843cf24afd611a.png)
  
  
  ---
