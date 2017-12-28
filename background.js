@@ -125,13 +125,16 @@ chrome.webRequest.onCompleted.addListener((details) => {
 }, [`responseHeaders`]);
 
 
-let rememberFilter = ``;
+let filterParams = ``;
 
 chrome.webRequest.onCompleted.addListener((details) => {
-    const url = details.url;
-    
-    if (!url.match(/format=json|\.json/)) {
-        rememberFilter = new URL(url).search;
+    const url = new URL(details.url);
+
+    if (!details.url.match(/format=json|\.json/)) {
+        const params = new URLSearchParams(url.search);
+        params.delete(`page_number`);
+
+        filterParams = params;
     }
 }, {
     urls: [`https://worker.mturk.com/?*`, `https://worker.mturk.com/projects*`], types: [`main_frame`]
@@ -140,7 +143,7 @@ chrome.webRequest.onCompleted.addListener((details) => {
 chrome.webRequest.onBeforeRequest.addListener((details) => {
     if (storage.scripts.rememberFilter) {
         return {
-            redirectUrl: details.url + rememberFilter
+            redirectUrl: `${details.url}?${filterParams}`
         };
     }
 }, {
@@ -1012,7 +1015,7 @@ const storage = new Object();
     ((object) => {
         const scripts = [
             `autoAcceptChecker`, `confirmReturnHIT`, `dashboardEnhancer`, `hitExporter`, `hitTracker`, `hitDetailsEnhancer`,
-            `queueInfoEnhancer`, `rateLimitReloader`, `rememberFilter`, `requesterReviews`, `workspaceExpander`
+            `paginationLastPage`, `queueInfoEnhancer`, `rateLimitReloader`, `rememberFilter`, `requesterReviews`, `workspaceExpander`
         ];
 
         storage.scripts = new Object();
