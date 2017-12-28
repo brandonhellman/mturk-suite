@@ -25,15 +25,6 @@
         "persistent": true
     },
     
-    "content_scripts": [
-        {
-            "matches": ["https://worker.mturk.com/*"],
-            "js": ["worker/worker.js"],
-            "run_at": "document_start",
-            "all_frames": true
-        }
-    ],
-
     "incognito": "split",
     
     "minimum_chrome_version": "61",
@@ -74,5 +65,20 @@
     
     "web_accessible_resources": [
         "bootstrap/css/*"
+    ],
+    
+    "content_scripts": [
+        {
+            "matches": ["https://worker.mturk.com/*"],
+            "js": ["worker/worker.js"],
+            "run_at": "document_start",
+            "all_frames": true
+        },
+        
+        {
+            "matches": ["https://worker.mturk.com/*"],
+            "js": ["worker/paginationLastPage.js"],
+            "run_at": "document_start"
+        }
     ]
 }
