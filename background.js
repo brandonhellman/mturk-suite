@@ -244,7 +244,7 @@ async function hitExportPlain(arguments, request, sender, sendResponse) {
 
     copyTextToClipboard(exportTemplate);
 
-    const notification = new Notification(`HIT Export Succesful!`, {
+    const notification = new Notification(`HIT Export Successful!`, {
         icon: `/media/icon_128.png`,
         body: `Plain export has been copied to your clipboard.`,
     });
@@ -377,7 +377,7 @@ async function hitExportBBCode(arguments, request, sender, sendResponse) {
 
     copyTextToClipboard(`[table][tr][td]${exportTemplate}[/td][/tr][/table]`);
 
-    const notification = new Notification(`HIT Export Succesful!`, {
+    const notification = new Notification(`HIT Export Successful!`, {
         icon: `/media/icon_128.png`,
         body: `BBCode export has been copied to your clipboard.`,
     });
@@ -469,7 +469,7 @@ async function hitExportMarkdown(arguments, request, sender, sendResponse) {
 
     copyTextToClipboard(exportTemplate);
 
-    const notification = new Notification(`HIT Export Succesful!`, {
+    const notification = new Notification(`HIT Export Successful!`, {
         icon: `/media/icon_128.png`,
         body: `Markdown export has been copied to your clipboard.`,
     });
@@ -637,7 +637,7 @@ async function hitExportTurkerHub(arguments, request, sender, sendResponse) {
             });
 
             if (postHIT.status === 200) {
-                const notification = new Notification(`HIT Export Succesful!`, {
+                const notification = new Notification(`HIT Export Successful!`, {
                     icon: `/media/icon_128.png`,
                     body: `Turker Hub export posted on TurkerHub.com`
                 });
@@ -815,7 +815,7 @@ async function hitExportMTurkCrowd(arguments, request, sender, sendResponse) {
             });
 
             if (postHIT.status === 200) {
-                const notification = new Notification(`HIT Export Succesful!`, {
+                const notification = new Notification(`HIT Export Successful!`, {
                     icon: `/media/icon_128.png`,
                     body: `MTurk Crowd export posted on MTurkCrowd.com`
                 });
