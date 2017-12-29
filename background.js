@@ -1015,8 +1015,7 @@ const storage = new Object();
 
     ((object) => {
         const scripts = [
-            `autoAcceptChecker`, `confirmReturnHIT`, `dashboardEnhancer`, `hitExporter`, `hitTracker`, `hitDetailsEnhancer`,
-            `paginationLastPage`, `queueInfoEnhancer`, `rateLimitReloader`, `rememberFilter`, `requesterReviews`, `workspaceExpander`
+            `autoAcceptChecker`, `blockListOnMturk`, `confirmReturnHIT`, `dashboardEnhancer`, `hitExporter`, `hitTracker`, `hitDetailsEnhancer`, `paginationLastPage`, `queueInfoEnhancer`, `rateLimitReloader`, `rememberFilter`, `requesterReviews`, `workspaceExpander`
         ];
 
         storage.scripts = new Object();

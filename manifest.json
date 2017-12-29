@@ -79,6 +79,12 @@
             "matches": ["https://worker.mturk.com/*"],
             "js": ["worker/paginationLastPage.js"],
             "run_at": "document_start"
+        },
+        
+        {
+            "matches": ["https://worker.mturk.com/*"],
+            "js": ["worker/blockListOnMturk.js"],
+            "run_at": "document_start"
         }
     ]
 }
