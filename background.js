@@ -133,6 +133,7 @@ chrome.webRequest.onCompleted.addListener((details) => {
     if (!details.url.match(/format=json|\.json/)) {
         const params = new URLSearchParams(url.search);
         params.delete(`page_number`);
+        params.delete(`filters[search_term]`);
 
         filterParams = params;
     }
