@@ -90,7 +90,7 @@ let storage = (async (object) => {
                             strict: typeof bl.strict === `boolean` ? bl.strict : true,
                         };
                     }
-                    
+
                     localStorage.removeItem(`BLOCK_LIST`);
                 }
                 else {
@@ -276,7 +276,7 @@ async function finderRun() {
         else if (response.status === 429) {
             document.getElementById(`page-request-errors`).textContent = ++ pageRequestErrors;
         }
-        
+
         document.getElementById(`total-scans`).textContent = ++ totalScans;
         finderTimeout = setTimeout(finderRun, delay());
     }
@@ -781,7 +781,27 @@ function blockListImport(json) {
             blockListUpdate();
         }
         catch (error) {
-            alert(`An error occured while importing.\n\n${error}`);
+            const hitScraper = importBlockList.split(`^`);
+            const hitScraperLength = hitScraper.length;
+
+            if (hitScraperLength) {
+                const importBlockListHitScraper = confirm(`Is this a HIT Scraper block list and would you like to import it?`);
+
+                if (importBlockListHitScraper) {
+                    for (const value of hitScraper) {
+                        storage.blockList[value] = {
+                            name: value,
+                            match: value,
+                            strict: true,
+                        };
+                    }
+
+                    blockListUpdate();
+                }
+            }
+            else {
+                alert(`An error occured while importing.\n\n${error}`);
+            }
         }
     }
 }
@@ -968,7 +988,31 @@ function includeListImport() {
             includeListUpdate();
         }
         catch (error) {
-            alert(`An error occured while importing.\n\n${error}`);
+            const hitScraper = importIncludeList.split(`^`);
+            const hitScraperLength = hitScraper.length;
+
+            if (hitScraperLength) {
+                const importIncludeListHitScraper = confirm(`Is this a HIT Scraper include list and would you like to import it?`);
+
+                if (importIncludeListHitScraper) {
+                    for (const value of hitScraper) {
+                        storage.includeList[value] = {
+                            name: value,
+                            match: value,
+                            strict: true,
+                            sound: true,
+                            alarm: false,
+                            pushbullet: false,
+                            notification: true
+                        };
+                    }
+
+                    includeListUpdate();
+                }
+            }
+            else {
+                alert(`An error occured while importing.\n\n${error}`);
+            }
         }
     }
 }
