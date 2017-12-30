@@ -16,6 +16,7 @@ An extension that brings together a large collection of useful tools to assist w
 ---
 **[MTurk](#mturk)**
 - [Auto Accept Checker](#auto-accept-checker)
+- [Block List On MTurk](#block-list-on-mturk)
 - [Confirm Return HIT](#confirm-return-hit)
 - [HIT Exporter](#hit-exporter)
 - [HIT Details Enhancer](#hit-details-enhancer)
@@ -74,6 +75,14 @@ An extension that brings together a large collection of useful tools to assist w
  
  
  ![Auto Accept Next Checked](https://i.imgur.com/XWHCPBR.png)
+ 
+ 
+  ## Block List On MTurk
+ Uses the HIT Finder Include list to hide HITs on the MTurk Worker site.
+ - Can be enabled/disabled in the options
+ 
+ 
+ ![Block List On MTurk](https://i.gyazo.com/eedd439acb923fc830fcc51c95f3bd07.gif)
  
  
  ---
