@@ -557,7 +557,7 @@ async function catcherRun(forcedId) {
 
                 }
 
-                if (response.url.indexOf(`assignment_id=`)) {
+                if (~response.url.indexOf(`assignment_id=`)) {
                     watcher.caught = watcher.caught > 0 ? watcher.caught + 1 : 1;
                     watcherCaught(watcher);
                 } else {
