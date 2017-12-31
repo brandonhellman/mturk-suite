@@ -1288,8 +1288,12 @@ function reviewModal(requesterId) {
     $(modal).modal(`show`);
 }
 
+speechSynthesis.getVoices();
+
 function textToSpeech(phrase) {
-    chrome.tts.speak(phrase, { enqueue: true, voiceName: `Google US English` });
+    const message = new SpeechSynthesisUtterance(phrase);
+    message.voice = speechSynthesis.getVoices().filter((voice) => voice.name == `Google US English`)[0];
+    window.speechSynthesis.speak(message);
 }
 
 function timeNow() {

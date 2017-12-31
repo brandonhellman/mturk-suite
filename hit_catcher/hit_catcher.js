@@ -675,11 +675,12 @@ function catcherCaptchaFound() {
     }
 }
 
-function textToSpeech(phrase, options) {
-    chrome.tts.speak(phrase, {
-        enqueue: true,
-        voiceName: `Google US English`
-    });
+speechSynthesis.getVoices();
+
+function textToSpeech(phrase) {
+    const message = new SpeechSynthesisUtterance(phrase);
+    message.voice = speechSynthesis.getVoices().filter((voice) => voice.name == `Google US English`)[0];
+    window.speechSynthesis.speak(message);
 }
 
 document.getElementById(`pause`).addEventListener(`click`, catcherPauseToggle);

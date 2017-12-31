@@ -25,8 +25,6 @@
         "persistent": true
     },
 
-    "incognito": "split",
-
     "minimum_chrome_version": "61",
 
     "offline_enabled": true,
@@ -38,7 +36,6 @@
     "options_page": "options/options.html",
 
     "permissions": [
-        "tts",
         "tabs",
         "activeTab",
         "storage",

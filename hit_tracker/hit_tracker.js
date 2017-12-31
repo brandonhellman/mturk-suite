@@ -520,11 +520,7 @@ function sycningEnded() {
 }
 
 function loggedOut() {
-    chrome.tts.speak(`Attention, you are logged out of MTurk.`, {
-        enqueue: true,
-        voiceName: `Google US English`
-    });
-
+    textToSpeech(`Attention, you are logged out of MTurk.`);
     sycningEnded();
 }
 
@@ -714,6 +710,14 @@ document.getElementById(`sync-last-45-days`).addEventListener(`click`, async (e)
         });
     });
 })();
+
+speechSynthesis.getVoices();
+
+function textToSpeech(phrase) {
+    const message = new SpeechSynthesisUtterance(phrase);
+    message.voice = speechSynthesis.getVoices().filter((voice) => voice.name == `Google US English`)[0];
+    window.speechSynthesis.speak(message);
+}
 
 
 
