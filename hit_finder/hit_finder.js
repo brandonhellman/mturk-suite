@@ -809,7 +809,7 @@ function blockListImport(json) {
 function blockListExport() {
     try {
         const string = JSON.stringify(storage.blockList);
-        const copy = toClipBoard(string);
+        const copy = toClipBoard(string, document.getElementById(`block-list-modal`));
 
         alert(copy ? `Block list export has been copied to your clipboard.` : string);
     }
@@ -1020,7 +1020,7 @@ function includeListImport() {
 function includeListExport() {
     try {
         const string = JSON.stringify(storage.includeList);
-        const copy = toClipBoard(string);
+        const copy = toClipBoard(string , document.getElementById(`include-list-modal`));
 
         alert(copy ? `Include list export has been copied to your clipboard.` : string);
     }
@@ -1556,16 +1556,16 @@ async function updateRequesterReviews(reviews) {
     });
 })();
 
-function toClipBoard(string) {
+function toClipBoard(string, element) {
     const textarea = document.createElement(`textarea`);
     textarea.opacity = 0;
     textarea.textContent = string;
-    document.getElementById(`include-list-modal`).appendChild(textarea);
+    element.appendChild(textarea);
 
     textarea.select();
 
     const copy = document.execCommand(`copy`);
-    document.getElementById(`include-list-modal`).removeChild(textarea);
+    element.removeChild(textarea);
 
     return copy ? true : false;
 }
