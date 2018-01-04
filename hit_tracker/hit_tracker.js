@@ -1368,7 +1368,6 @@ function paidAfter30(hit) {
     const whenAfter30 = new Date(formatDate(mturkDate())).getTime() - (31 * 24 * 60 * 60 * 1000);
 
     if (isAfter30 < whenAfter30) {
-        console.log(`paidAfter30`, hit);
         hit.state = `Paid`;
     }
 
