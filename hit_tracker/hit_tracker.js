@@ -279,8 +279,7 @@ function updateDashboard(days) {
                     rejected: 0, 
                     pending: 0,
                     paid: 0,
-                    earnings: 0,
-                    bonuses: 0
+                    earnings: 0
                 };
 
                 result.day = days[day];
@@ -349,7 +348,6 @@ function saveDay(date) {
 
             if (result) {
                 count.day = result.day;
-                count.bonuses = count.day.earnings - count.day.approved - count.day.paid;
             }
 
             objectStore.put(count);
@@ -375,8 +373,7 @@ function countDay(date) {
             rejected: 0,
             submitted: 0,
 
-            earnings: 0,
-            bonuses: 0
+            earnings: 0
         };
 
         const transaction = hitTrackerDB.transaction([`hit`], `readonly`);
@@ -700,7 +697,10 @@ document.getElementById(`daily-overview`).addEventListener(`click`, dailyOvervie
 document.getElementById(`search`).addEventListener(`click`, search);
 
 async function requesterOverview() {
-    searchStart();
+    statusStart({
+        header: `Requester Overview`,
+        message: `Starting`
+    });
 
     const results = document.getElementById(`history-results`);
     const dateTo = document.getElementById(`date-to`).value;
@@ -708,32 +708,79 @@ async function requesterOverview() {
 
     const transaction = hitTrackerDB.transaction([`hit`], `readonly`);
     const objectStore = transaction.objectStore(`hit`);
+    const range = IDBKeyRange.bound(dateFrom.replace(/-/g, ``) || `0`, dateTo.replace(/-/g, ``) || `99999999`);
 
-    if (dateTo || dateFrom) {
-        searchingUpdate(`Requester Overview Date Range`);
+    let cursorCount = 0, cursorAccumulator = {};
 
-        let count = 0;
-        const hits = [];
+    objectStore.index(`date`).openCursor(range).onsuccess = (event) => {
+        const cursor = event.target.result;
 
-        objectStore.index(`date`).openCursor(IDBKeyRange.bound(dateFrom.replace(/-/g, ``) || `0`, dateTo.replace(/-/g, ``) || `99999999`)).onsuccess = (event) => {
+        if (cursor) {
+            statusUpdate({ message: `Processing HIT ${++ cursorCount}` });
+            
+            const hit = cursor.value;
+            const requester_id = hit.requester_id;
 
-            const cursor = event.target.result;
-
-            if (cursor) {
-                hits.push(cursor.value);
-                return cursor.continue();
+            if (hit.state.match(/Submitted|Pending|Approved|Paid/)) {
+                if (cursorAccumulator[requester_id]) {
+                    cursorAccumulator[requester_id].count += 1;
+                    cursorAccumulator[requester_id].value += hit.reward.amount_in_dollars;
+                }
+                else {
+                    cursorAccumulator[requester_id] = {
+                        id: requester_id,
+                        name: hit.requester_name,
+                        count: 1,
+                        value: hit.reward.amount_in_dollars
+                    }
+                }
             }
-            else {
-                return process(hits);
-            }
-        };
-    }
-    else {
-        searchingUpdate(`Requester Overview Get All`);
 
-        objectStore.getAll().onsuccess = (event) => {
-            const hits = event.target.result;
-            return process(event.target.result);
+            return cursor.continue();
+        }
+        else {
+            while (results.firstChild) {
+                results.removeChild(results.firstChild);
+            }
+
+            const sorted = Object.keys(cursorAccumulator).sort((a, b) => cursorAccumulator[a].value - cursorAccumulator[b].value);
+
+            for (let i = sorted.length - 1; i > -1; i --) {
+                const req = cursorAccumulator[sorted[i]];
+
+                const tr = document.createElement(`tr`);
+
+                const requester = document.createElement(`td`);
+                tr.append(requester);
+
+                const requesterView = document.createElement(`button`);
+                requesterView.className = `btn btn-sm btn-primary mr-1`;
+                requesterView.textContent = `View`;
+                requesterView.addEventListener(`click`, async (event) => {
+                    document.getElementById(`view`).value = ``;
+                    document.getElementById(`matching`).value = req.id;
+                    document.getElementById(`date-from`).value = ``;
+                    document.getElementById(`date-to`).value = ``;
+                    search();
+                });
+                requester.appendChild(requesterView);
+
+                const requesterLink = document.createElement(`a`);
+                requesterLink.href = `https://worker.mturk.com/requesters/${req.id}/projects`;
+                requesterLink.target = `_blank`;
+                requesterLink.textContent = req.name;
+                requester.appendChild(requesterLink);
+
+                const count = document.createElement(`td`);
+                count.textContent = req.count;
+                tr.appendChild(count);
+
+                const value = document.createElement(`td`);
+                value.textContent = req.value.toMoneyString();
+                tr.appendChild(value);
+
+                results.appendChild(tr);
+            }
         }
     }
 
@@ -755,77 +802,8 @@ async function requesterOverview() {
 
         results.prepend(tr);
 
-        return searchEnd();
+        return statusEnd();
     };
-
-    function process(hits) {
-        searchingUpdate(`Requester Overview Sorting`);
-
-        const requesters = hits.reduce((accumulator, currentValue) => {
-            const requester_id = currentValue.requester_id;
-
-            if (~`Submitted|Pending|Approved|Paid`.indexOf(currentValue.state)) {
-                if (accumulator[requester_id]) {
-                    accumulator[requester_id].count += 1;
-                    accumulator[requester_id].value += currentValue.reward.amount_in_dollars;
-                }
-                else {
-                    accumulator[requester_id] = {
-                        id: currentValue.requester_id,
-                        name: currentValue.requester_name,
-                        count: 1,
-                        value: currentValue.reward.amount_in_dollars
-                    }
-                }
-            }
-
-            return accumulator;
-        }, {});
-
-
-        const sorted = Object.keys(requesters).sort((a, b) => requesters[a].value - requesters[b].value);
-
-        while (results.firstChild) {
-            results.removeChild(results.firstChild);
-        }
-
-        for (let i = sorted.length - 1; i > -1; i --) {
-            const req = requesters[sorted[i]];
-
-            const tr = document.createElement(`tr`);
-
-            const requester = document.createElement(`td`);
-            tr.append(requester);
-
-            const requesterView = document.createElement(`button`);
-            requesterView.className = `btn btn-sm btn-primary mr-1`;
-            requesterView.textContent = `View`;
-            requesterView.addEventListener(`click`, async (event) => {
-                document.getElementById(`view`).value = ``;
-                document.getElementById(`matching`).value = req.id;
-                document.getElementById(`date-from`).value = ``;
-                document.getElementById(`date-to`).value = ``;
-                search();
-            });
-            requester.appendChild(requesterView);
-
-            const requesterLink = document.createElement(`a`);
-            requesterLink.href = `https://worker.mturk.com/requesters/${req.id}/projects`;
-            requesterLink.target = `_blank`;
-            requesterLink.textContent = req.name;
-            requester.appendChild(requesterLink);
-
-            const count = document.createElement(`td`);
-            count.textContent = req.count;
-            tr.appendChild(count);
-
-            const value = document.createElement(`td`);
-            value.textContent = req.value.toMoneyString();
-            tr.appendChild(value);
-
-            results.appendChild(tr);
-        }
-    }
 }
 
 async function dailyOverview() {
@@ -893,12 +871,6 @@ async function dailyOverview() {
         earningsHits.textContent = `Earnings HITs`;
         th.appendChild(earningsHits);
 
-        /*
-        const earningsBonus = document.createElement(`td`);
-        earningsBonus.textContent = `Earnings Bonus`;
-        th.appendChild(earningsBonus);
-        */
-
         results.prepend(th);
 
         return searchEnd();
@@ -922,7 +894,7 @@ async function dailyOverview() {
             tr.appendChild(submitted);
 
             const approved = document.createElement(`td`);
-            approved.textContent = day.approved;
+            approved.textContent = day.approved + day.paid;
             tr.appendChild(approved);
 
             const rejected = document.createElement(`td`);
@@ -940,12 +912,6 @@ async function dailyOverview() {
             const earningsHits = document.createElement(`td`);
             earningsHits.textContent = day.earnings.toMoneyString();
             tr.appendChild(earningsHits);
-
-            /*
-            const earningsBonus = document.createElement(`td`);
-            earningsBonus.textContent = (day.day.earnings - day.earnings).toMoneyString();
-            tr.appendChild(earningsBonus);
-            */
 
             const actions = document.createElement(`span`);
             date.prepend(actions);
@@ -973,7 +939,6 @@ async function dailyOverview() {
             });
             actions.appendChild(syncThisDay);
 
-
             if (!day.day || day.day.submitted !== (day.submitted + day.rejected + day.approved + day.paid)) {
                 syncThisDay.classList.add(`btn-warning`);
             }
@@ -988,6 +953,7 @@ async function search() {
 
     const view = document.getElementById(`view`).value;
     const matching = document.getElementById(`matching`).value;
+    const matchingType = document.getElementById(`matching-type`).value;
     const dateTo = document.getElementById(`date-to`).value;
     const dateFrom = document.getElementById(`date-from`).value;
 
@@ -1025,8 +991,27 @@ async function search() {
             searchingUpdate(`Processing HIT ${++ count}`);
 
             const value = cursor.value;
-            if (matching && ![value.requester_id, value.requester_name, value.title].includes(matching)) {
-                return cursor.continue();
+
+            if (matching) {
+                const hitValues = [value.requester_id, value.requester_name, value.title];
+
+                if (matchingType === `contain`) {
+                    let contains = false;
+
+                    for (const item of hitValues) {
+                        if (~item.toLowerCase().indexOf(matching.toLowerCase())) {
+                            contains = true;
+                            break;
+                        }
+                    }
+
+                    if (!contains) {
+                        return cursor.continue();
+                    }
+                }
+                else if (!hitValues.includes(matching)) {
+                    return cursor.continue(); 
+                }
             }
 
             if (view && view !== value.state) {
@@ -1211,8 +1196,7 @@ function trackerImport(file) {
                             rejected: 0,
                             submitted: 0,
 
-                            earnings: 0,
-                            bonuses: 0
+                            earnings: 0
                         });
                     }
                     else {
@@ -1246,9 +1230,18 @@ function trackerImportPutHit(hits) {
         const transaction = hitTrackerDB.transaction([`hit`], `readwrite`);
         const objectStore = transaction.objectStore(`hit`);
 
+        let count = 0, length = hits.length;
+        
         for (const hit of hits) {
+            statusUpdate({ message: `Putting HIT ${++ count} of ${length}` });
+            
             if (hit.hit_id && hit.requester_id) {
-                objectStore.put(hit);
+                if (hit.state !== `Paid`) {
+                    objectStore.put(paidAfter30(hit));
+                }
+                else {
+                    objectStore.put(hit);
+                }
             }
         }
 
@@ -1265,7 +1258,11 @@ function trackerImportPutDay(days) {
         const transaction = hitTrackerDB.transaction([`day`], `readwrite`);
         const objectStore = transaction.objectStore(`day`);
 
+        let count = 0, length = days.length;
+        
         for (const day of days) {
+            statusUpdate({ message: `Putting Day ${++ count} of ${length}` });
+            
             if (day.day && day.day.earnings && day.date) {
                 objectStore.put(day);
             }
@@ -1366,6 +1363,21 @@ function statusEnd() {
     $(statusModal).modal(`hide`);
 }
 
+function paidAfter30(hit) {
+    const isAfter30 = new Date(formatDate(hit.date)).getTime();
+    const whenAfter30 = new Date(formatDate(mturkDate())).getTime() - (31 * 24 * 60 * 60 * 1000);
+
+    if (isAfter30 < whenAfter30) {
+        console.log(`paidAfter30`, hit);
+        hit.state = `Paid`;
+    }
+
+    return hit;
+}
+
+function formatDate(date) {
+    return [date.slice(0, 4), date.slice(4,6), date.slice(6,8)].join(`-`);
+}
 
 
 

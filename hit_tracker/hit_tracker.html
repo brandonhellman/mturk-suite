@@ -42,7 +42,7 @@
             </ul>
 
             <div class="tab-content">
-                <div class="tab-pane" id="today" role="tabpanel">
+                <div class="tab-pane active" id="today" role="tabpanel">
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-md-6">
@@ -144,7 +144,7 @@
                     </div>
                 </div>
 
-                <div class="tab-pane active" id="history" role="tabpanel">
+                <div class="tab-pane" id="history" role="tabpanel">
                     <div class="container-fluid">
                         <div class="card">
                             <div class="card-body">
@@ -158,7 +158,7 @@
                                     <div class="row mt-3">
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text">View</span>
+                                                <span class="btn">View</span>
                                             </div>
                                             <select id="view" class="custom-select">
                                                 <option value="" selected>All</option>
@@ -168,8 +168,13 @@
                                                 <option value="Paid">Paid</option>
                                             </select>
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text">HITs Matching</span>
+                                                <span class="btn">HITs that</span>
                                             </div>
+                                            <select id="matching-type" class="custom-select">
+                                                <option value="contain" selected>Contain</option>
+                                                <option value="exactly">Exactly Match</option>
+                                                
+                                            </select>
                                             <input id="matching" type="text" class="form-control" placeholder="Leave Blank for All / Requester Name or ID / HIT Title">
                                             <div class="input-group-append">
                                                 <button class="btn btn-primary" type="button" id="search">Search</button>
@@ -179,11 +184,11 @@
                                     <div class="row mt-3">
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text">From</span>
+                                                <span class="btn">From</span>
                                             </div>
                                             <input id="date-from" type="date" class="form-control">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text">To</span>
+                                                <span class="btn">To</span>
                                             </div>
                                             <input id="date-to" type="date" class="form-control">
                                         </div>
