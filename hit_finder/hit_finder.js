@@ -910,7 +910,7 @@ function blockListUpdate() {
     const sorted = Object.keys(storage.blockList).map((currentValue) => {
         storage.blockList[currentValue].term = currentValue;
         return storage.blockList[currentValue];
-    }).sort((a, b) =>  a.name > b.name);
+    }).sort((a, b) => a.name.localeCompare(b.name, `en`, { numeric: true }));
 
     const body = document.getElementById(`block-list-modal`).getElementsByClassName(`modal-body`)[0];
 
@@ -1153,7 +1153,7 @@ function includeListUpdate() {
     const sorted = Object.keys(storage.includeList).map((currentValue) => {
         storage.includeList[currentValue].match = currentValue;
         return storage.includeList[currentValue];
-    }).sort((a, b) =>  a.name > b.name);
+    }).sort((a, b) => a.name.localeCompare(b.name, `en`, { numeric: true }));
 
     const body = document.getElementById(`include-list-modal`).getElementsByClassName(`modal-body`)[0];
 
