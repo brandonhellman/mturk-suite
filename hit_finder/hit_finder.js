@@ -1574,7 +1574,7 @@ document.getElementById(`found-card-header`).addEventListener(`click`, toggleVis
 document.getElementById(`logged-card-header`).addEventListener(`click`, toggleVisibility);
 
 function toggleVisibility(e) {
-    const el = e.target.closest(`.card`).firstElementChild; console.log(el);
+    const el = e.target.closest(`.card`).firstElementChild;
     const elParent = el.nextElementSibling;
 
     if ([...el.firstElementChild.classList].includes(`glyphicon-resize-small`)) {
