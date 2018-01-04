@@ -4,6 +4,7 @@
         <title>HIT Tracker</title>
 
         <link id="theme" href="/bootstrap/css/default.min.css" rel="stylesheet">
+        <link href="/hit_tracker/hit_tracker.css" rel="stylesheet">
 
         <script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
         <script src="/bootstrap/js/popper.min.js"></script>
@@ -15,13 +16,15 @@
             <div class="float-right">
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Sync HIT Tracker
+                        Sync
                     </button>
                     <div class="dropdown-menu dropdown-menu-right">
-                        <button id="sync-today" class="dropdown-item" type="button">Sync Today Only</button>
-                        <button id="sync-last-45-days" class="dropdown-item" type="button">Sync Last 45 Days</button>
+                        <button id="sync-today" class="dropdown-item" type="button">Today</button>
+                        <button id="sync-last-45-days" class="dropdown-item" type="button">Last 45 Days</button>
                     </div>
                 </div>
+                <button id="import" type="button" class="btn btn-secondary">Import</button>
+                <button id="export" type="button" class="btn btn-secondary">Export</button>
             </div>
         </nav>
 
@@ -36,8 +39,7 @@
             </ul>
 
             <div class="tab-content">
-                <div class="tab-pane active" id="today" role="tabpanel">
-
+                <div class="tab-pane" id="today" role="tabpanel">
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-md-6">
@@ -139,9 +141,56 @@
                     </div>
                 </div>
 
-                <div class="tab-pane" id="history" role="tabpanel">
-                    <div class="container text-center mt-5 h-100">
-                        <img src="/media/Under_construction_graphic.gif"><img>
+                <div class="tab-pane active" id="history" role="tabpanel">
+                    <div class="container-fluid">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="text-center">
+                                            <button id="requester-overview" type="button" class="btn btn-primary">Reqeuster Overview</button>
+                                            <button id="daily-overview" type="button" class="btn btn-primary">Daily Overview</button>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">View</span>
+                                            </div>
+                                            <select id="view" class="custom-select">
+                                                <option value="" selected>All</option>
+                                                <option value="Submitted">Pending</option>
+                                                <option value="Approved">Approved</option>
+                                                <option value="Rejected">Rejected</option>
+                                                <option value="Paid">Paid</option>
+                                            </select>
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">HITs Matching</span>
+                                            </div>
+                                            <input id="matching" type="text" class="form-control" placeholder="Leave Blank for All / Requester Name or ID / HIT Title">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-primary" type="button" id="search">Search</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">From</span>
+                                            </div>
+                                            <input id="date-from" type="date" class="form-control">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">To</span>
+                                            </div>
+                                            <input id="date-to" type="date" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <table class="table table-striped table-bordered table-sm">
+                            <tbody id="history-results"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -156,6 +205,24 @@
                     <div class="modal-body">
                         <div class="container">
                             <span id="sync-message"></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="sync-cancel" class="btn btn-danger" disabled>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="searching-modal" class="modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b class="col-4">Searching</b>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <span id="searching-message">This may take some time</span>
                         </div>
                     </div>
                     <div class="modal-footer">

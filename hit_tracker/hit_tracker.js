@@ -130,7 +130,7 @@ function displayTodaysInfo(hits) {
         requesterTbody.removeChild(requesterTbody.firstChild);
     }
 
-    const sorted = Object.keys(requesters).sort((a, b) => requesters[a].reward - requesters[b].reward);
+    const sorted = Object.keys(requesters).sort((a, b) => requesters[a].value - requesters[b].value);
 
     for (let i = sorted.length - 1; i > -1; i --) {
         const req = requesters[sorted[i]];
@@ -320,7 +320,8 @@ function checkDays(days) {
                     const i = daysArray.indexOf(value.date);
 
                     if (i !== -1) {
-                        daysArray.splice(i, 1);
+                        const spliced = daysArray.splice(i, 1);
+                        saveDay(spliced[0]);
                     }
                 }
 
@@ -361,7 +362,6 @@ function saveDay(date) {
     });
 }
 
-
 function countDay(date) {
     return new Promise((resolve) => {
         const object = {
@@ -393,11 +393,13 @@ function countDay(date) {
 
                 object[state] ++;
 
-                if (state === `paid` || `approved`) {
+                if (state.match(/paid/)) {
                     object.earnings += cursor.value.reward.amount_in_dollars;
                 }
-
                 cursor.continue();
+            }
+            else {
+                console.log(`${date} counted`)
             }
         };
 
@@ -696,6 +698,426 @@ document.getElementById(`sync-last-45-days`).addEventListener(`click`, async (e)
         function: `hitTrackerGetProjected`
     });
 });
+
+document.getElementById(`requester-overview`).addEventListener(`click`, requesterOverview);
+document.getElementById(`daily-overview`).addEventListener(`click`, dailyOverview);
+document.getElementById(`search`).addEventListener(`click`, search);
+
+async function requesterOverview() {
+    searchStart();
+
+    const results = document.getElementById(`history-results`);
+    const dateTo = document.getElementById(`date-to`).value;
+    const dateFrom = document.getElementById(`date-from`).value;
+
+    const transaction = hitTrackerDB.transaction([`hit`], `readonly`);
+    const objectStore = transaction.objectStore(`hit`);
+
+    if (dateTo || dateFrom) {
+        searchingUpdate(`Requester Overview Date Range`);
+        
+        let count = 0;
+        const hits = [];
+
+        objectStore.index(`date`).openCursor(IDBKeyRange.bound(dateFrom.replace(/-/g, ``) || `0`, dateTo.replace(/-/g, ``) || `99999999`)).onsuccess = (event) => {
+            
+            const cursor = event.target.result;
+
+            if (cursor) {
+                hits.push(cursor.value);
+                return cursor.continue();
+            }
+            else {
+                return process(hits);
+            }
+        };
+    }
+    else {
+        searchingUpdate(`Requester Overview Get All`);
+        
+        objectStore.getAll().onsuccess = (event) => {
+            const hits = event.target.result;
+            return process(event.target.result);
+        }
+    }
+
+    transaction.oncomplete = (event) => {
+        const tr = document.createElement(`tr`);
+        tr.className = `bg-primary text-white`;
+
+        const requester = document.createElement(`td`);
+        requester.textContent = `Requester`;
+        tr.append(requester);
+
+        const count = document.createElement(`td`);
+        count.textContent = `HITs`;
+        tr.appendChild(count);
+
+        const value = document.createElement(`td`);
+        value.textContent = `Reward`;
+        tr.appendChild(value);
+
+        results.prepend(tr);
+
+        return searchEnd();
+    };
+
+    function process(hits) {
+        searchingUpdate(`Requester Overview Sorting`);
+        
+        const requesters = hits.reduce((accumulator, currentValue) => {
+            const requester_id = currentValue.requester_id;
+
+            if (~`Submitted|Pending|Approved|Paid`.indexOf(currentValue.state)) {
+                if (accumulator[requester_id]) {
+                    accumulator[requester_id].count += 1;
+                    accumulator[requester_id].value += currentValue.reward.amount_in_dollars;
+                }
+                else {
+                    accumulator[requester_id] = {
+                        id: currentValue.requester_id,
+                        name: currentValue.requester_name,
+                        count: 1,
+                        value: currentValue.reward.amount_in_dollars
+                    }
+                }
+            }
+
+            return accumulator;
+        }, {});
+
+
+        const sorted = Object.keys(requesters).sort((a, b) => requesters[a].value - requesters[b].value);
+
+        while (results.firstChild) {
+            results.removeChild(results.firstChild);
+        }
+
+        for (let i = sorted.length - 1; i > -1; i --) {
+            const req = requesters[sorted[i]];
+
+            const tr = document.createElement(`tr`);
+
+            const requester = document.createElement(`td`);
+            tr.append(requester);
+
+            const requesterView = document.createElement(`button`);
+            requesterView.className = `btn btn-sm btn-primary mr-1`;
+            requesterView.textContent = `View`;
+            requesterView.addEventListener(`click`, async (event) => {
+                document.getElementById(`view`).value = ``;
+                document.getElementById(`matching`).value = req.id;
+                document.getElementById(`date-from`).value = ``;
+                document.getElementById(`date-to`).value = ``;
+                search();
+            });
+            requester.appendChild(requesterView);
+
+            const requesterLink = document.createElement(`a`);
+            requesterLink.href = `https://worker.mturk.com/requesters/${req.id}/projects`;
+            requesterLink.target = `_blank`;
+            requesterLink.textContent = req.name;
+            requester.appendChild(requesterLink);
+
+            const count = document.createElement(`td`);
+            count.textContent = req.count;
+            tr.appendChild(count);
+
+            const value = document.createElement(`td`);
+            value.textContent = req.value.toMoneyString();
+            tr.appendChild(value);
+
+            results.appendChild(tr);
+        }
+    }
+}
+
+async function dailyOverview() {
+    searchStart();
+
+    const results = document.getElementById(`history-results`);
+    const dateTo = document.getElementById(`date-to`).value;
+    const dateFrom = document.getElementById(`date-from`).value;
+
+    const transaction = hitTrackerDB.transaction([`day`], `readonly`);
+    const objectStore = transaction.objectStore(`day`);
+
+    if (dateTo || dateFrom) {
+        const days = [];
+
+        objectStore.openCursor(IDBKeyRange.bound(dateFrom.replace(/-/g, ``) || `0`, dateTo.replace(/-/g, ``) || `99999999`)).onsuccess = (event) => {
+            const cursor = event.target.result;
+
+            if (cursor) {
+                days.push(cursor.value);
+                return cursor.continue();
+            }
+            else {
+                return process(days);
+            }
+        };
+    }
+    else {
+        objectStore.getAll().onsuccess = (event) => {
+            const hits = event.target.result;
+            return process(event.target.result);
+        }
+    }
+
+
+    transaction.oncomplete = (event) => {
+        const th = document.createElement(`tr`);
+        th.className = `bg-primary text-white`;
+
+        const date = document.createElement(`td`);
+        date.textContent = `Date`;
+        th.appendChild(date);
+
+        const submitted = document.createElement(`td`);
+        submitted.textContent = `Submitted`;
+        th.appendChild(submitted);
+
+        const approved = document.createElement(`td`);
+        approved.textContent = `Approved`;
+        th.appendChild(approved);
+
+        const rejected = document.createElement(`td`);
+        rejected.textContent = `Rejected`;
+        th.appendChild(rejected);
+
+        const pending = document.createElement(`td`);
+        pending.textContent = `Pending`;
+        th.appendChild(pending);
+
+        const ret_aban = document.createElement(`td`);
+        ret_aban.textContent = `Returned/Abandoned`;
+        th.appendChild(ret_aban);
+
+        const earningsHits = document.createElement(`td`);
+        earningsHits.textContent = `Earnings HITs`;
+        th.appendChild(earningsHits);
+
+        const earningsBonus = document.createElement(`td`);
+        earningsBonus.textContent = `Earnings Bonus`;
+        th.appendChild(earningsBonus);
+
+        results.prepend(th);
+
+        return searchEnd();
+    }
+
+    function process(days) {
+        while (results.firstChild) {
+            results.removeChild(results.firstChild);
+        }
+
+        for (const day of days) {
+            const tr = document.createElement(`tr`);
+            const formattedDate = [day.date.slice(0, 4), day.date.slice(4,6), day.date.slice(6,8)].join(`-`);
+
+            const date = document.createElement(`td`);
+            date.textContent = formattedDate;
+            tr.appendChild(date);
+
+            const submitted = document.createElement(`td`);
+            submitted.textContent = day.submitted + day.rejected + day.approved + day.paid;
+            tr.appendChild(submitted);
+
+            const approved = document.createElement(`td`);
+            approved.textContent = day.approved;
+            tr.appendChild(approved);
+
+            const rejected = document.createElement(`td`);
+            rejected.textContent = day.rejected;
+            tr.appendChild(rejected);
+
+            const pending = document.createElement(`td`);
+            pending.textContent = day.submitted;
+            tr.appendChild(pending);
+
+            const ret_aban = document.createElement(`td`);
+            ret_aban.textContent = day.returned + day.abandoned;
+            tr.appendChild(ret_aban);
+
+            const earningsHits = document.createElement(`td`);
+            earningsHits.textContent = day.earnings.toMoneyString();
+            tr.appendChild(earningsHits);
+
+            const earningsBonus = document.createElement(`td`);
+            earningsBonus.textContent = (day.day.earnings - day.earnings).toMoneyString();
+            tr.appendChild(earningsBonus);
+
+            const actions = document.createElement(`span`);
+            date.prepend(actions);
+
+            const viewThisDay = document.createElement(`button`);
+            viewThisDay.className = `btn btn-sm btn-primary mr-1`;
+            viewThisDay.textContent = `View`;
+            viewThisDay.addEventListener(`click`, async (event) => {
+                document.getElementById(`view`).value = ``;
+                document.getElementById(`matching`).value = ``;
+                document.getElementById(`date-from`).value = formattedDate;
+                document.getElementById(`date-to`).value = formattedDate;
+                search();
+            });
+            actions.appendChild(viewThisDay);
+
+            const syncThisDay = document.createElement(`button`);
+            syncThisDay.className = `btn btn-sm btn-primary mr-1`;
+            syncThisDay.textContent = `Sync`;
+            syncThisDay.addEventListener(`click`, async (event) => {
+                await syncDay(day.date);
+                const classList = event.target.parentElement.parentElement.classList;
+                classList.add(`bg-warning`);
+                classList.add(`text-white`);
+            });
+            actions.appendChild(syncThisDay);
+
+            results.prepend(tr);
+        }
+    }
+}
+
+async function search() {
+    searchStart();
+
+    const view = document.getElementById(`view`).value;
+    const matching = document.getElementById(`matching`).value;
+    const dateTo = document.getElementById(`date-to`).value;
+    const dateFrom = document.getElementById(`date-from`).value;
+
+    console.log(view, matching, dateTo, dateFrom)
+
+    const transaction = hitTrackerDB.transaction([`hit`], `readonly`);
+    const objectStore = transaction.objectStore(`hit`);
+    let request;
+
+    if (dateFrom || dateTo) {
+        const index = objectStore.index(`date`);
+        request = index.openCursor(IDBKeyRange.bound(dateFrom.replace(/-/g, ``) || `0`, dateTo.replace(/-/g, ``) || `99999999`));
+    }
+    else if (view) {
+        const index = objectStore.index(`state`);
+        request = index.openCursor(IDBKeyRange.only(view));
+    }
+    else {
+        const index = objectStore.index(`state`);
+        request = index.openCursor();
+    }
+
+    let count = 0;
+
+    const results = document.getElementById(`history-results`);
+
+    while (results.firstChild) {
+        results.removeChild(results.firstChild);
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    request.onsuccess = (event) => {
+        const cursor = event.target.result;
+
+        if (cursor) {
+            searchingUpdate(`Processing HIT ${++ count}`);
+
+            const value = cursor.value;
+            if (matching && ![value.requester_id, value.requester_name, value.title].includes(matching)) {
+                return cursor.continue();
+            }
+
+            if (view && view !== value.state) {
+                return cursor.continue();
+            }
+
+            const tr = document.createElement(`tr`);
+
+            const requester_name = document.createElement(`td`);
+            requester_name.textContent = value.requester_name;
+            tr.appendChild(requester_name);
+
+            const title = document.createElement(`td`);
+            title.textContent = value.title;
+            tr.appendChild(title);
+
+            if (value.source) {
+                const viewSource = document.createElement(`a`);
+                viewSource.href = value.source;
+                viewSource.target = `_blank`;
+                viewSource.className = `btn btn-sm btn-primary mr-1`;
+                viewSource.textContent = `Src`;
+                title.prepend(viewSource);
+
+                if (value.answer) {
+                    viewSource.title = Object.keys(value.answer).reduce((a, cV) => a += `<b>${cV}</b>: ${value.answer[cV]} <br>`, ``);
+
+                    viewSource.dataset.html = `true`;
+                    viewSource.dataset.toggle = `tooltip`;
+                }
+            }
+
+            const reward = document.createElement(`td`);
+            reward.textContent = value.reward.amount_in_dollars.toMoneyString();
+            tr.appendChild(reward);
+
+            const state = document.createElement(`td`);
+            state.textContent = value.state;
+            tr.appendChild(state);
+
+            fragment.appendChild(tr);
+
+            return cursor.continue();
+        }
+    };
+
+    transaction.oncomplete = (event) => {
+        const th = document.createElement(`tr`);
+        th.className = `bg-primary text-white`;
+
+        const requester_name = document.createElement(`td`);
+        requester_name.textContent = `Name`;
+        th.appendChild(requester_name);
+
+        const title = document.createElement(`td`);
+        title.textContent = `Title`;
+        th.appendChild(title);
+
+        const reward = document.createElement(`td`);
+        reward.textContent = `Reward`;
+        th.appendChild(reward);
+
+        const state = document.createElement(`td`);
+        state.textContent = `Status`;
+        th.appendChild(state);
+
+        $(`[data-toggle="tooltip"]`).tooltip();
+
+        results.appendChild(th);
+        results.appendChild(fragment);
+        
+        return searchEnd();
+    }
+}
+
+function searchStart() {
+    const modal = document.getElementById(`searching-modal`);
+    searchingUpdate(`This may take some time`);
+
+    $(modal).modal({
+        backdrop: `static`,
+        keyboard: false
+    });
+}
+
+function searchingUpdate(message) {
+    document.getElementById(`searching-message`).textContent = message ? message : null;
+}
+
+function searchEnd() {
+    const modal = document.getElementById(`searching-modal`);
+
+    $(modal).modal(`hide`);
+}
 
 (function updateTheme() {
     const theme = document.getElementById(`theme`);
