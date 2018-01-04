@@ -1035,6 +1035,10 @@ async function search() {
 
             const tr = document.createElement(`tr`);
 
+            const date_accepted = document.createElement(`td`);
+            date_accepted.textContent = [value.date.slice(0, 4), value.date.slice(4,6), value.date.slice(6,8)].join(`-`);
+            tr.appendChild(date_accepted)
+
             const requester_name = document.createElement(`td`);
             requester_name.textContent = value.requester_name;
             tr.appendChild(requester_name);
@@ -1076,6 +1080,10 @@ async function search() {
     transaction.oncomplete = (event) => {
         const th = document.createElement(`tr`);
         th.className = `bg-primary text-white`;
+
+        const date_accepted = document.createElement(`td`);
+        date_accepted.textContent = `Date`;
+        th.appendChild(date_accepted);
 
         const requester_name = document.createElement(`td`);
         requester_name.textContent = `Name`;
