@@ -893,9 +893,11 @@ async function dailyOverview() {
         earningsHits.textContent = `Earnings HITs`;
         th.appendChild(earningsHits);
 
+        /*
         const earningsBonus = document.createElement(`td`);
         earningsBonus.textContent = `Earnings Bonus`;
         th.appendChild(earningsBonus);
+        */
 
         results.prepend(th);
 
@@ -939,9 +941,11 @@ async function dailyOverview() {
             earningsHits.textContent = day.earnings.toMoneyString();
             tr.appendChild(earningsHits);
 
+            /*
             const earningsBonus = document.createElement(`td`);
             earningsBonus.textContent = (day.day.earnings - day.earnings).toMoneyString();
             tr.appendChild(earningsBonus);
+            */
 
             const actions = document.createElement(`span`);
             date.prepend(actions);
@@ -969,11 +973,11 @@ async function dailyOverview() {
             });
             actions.appendChild(syncThisDay);
 
-            
+
             if (!day.day || day.day.submitted !== (day.submitted + day.rejected + day.approved + day.paid)) {
                 syncThisDay.classList.add(`btn-warning`);
             }
-            
+
             results.prepend(tr);
         }
     }
@@ -1157,7 +1161,7 @@ function trackerImport(file) {
                 header: `Importing`,
                 message: `Importing backup`
             });
-            
+
             const json = JSON.parse(event.target.result);
 
             if (json.hits && json.days) {
@@ -1185,43 +1189,51 @@ function trackerImport(file) {
                 }, []);
 
                 const days = json.STATS.reduce((accumulator, currentValue) => {
-                    accumulator.push({
-                        day: currentValue,
-                        date: currentValue.date.replace(/-/g, ``),
-                        
-                        assigned: 0,  
-                        returned: 0, 
-                        abandoned: 0, 
+                    if (currentValue.earnings !== undefined) {
+                        accumulator.push({
+                            day: currentValue,
+                            date: currentValue.date.replace(/-/g, ``),
 
-                        paid: 0,
-                        approved: 0,
-                        rejected: 0,
-                        submitted: 0,
+                            assigned: 0,  
+                            returned: 0, 
+                            abandoned: 0, 
 
-                        earnings: 0,
-                        bonuses: 0
-                    });
+                            paid: 0,
+                            approved: 0,
+                            rejected: 0,
+                            submitted: 0,
+
+                            earnings: 0,
+                            bonuses: 0
+                        });
+                    }
+                    else {
+                        statusEnd();
+                        return alert(`Import failed! Error importing day: ${JSON.stringify(currentValue)}`);
+                    }
 
                     return accumulator;
                 }, []);
 
                 await trackerImportPutHit(hits);
                 await trackerImportPutDay(days);
+                statusEnd();
             }
             else {
-                alert(`Import failed! Unrecognized format`);
+                statusEnd();
+                return alert(`Import failed! Unrecognized format`);
             }
         }
         catch (error) {
-            alert(`Import failed! ${error}`);
+            statusEnd();
+            return alert(`Import failed! ${error}`);
         }
-        statusEnd();
     }
 }
 
 function trackerImportPutHit(hits) {
     statusUpdate({ message: `Putting HITs` });
-    
+
     return new Promise((resolve) => {
         const transaction = hitTrackerDB.transaction([`hit`], `readwrite`);
         const objectStore = transaction.objectStore(`hit`);
@@ -1240,7 +1252,7 @@ function trackerImportPutHit(hits) {
 
 function trackerImportPutDay(days) {
     statusUpdate({ message: `Putting Days` });
-    
+
     return new Promise(async (resolve) => {
         const transaction = hitTrackerDB.transaction([`day`], `readwrite`);
         const objectStore = transaction.objectStore(`day`);
@@ -1306,15 +1318,15 @@ function statusStart(opts) {
     const statusModal = document.getElementById(`status-modal`);
     const statusHeader = document.getElementById(`status-header`);
     const statusMessage = document.getElementById(`status-message`);
-    
+
     if (opts.header) {
         statusHeader.textContent = opts.header;
     }
-    
+
     if (opts.message) {
         statusMessage.textContent = opts.message;
     }
-    
+
     $(statusModal).modal({
         backdrop: `static`,
         keyboard: false
@@ -1325,11 +1337,11 @@ function statusUpdate(opts) {
     const statusModal = document.getElementById(`status-modal`);
     const statusHeader = document.getElementById(`status-header`);
     const statusMessage = document.getElementById(`status-message`);
-    
+
     if (opts.header) {
         statusHeader.textContent = opts.header;
     }
-    
+
     if (opts.message) {
         statusMessage.textContent = opts.message;
     }
@@ -1339,10 +1351,10 @@ function statusEnd() {
     const statusModal = document.getElementById(`status-modal`);
     const statusHeader = document.getElementById(`status-header`);
     const statusMessage = document.getElementById(`status-message`);
-    
+
     statusHeader.textContent = ``;
     statusMessage.textContent = ``;
-    
+
     $(statusModal).modal(`hide`);
 }
 
