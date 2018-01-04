@@ -4,7 +4,7 @@ An extension that brings together a large collection of useful tools to assist w
 
 # Install
 - [Chrome](https://chrome.google.com/webstore/detail/mturk-suite/iglbakfobmoijpbigmlfklckogbefnlf)
-- Firefox - Coming Soon
+- [Firefox](https://addons.mozilla.org/en-US/firefox/addon/mturk-suite/)
 
 # Features
 **[Omnibar & Context Menus](#omnibar--context-menus)**
