@@ -355,7 +355,6 @@ function saveDay(date) {
             objectStore.put(count);
         };
 
-
         transaction.oncomplete = (event) => {
             resolve();
         };
@@ -397,9 +396,6 @@ function countDay(date) {
                     object.earnings += cursor.value.reward.amount_in_dollars;
                 }
                 cursor.continue();
-            }
-            else {
-                console.log(`${date} counted`)
             }
         };
 
@@ -715,12 +711,12 @@ async function requesterOverview() {
 
     if (dateTo || dateFrom) {
         searchingUpdate(`Requester Overview Date Range`);
-        
+
         let count = 0;
         const hits = [];
 
         objectStore.index(`date`).openCursor(IDBKeyRange.bound(dateFrom.replace(/-/g, ``) || `0`, dateTo.replace(/-/g, ``) || `99999999`)).onsuccess = (event) => {
-            
+
             const cursor = event.target.result;
 
             if (cursor) {
@@ -734,7 +730,7 @@ async function requesterOverview() {
     }
     else {
         searchingUpdate(`Requester Overview Get All`);
-        
+
         objectStore.getAll().onsuccess = (event) => {
             const hits = event.target.result;
             return process(event.target.result);
@@ -764,7 +760,7 @@ async function requesterOverview() {
 
     function process(hits) {
         searchingUpdate(`Requester Overview Sorting`);
-        
+
         const requesters = hits.reduce((accumulator, currentValue) => {
             const requester_id = currentValue.requester_id;
 
@@ -967,12 +963,17 @@ async function dailyOverview() {
             syncThisDay.textContent = `Sync`;
             syncThisDay.addEventListener(`click`, async (event) => {
                 await syncDay(day.date);
-                const classList = event.target.parentElement.parentElement.classList;
+                const classList = event.target.parentElement.parentElement.parentElement.classList;
                 classList.add(`bg-warning`);
                 classList.add(`text-white`);
             });
             actions.appendChild(syncThisDay);
 
+            
+            if (!day.day || day.day.submitted !== (day.submitted + day.rejected + day.approved + day.paid)) {
+                syncThisDay.classList.add(`btn-warning`);
+            }
+            
             results.prepend(tr);
         }
     }
@@ -985,8 +986,6 @@ async function search() {
     const matching = document.getElementById(`matching`).value;
     const dateTo = document.getElementById(`date-to`).value;
     const dateFrom = document.getElementById(`date-from`).value;
-
-    console.log(view, matching, dateTo, dateFrom)
 
     const transaction = hitTrackerDB.transaction([`hit`], `readonly`);
     const objectStore = transaction.objectStore(`hit`);
@@ -1094,7 +1093,7 @@ async function search() {
 
         results.appendChild(th);
         results.appendChild(fragment);
-        
+
         return searchEnd();
     }
 }
@@ -1142,6 +1141,210 @@ function textToSpeech(phrase) {
 }
 
 
+
+document.getElementById(`import`).addEventListener(`click`, (event) => document.getElementById(`import-file`).click());
+document.getElementById(`import-file`).addEventListener(`change`, (event) => trackerImport(event.target.files[0]));
+document.getElementById(`export`).addEventListener(`click`, (event) => trackerExport());
+
+
+function trackerImport(file) {
+    const reader = new FileReader();
+    reader.readAsText(file);
+
+    reader.onload = async (event) => {
+        try {
+            statusStart({
+                header: `Importing`,
+                message: `Importing backup`
+            });
+            
+            const json = JSON.parse(event.target.result);
+
+            if (json.hits && json.days) {
+                await trackerImportPutHit(json.hits);
+                await trackerImportPutDay(json.days);
+            }
+            else if (json.STATS && json.HIT) {
+                const hits = json.HIT.reduce((accumulator, currentValue) => {
+                    accumulator.push({
+                        assignment_id: null,
+                        date: currentValue.date.replace(/-/g, ``),
+                        hit_id: currentValue.hitId,
+                        requester_feedback: currentValue.feedback === `` ? null : currentValue.feedback,
+                        requester_id: currentValue.requesterId,
+                        requester_name: currentValue.requesterName,
+                        reward: {
+                            amount_in_dollars: currentValue.reward,
+                            currency_code: null
+                        },
+                        state: currentValue.status.split(` `)[0].replace(`Pending`, `Submitted`),
+                        title: currentValue.title
+                    });
+
+                    return accumulator;
+                }, []);
+
+                const days = json.STATS.reduce((accumulator, currentValue) => {
+                    accumulator.push({
+                        day: currentValue,
+                        date: currentValue.date.replace(/-/g, ``),
+                        
+                        assigned: 0,  
+                        returned: 0, 
+                        abandoned: 0, 
+
+                        paid: 0,
+                        approved: 0,
+                        rejected: 0,
+                        submitted: 0,
+
+                        earnings: 0,
+                        bonuses: 0
+                    });
+
+                    return accumulator;
+                }, []);
+
+                await trackerImportPutHit(hits);
+                await trackerImportPutDay(days);
+            }
+            else {
+                alert(`Import failed! Unrecognized format`);
+            }
+        }
+        catch (error) {
+            alert(`Import failed! ${error}`);
+        }
+        statusEnd();
+    }
+}
+
+function trackerImportPutHit(hits) {
+    statusUpdate({ message: `Putting HITs` });
+    
+    return new Promise((resolve) => {
+        const transaction = hitTrackerDB.transaction([`hit`], `readwrite`);
+        const objectStore = transaction.objectStore(`hit`);
+
+        for (const hit of hits) {
+            if (hit.hit_id && hit.requester_id) {
+                objectStore.put(hit);
+            }
+        }
+
+        transaction.oncomplete = (event) => {
+            return resolve();
+        };
+    });
+}
+
+function trackerImportPutDay(days) {
+    statusUpdate({ message: `Putting Days` });
+    
+    return new Promise(async (resolve) => {
+        const transaction = hitTrackerDB.transaction([`day`], `readwrite`);
+        const objectStore = transaction.objectStore(`day`);
+
+        for (const day of days) {
+            if (day.day && day.day.earnings && day.date) {
+                objectStore.put(day);
+            }
+        }
+
+        transaction.oncomplete = async (event) => {
+            const dates = days.reduce((accumulator, currentValue) => {
+                accumulator.push(currentValue.date);
+                return accumulator;
+            }, []);
+
+            for (const date of dates) {
+                await saveDay(date);
+            }
+
+            return resolve();
+        };
+    });
+}
+
+async function trackerExport() {
+    const exportFile = document.getElementById(`export-file`);
+
+    const data = JSON.stringify({
+        hits: await trackerExportGetHit(),
+        days: await trackerExportGetDay()
+    });
+
+    exportFile.href = window.URL.createObjectURL(new Blob([data], { type: `application/json` }));
+    exportFile.download = `HIT_Tracker_Backup_${mturkDate()}.json`;
+    exportFile.click();
+}
+
+function trackerExportGetHit() {
+    return new Promise((resolve) => {
+        const transaction = hitTrackerDB.transaction([`hit`], `readonly`);
+        const objectStore = transaction.objectStore(`hit`);
+
+        objectStore.getAll().onsuccess = (event) => {
+            resolve(event.target.result);
+        }
+    });
+
+}
+
+function trackerExportGetDay() {
+    return new Promise((resolve) => {
+        const transaction = hitTrackerDB.transaction([`day`], `readonly`);
+        const objectStore = transaction.objectStore(`day`);
+
+        objectStore.getAll().onsuccess = (event) => {
+            resolve(event.target.result);
+        }
+    });
+}
+
+function statusStart(opts) {
+    const statusModal = document.getElementById(`status-modal`);
+    const statusHeader = document.getElementById(`status-header`);
+    const statusMessage = document.getElementById(`status-message`);
+    
+    if (opts.header) {
+        statusHeader.textContent = opts.header;
+    }
+    
+    if (opts.message) {
+        statusMessage.textContent = opts.message;
+    }
+    
+    $(statusModal).modal({
+        backdrop: `static`,
+        keyboard: false
+    });
+}
+
+function statusUpdate(opts) {
+    const statusModal = document.getElementById(`status-modal`);
+    const statusHeader = document.getElementById(`status-header`);
+    const statusMessage = document.getElementById(`status-message`);
+    
+    if (opts.header) {
+        statusHeader.textContent = opts.header;
+    }
+    
+    if (opts.message) {
+        statusMessage.textContent = opts.message;
+    }
+}
+
+function statusEnd() {
+    const statusModal = document.getElementById(`status-modal`);
+    const statusHeader = document.getElementById(`status-header`);
+    const statusMessage = document.getElementById(`status-message`);
+    
+    statusHeader.textContent = ``;
+    statusMessage.textContent = ``;
+    
+    $(statusModal).modal(`hide`);
+}
 
 
 

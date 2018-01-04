@@ -25,6 +25,9 @@
                 </div>
                 <button id="import" type="button" class="btn btn-secondary">Import</button>
                 <button id="export" type="button" class="btn btn-secondary">Export</button>
+
+                <input id="import-file" type="file" style="display: none;" />
+                <a id="export-file" style="display: none;" href download></a>
             </div>
         </nav>
 
@@ -213,7 +216,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div id="searching-modal" class="modal">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -227,6 +230,21 @@
                     </div>
                     <div class="modal-footer">
                         <button id="sync-cancel" class="btn btn-danger" disabled>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="status-modal" class="modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b id="status-header" class="col-4"></b>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <span id="status-message"></span>
+                        </div>
                     </div>
                 </div>
             </div>
