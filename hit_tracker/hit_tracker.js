@@ -999,7 +999,7 @@ async function search() {
                     let contains = false;
 
                     for (const item of hitValues) {
-                        if (~item.toLowerCase().indexOf(matching.toLowerCase())) {
+                        if (item && ~item.toLowerCase().indexOf(matching.toLowerCase())) {
                             contains = true;
                             break;
                         }
