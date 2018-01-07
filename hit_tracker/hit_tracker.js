@@ -557,7 +557,7 @@ function getTrackerInfo() {
         }
     };
 
-    const week = getWeek(), month = getMonth();
+    const week = getWeek(), month = getMonth();    
     const boundWeek = IDBKeyRange.bound(week.start, week.end);
     const boundMonth = IDBKeyRange.bound(month.start, month.end);
 
@@ -603,14 +603,15 @@ function getTrackerInfo() {
 
 
 function getWeek() {
-    const today = mturkDateString();
-    const month = (today.getMonth() + 1) < 10 ? `0` + (today.getMonth() + 1).toString() : ((today.getMonth() + 1)).toString();
-    const year = (today.getFullYear()).toString();
-    const date = new Date(today);
-
+    const today = new Date(mturkDateString());
+    const start = today.getDate() - today.getDay();
+    const end = start + 6;
+    const startDate = new Date(today.setDate(start)).toISOString().slice(0, 10).replace(/-/g, ``);
+    const endDate = new Date(today.setDate(today.getDate() + 6)).toISOString().slice(0, 10).replace(/-/g, ``);
+    
     return {
-        start: year + month + (date.getDate() - date.getDay()),
-        end: year + month + (date.getDate() - date.getDay() + 6),
+        start: startDate,
+        end: endDate,
     }
 }
 
@@ -1236,7 +1237,7 @@ function trackerImportPutHit(hits) {
             statusUpdate({ message: `Putting HIT ${++ count} of ${length}` });
             
             if (hit.hit_id && hit.requester_id) {
-                if (hit.state !== `Paid`) {
+                if (!hit.state.match(/Rejected|Paid/)) {
                     objectStore.put(paidAfter30(hit));
                 }
                 else {
