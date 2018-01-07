@@ -146,6 +146,10 @@
 
                 <div class="tab-pane" id="history" role="tabpanel">
                     <div class="container-fluid">
+                        <div class="alert alert-warning alert-dismissible fade show mt-3">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            If you imported a HITDB backup and something seems off, import it again.
+                        </div>
                         <div class="card">
                             <div class="card-body">
                                 <div class="container-fluid">
@@ -173,7 +177,7 @@
                                             <select id="matching-type" class="custom-select">
                                                 <option value="contain" selected>Contain</option>
                                                 <option value="exactly">Exactly Match</option>
-                                                
+
                                             </select>
                                             <input id="matching" type="text" class="form-control" placeholder="Leave Blank for All / Requester Name or ID / HIT Title">
                                             <div class="input-group-append">
@@ -239,7 +243,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div id="status-modal" class="modal">
             <div class="modal-dialog">
                 <div class="modal-content">
