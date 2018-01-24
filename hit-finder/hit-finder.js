@@ -262,29 +262,14 @@ async function finderProcess () {
     masters.textContent = hit.project_requirements.filter((o) => [`2F1QJWKUDD8XADTFD2Q0G6UTO95ALH`, `2NDP2L92HECWY8NS8H3CK0CP5L9GHO`, `21VZU98JHSTLZ5BPP4A9NOBJEK3DPG`].includes(o.qualification_type_id)).length > 0 ? `Y` : `N`
     row.appendChild(masters)
 
-    const recentRow = row.cloneNode(true)
+    const recentRow = toggleColumns(row.cloneNode(true), `recent`)
     recentRow.id = `recent-${hit.hit_set_id}`
 
-    const loggedRow = row.cloneNode(true)
+    const loggedRow = toggleColumns(row.cloneNode(true), `logged`)
     loggedRow.id = `logged-${hit.hit_set_id}`
 
-    const includedRow = row.cloneNode(true)
+    const includedRow = toggleColumns(row.cloneNode(true), `included`)
     includedRow.id = `included-${hit.hit_set_id}`
-
-    const cols = [`time`, `requester`, `title`, `available`, `reward`, `masters`]
-
-    for (let i = 0; i < cols.length; i++) {
-      const col = cols[i]
-      const index = i + 1
-
-      recentRow.children[index].style.display = storage.hitFinder[`display-recent-column-${col}`] ? `` : `none`
-      loggedRow.children[index].style.display = storage.hitFinder[`display-logged-column-${col}`] ? `` : `none`
-      includedRow.children[index].style.display = storage.hitFinder[`display-included-column-${col}`] ? `` : `none`
-
-      document.getElementById(`recent-hits-thead`).children[0].children[index].style.display = storage.hitFinder[`display-recent-column-${col}`] ? `` : `none`
-      document.getElementById(`logged-hits-thead`).children[0].children[index].style.display = storage.hitFinder[`display-logged-column-${col}`] ? `` : `none`
-      document.getElementById(`include-list-hits-thead`).children[0].children[index].style.display = storage.hitFinder[`display-included-column-${col}`] ? `` : `none`
-    }
 
     recentFragment.appendChild(recentRow)
 
@@ -303,6 +288,8 @@ async function finderProcess () {
     }
   }
 
+  toggleColumns(document.getElementById(`recent-hits-thead`).children[0], `recent`)
+  toggleColumns(document.getElementById(`logged-hits-thead`).children[0], `logged`)
   removeChildren(document.getElementById(`recent-hits-tbody`))
 
   document.getElementById(`recent-hits-tbody`).insertBefore(recentFragment, document.getElementById(`recent-hits-tbody`).firstChild)
@@ -593,6 +580,19 @@ function timeNow () {
   hours = hours || 12
   minutes = minutes < 10 ? `0` + minutes : minutes
   return `${hours}:${minutes}${ampm}`
+}
+
+function toggleColumns () {
+  const [element, type] = arguments
+
+  element.children[1].style.display = storage.hitFinder[`display-${type}-column-time`] ? `` : `none`
+  element.children[2].style.display = storage.hitFinder[`display-${type}-column-requester`] ? `` : `none`
+  element.children[3].style.display = storage.hitFinder[`display-${type}-column-title`] ? `` : `none`
+  element.children[4].style.display = storage.hitFinder[`display-${type}-column-available`] ? `` : `none`
+  element.children[5].style.display = storage.hitFinder[`display-${type}-column-reward`] ? `` : `none`
+  element.children[6].style.display = storage.hitFinder[`display-${type}-column-masters`] ? `` : `none`
+
+  return element
 }
 
 function removeChildren () {
