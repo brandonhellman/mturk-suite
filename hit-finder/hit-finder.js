@@ -1,37 +1,3 @@
-Object.assign(String.prototype, {
-  toMoneyString () {
-    return `$${Number(this).toFixed(2).toLocaleString(`en-US`, { minimumFractionDigits: 2 })}`
-  }
-})
-
-Object.assign(Number.prototype, {
-  toMoneyString () {
-    return `$${this.toFixed(2).toLocaleString(`en-US`, { minimumFractionDigits: 2 })}`
-  },
-  toTimeString () {
-    let seconds = this
-    let minute = Math.floor(seconds / 60)
-    seconds = seconds % 60
-    let hour = Math.floor(minute / 60)
-    minute = minute % 60
-    let day = Math.floor(hour / 24)
-    hour = hour % 24
-
-    let string = ``
-
-    if (day > 0) {
-      string += `${day} day${day > 1 ? `s` : ``} `
-    }
-    if (hour > 0) {
-      string += `${hour} hour${hour > 1 ? `s` : ``} `
-    }
-    if (minute > 0) {
-      string += `${minute} minute${minute > 1 ? `s` : ``}`
-    }
-    return string.trim()
-  }
-})
-
 const finderDB = {}
 const reviewsDB = {}
 const includeAlerted = []
@@ -153,7 +119,6 @@ async function finderFetch () {
 }
 
 async function finderProcess () {
-  console.time(`finderProcess`)
   const [json] = arguments
 
   const recentFragment = document.createDocumentFragment()
@@ -289,7 +254,7 @@ async function finderProcess () {
     const rewardLink = document.createElement(`a`)
     rewardLink.href = `https://worker.mturk.com/projects/${hit.hit_set_id}/tasks/accept_random`
     rewardLink.target = `_blank`
-    rewardLink.textContent = hit.monetary_reward.amount_in_dollars.toMoneyString()
+    rewardLink.textContent = toMoneyString(hit.monetary_reward.amount_in_dollars)
     reward.appendChild(rewardLink)
 
     const masters = document.createElement(`td`)
@@ -352,7 +317,6 @@ async function finderProcess () {
 
   document.getElementById(`hits-found`).textContent = `Found: ${json.num_results} | Blocked: ${blocked} | ${new Date().toLocaleTimeString()}`
   document.getElementById(`hits-logged`).textContent = document.getElementById(`logged-hits-tbody`).children.length
-  console.timeEnd(`finderProcess`)
 }
 
 function minimumAvailable () {
@@ -447,7 +411,7 @@ function includedAlert (il, hit) {
         items: [
                     { title: `Title`, message: hit.title },
                     { title: `Requester`, message: hit.requester_name },
-                    { title: `Reward`, message: hit.monetary_reward.amount_in_dollars.toMoneyString() },
+                    { title: `Reward`, message: toMoneyString(hit.monetary_reward.amount_in_dollars) },
                     { title: `Available`, message: hit.assignable_hits_count.toString() }
         ],
         buttons: [
@@ -473,7 +437,7 @@ function includedAlert (il, hit) {
       data: {
         type: `note`,
         title: `Include list match found!`,
-        body: `Title: ${hit.title}\nReq: ${hit.requester_name}\nReward: ${hit.monetary_reward.amount_in_dollars.toMoneyString()}\nAvail: ${hit.assignable_hits_count}`
+        body: `Title: ${hit.title}\nReq: ${hit.requester_name}\nReward: ${toMoneyString(hit.monetary_reward.amount_in_dollars)}\nAvail: ${hit.assignable_hits_count}`
       }
     })
 
@@ -632,6 +596,31 @@ function timeNow () {
   hours = hours || 12
   minutes = minutes < 10 ? `0` + minutes : minutes
   return `${hours}:${minutes}${ampm}`
+}
+
+function toMoneyString () {
+  const [string] = arguments
+  return `$${Number(string).toFixed(2).toLocaleString(`en-US`, { minimumFractionDigits: 2 })}`
+}
+
+function toDurationString () {
+  const [string] = arguments
+
+  let seconds = string
+  let minute = Math.floor(seconds / 60)
+  seconds = seconds % 60
+  let hour = Math.floor(minute / 60)
+  minute = minute % 60
+  let day = Math.floor(hour / 24)
+  hour = hour % 24
+
+  let durationString = ``
+
+  if (day > 0) durationString += `${day} day${day > 1 ? `s` : ``} `
+  if (hour > 0) durationString += `${hour} hour${hour > 1 ? `s` : ``} `
+  if (minute > 0) durationString += `${minute} minute${minute > 1 ? `s` : ``}`
+
+  return durationString.trim()
 }
 
 window.chrome.notifications.onButtonClicked.addListener((id, btn) => {
@@ -958,8 +947,8 @@ $(`#hit-info-modal`).on(`show.bs.modal`, (event) => {
 
   document.getElementById(`hit-info-title`).textContent = hit.title
   document.getElementById(`hit-info-requester`).textContent = `${hit.requester_name} [${hit.requester_id}]`
-  document.getElementById(`hit-info-reward`).textContent = hit.monetary_reward.amount_in_dollars.toMoneyString()
-  document.getElementById(`hit-info-duration`).textContent = hit.assignment_duration_in_seconds.toTimeString()
+  document.getElementById(`hit-info-reward`).textContent = toMoneyString(hit.monetary_reward.amount_in_dollars)
+  document.getElementById(`hit-info-duration`).textContent = toDurationString(hit.assignment_duration_in_seconds)
   document.getElementById(`hit-info-available`).textContent = hit.assignable_hits_count
   document.getElementById(`hit-info-description`).textContent = hit.description
   document.getElementById(`hit-info-requirements`).textContent = hit.project_requirements.map((o) => `${o.qualification_type.name} ${o.comparator} ${o.qualification_values.map(v => v).join(`, `)}`.trim()).join(`; `) || `None`
@@ -1000,7 +989,7 @@ $(`#requester-review-modal`).on(`show.bs.modal`, (event) => {
   if (storage.reviews.turkerview) {
     if (tv) {
       document.getElementById(`review-turkerview-link`).href = `https://turkerview.com/requesters/${key}`
-      document.getElementById(`review-turkerview-ratings-hourly`).textContent = tv.ratings.hourly.toMoneyString()
+      document.getElementById(`review-turkerview-ratings-hourly`).textContent = toMoneyString(tv.ratings.hourly)
       document.getElementById(`review-turkerview-ratings-pay`).textContent = tv.ratings.pay || `-`
       document.getElementById(`review-turkerview-ratings-fast`).textContent = tv.ratings.fast || `-`
       document.getElementById(`review-turkerview-ratings-comm`).textContent = tv.ratings.comm || `-`
