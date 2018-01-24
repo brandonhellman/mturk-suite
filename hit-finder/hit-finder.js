@@ -519,11 +519,15 @@ function blockListUpdate () {
     const hit = finderDB[key]
 
     if (blockListed(hit)) {
-      const element = document.getElementById(hit.hit_set_id)
+      const recent = document.getElementById(`recent-${hit.hit_set_id}`)
+      const logged = document.getElementById(`logged-${hit.hit_set_id}`)
+      const included = document.getElementById(`included-${hit.hit_set_id}`)
 
-      if (element !== null) {
-        element.parentNode.removeChild(element)
-      }
+      if (recent) recent.parentNode.removeChild(recent)
+      if (logged) logged.parentNode.removeChild(logged)
+      if (included) included.parentNode.removeChild(included)
+
+      delete finderDB[key]
     }
   }
 
@@ -563,7 +567,8 @@ function includeListUpdate () {
 
   for (const key in finderDB) {
     const hit = finderDB[key]
-    const element = document.getElementById(hit.hit_set_id)
+
+    const element = document.getElementById(`logged-${hit.hit_set_id}`)
 
     if (element) {
       if (includeListed(hit)) {
@@ -579,14 +584,6 @@ function includeListUpdate () {
   })
 }
 
-function removeChildren () {
-  const [element] = arguments
-
-  while (element.firstChild) {
-    element.removeChild(element.firstChild)
-  }
-}
-
 function timeNow () {
   const date = new Date()
   let hours = date.getHours()
@@ -596,6 +593,14 @@ function timeNow () {
   hours = hours || 12
   minutes = minutes < 10 ? `0` + minutes : minutes
   return `${hours}:${minutes}${ampm}`
+}
+
+function removeChildren () {
+  const [element] = arguments
+
+  while (element.firstChild) {
+    element.removeChild(element.firstChild)
+  }
 }
 
 function toMoneyString () {
@@ -842,7 +847,7 @@ function hitTrackerMatchObject () {
 
   return new Promise(async (resolve) => {
     const match = await hitTrackerMatch(name, value)
-    resolveValue = match ? { color: `success`, icon: `check` } : { color: `secondary`, icon: `ban` }
+    resolveValue = match ? { color: `success`, icon: `check` } : { color: `secondary`, icon: `minus` }
     resolve(resolveValue)
   })
 }
