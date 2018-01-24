@@ -1,0 +1,60 @@
+.table-extra-condensed {
+    line-height: 1;
+}
+
+.table-extra-condensed th {
+    padding: 1px 1px !important;
+}
+
+.table-extra-condensed td {
+    padding: 1px 1px !important;
+}
+
+.included td {
+    border: 2px solid #009900 !important;
+}
+
+.table-success *:not(svg):not(path):not(a):not(.btn),
+.table-warning *:not(svg):not(path):not(a):not(.btn),
+.table-danger *:not(svg):not(path):not(a):not(.btn),
+.table-default *:not(svg):not(path):not(a):not(.btn) {
+    color: black !important;
+}
+
+.table-success .btn,
+.table-warning .btn,
+.table-danger .btn,
+.table-default .btn {
+    border-color: black !important;
+    border-style: solid !important;
+    border-width: 1px !important;
+}
+
+.table-success a:any-link,
+.table-warning a:any-link,
+.table-danger a:any-link,
+.table-default a:any-link {
+    color: -webkit-link !important;
+    text-decoration: underline !important;
+}
+
+.table-success a:any-link:active,
+.table-warning a:any-link:active,
+.table-danger a:any-link:active,
+.table-default a:any-link:active {
+    color: -webkit-activelink !important;
+    text-decoration: underline !important;
+}
+
+.table-success a:visited,
+.table-warning a:visited,
+.table-danger a:visited,
+.table-default a:visited {
+    color: #551A8B !important;
+    text-decoration: underline !important;
+}
+
+.table-default td {
+    background-color: buttonface !important;
+}
+

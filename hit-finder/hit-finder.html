@@ -1,0 +1,970 @@
+<html>    
+    <head>
+        <meta charset="utf-8">
+        <title>HIT Finder</title>
+
+        <link href="/hit-finder/hit-finder.css" rel="stylesheet">
+
+        <script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
+        <script src="/bootstrap/js/popper.min.js"></script>
+        <script src="/bootstrap/js/bootstrap.min.js"></script>
+        <script src="/bootstrap/js/nested-modals.js"></script>
+        <script src="/fontawesome/fontawesome-all.min.js"></script>
+
+        <script src="/js/theme.js"></script>
+        <script src="/js/text-to-speech.js"></script>
+    </head>
+
+    <body>
+        <div class="mb-1">
+            <div class="input-group input-group-sm mb-3">
+                <button type="button" id="find" class="btn btn-sm btn-outline-success mr-1">Find HITs</button>
+
+                <div class="input-group-addon">
+                      <span class="input-group-text">Speed</span>
+                </div>
+                <input type="number" id="speed" class="text-center" step="100" min="0" style="width: 75px;">
+                <div class="input-group-addon">
+                      <span class="input-group-text">ms</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-primary ml-1" data-toggle="modal" data-target="#block-list-modal">Block List</button>
+                <button type="button" class="btn btn-sm btn-primary ml-1" data-toggle="modal" data-target="#include-list-modal">Include List</button>
+                <button type="button" class="btn btn-sm btn-primary ml-1" data-toggle="modal" data-target="#settings-modal">Settings</button>
+            </div>   
+        </div>
+
+        <div id="include-list-hits-card" class="card mb-1" style="display: none;">
+            <div class="card-header p-1">
+                <button type="button" id="include-hits-clear" class="btn btn-sm btn-danger">
+                    <i class="fa fa-minus-circle"></i>
+                </button>
+                Include List HITs
+            </div>
+
+            <div class="card-block">
+                <table class="table table-hover table-striped table-extra-condensed">
+                    <thead id="include-list-hits-thead">
+                        <th class="w-1"></th>
+                        <th class="w-1">Time</th>
+                        <th>Requester</th>
+                        <th>Title</th>
+                        <th class="text-center w-1">HITs</th>
+                        <th class="text-center">Reward</th>
+                        <th class="text-center w-1">M</th>
+                    </thead>
+                    <tbody id="include-list-hits-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="recent-hits-card" class="card mb-1">
+            <div class="card-header p-1">
+                <button type="button" id="recent-hits-toggle" class="btn btn-sm btn-primary">
+                    <i class="fa fa-caret-up"></i>
+                </button>
+                Recent HITs
+                <small id="hits-found"></small>
+                <span class="float-right small">
+                    Total Scans: <span id="total-scans">0</span> | PRE: <span id="page-request-errors">0</span>
+                </span>
+            </div>
+
+            <div class="card-block">
+                <table class="table table-hover table-striped table-extra-condensed">
+                    <thead id="recent-hits-thead">
+                        <th class="w-1"></th>
+                        <th class="w-1">Time</th>
+                        <th>Requester</th>
+                        <th>Title</th>
+                        <th class="text-center w-1">HITs</th>
+                        <th class="text-center">Reward</th>
+                        <th class="text-center w-1">M</th>
+                    </thead>
+                    <tbody id="recent-hits-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Logged HITs Card -->
+        <div id="logged-hits-card" class="card mb-1">
+            <div class="card-header p-1">
+               <button type="button" id="logged-hits-toggle" class="btn btn-sm btn-primary">
+                    <i class="fa fa-caret-up"></i>
+                </button>
+                Logged HITs
+                <small id="updated"></small>
+                <span class="float-right small">
+                    HITs Logged: <span id="hits-logged">0</span>
+                </span>
+            </div>
+
+            <div class="card-block">
+                <table class="table table-hover table-striped table-extra-condensed">
+                    <thead id="logged-hits-thead">
+                        <th class="w-1"></th>
+                        <th class="w-1">Time</th>
+                        <th>Requester</th>
+                        <th>Title</th>
+                        <th class="text-center w-1">HITs</th>
+                        <th class="text-center">Reward</th>
+                        <th class="text-center w-1">M</th>
+                    </thead>
+                    <tbody id="logged-hits-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Block List Modal -->
+        <div id="block-list-modal" class="modal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Block List</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="block-list-delete" class="btn btn-danger mr-auto">Delete All</button>
+                        <label class="btn btn-secondary mb-0">
+                            Import
+                            <input type="file" id="block-list-import" style="display: none;"></input>
+                        </label>
+                        <button type="button" id="block-list-export" class="btn btn-secondary">Export</button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#block-list-add-modal">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block List Add Modal -->
+        <div id="block-list-add-modal" class="modal">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add To Block List</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="small mb-0" style="cursor: help;" data-toggle="tooltip"
+                                   title="Nickname for the match term">Name</label>
+                            <input type="text" id="block-list-add-name" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="small mb-0" style="cursor: help;" data-toggle="tooltip"
+                                   title="Term used to match a requester id, requester name, group id or hit title">Match</label>
+                            <input type="text" id="block-list-add-match" class="form-control">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <label class="custom-control custom-checkbox" style="cursor: help;" data-toggle="tooltip"
+                                       title="Requires matches to be 100% identical to the requester id, requester name, group id or hit title">
+                                    <input type="checkbox" id="block-list-add-strict" class="custom-control-input">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Strict Matching</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="block-list-add-save" class="btn btn-primary" data-dismiss="modal">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block List Edit Modal -->
+        <div id="block-list-edit-modal" class="modal">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Block List Item</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="small mb-0">Name</label>
+                            <input type="text" id="block-list-edit-name" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="small mb-0">Match</label>
+                            <input type="text" id="block-list-edit-match" class="form-control" disabled>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;"
+                                       title="Requires matches to be exact">
+                                    <input type="checkbox" id="block-list-edit-strict" class="custom-control-input">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Strict Matching</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="block-list-edit-delete" class="btn btn-danger" data-dismiss="modal">Delete</button>
+                        <button type="button" id="block-list-edit-save" class="btn btn-primary" data-dismiss="modal">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Include List Modal -->
+        <div id="include-list-modal" class="modal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Include List</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="include-list-delete" class="btn btn-danger mr-auto">Delete All</button>
+                        <label class="btn btn-secondary mb-0">
+                            Import
+                            <input type="file" id="include-list-import" style="display: none;"></input>
+                        </label>
+                        <button type="button" id="include-list-export" class="btn btn-secondary">Export</button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#include-list-add-modal" data-id-include-list-add-strict="true" data-id-include-list-add-sound="true" data-id-include-list-add-notification="true">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Include List Add Modal -->
+        <div id="include-list-add-modal" class="modal">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add To Include List</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="small mb-0" style="cursor: help;" data-toggle="tooltip"
+                                   title="Nickname for the match term">Name</label>
+                            <input type="text" id="include-list-add-name" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="small mb-0" style="cursor: help;" data-toggle="tooltip"
+                                   title="Term used to match a requester id, requester name, group id or hit title">Match</label>
+                            <input type="text" id="include-list-add-match" class="form-control">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <label class="custom-control custom-checkbox" style="cursor: help;" data-toggle="tooltip"
+                                       title="Requires matches to be 100% identical to the requester id, requester name, group id or hit title">
+                                    <input type="checkbox" id="include-list-add-strict" class="custom-control-input">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Strict Matching</span>
+                                </label>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="custom-control custom-checkbox" style="cursor: help;" data-toggle="tooltip"
+                                       title="Plays the sound selected under options if matched">
+                                    <input type="checkbox" id="include-list-add-sound" class="custom-control-input">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Sound</span>
+                                </label>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="custom-control custom-checkbox" style="cursor: help;" data-toggle="tooltip"
+                                       title="Plays an annoyingly loud alarm if matched and the alarm is enabled">
+                                    <input type="checkbox" id="include-list-add-alarm" class="custom-control-input">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Alarm</span>
+                                </label>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="custom-control custom-checkbox" style="cursor: help;" data-toggle="tooltip"
+                                       title="Shows a desktop notification that you can preview or accept the HIT from if matched">
+                                    <input type="checkbox" id="include-list-add-notification" class="custom-control-input">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Notification</span>
+                                </label>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="custom-control custom-checkbox" style="cursor: help;" data-toggle="tooltip"
+                                       title="Sends you a Pushbullet message if matched and enabled under options">
+                                    <input type="checkbox" id="include-list-add-pushbullet" class="custom-control-input">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Pushbullet</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="include-list-add-save" class="btn btn-primary" data-dismiss="modal">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Include List Edit Modal -->
+        <div id="include-list-edit-modal" class="modal">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Include List Item</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="small mb-0" style="cursor: help;" data-toggle="tooltip"
+                                   title="Nickname for the match term">Name</label>
+                            <input type="text" id="include-list-edit-name" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="small mb-0" style="cursor: help;" data-toggle="tooltip"
+                                   title="Term used to match a requester id, requester name, group id or hit title">Match</label>
+                            <input type="text" id="include-list-edit-match" class="form-control">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <label class="custom-control custom-checkbox" style="cursor: help;" data-toggle="tooltip"
+                                       title="Requires matches to be 100% identical to the requester id, requester name, group id or hit title">
+                                    <input type="checkbox" id="include-list-edit-strict" class="custom-control-input">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Strict Matching</span>
+                                </label>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="custom-control custom-checkbox" style="cursor: help;" data-toggle="tooltip"
+                                       title="Plays the sound selected under options if matched">
+                                    <input type="checkbox" id="include-list-edit-sound" class="custom-control-input">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Sound</span>
+                                </label>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="custom-control custom-checkbox" style="cursor: help;" data-toggle="tooltip"
+                                       title="Plays an annoyingly loud alarm if matched and the alarm is enabled">
+                                    <input type="checkbox" id="include-list-edit-alarm" class="custom-control-input">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Alarm</span>
+                                </label>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="custom-control custom-checkbox" style="cursor: help;" data-toggle="tooltip"
+                                       title="Shows a desktop notification that you can preview or accept the HIT from if matched">
+                                    <input type="checkbox" id="include-list-edit-notification" class="custom-control-input">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Notification</span>
+                                </label>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="custom-control custom-checkbox" style="cursor: help;" data-toggle="tooltip"
+                                       title="Sends you a Pushbullet message if matched and enabled under options">
+                                    <input type="checkbox" id="include-list-edit-pushbullet" class="custom-control-input">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Pushbullet</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="include-list-edit-delete" class="btn btn-danger" data-dismiss="modal">Delete</button>
+                        <button type="button" id="include-list-edit-save" class="btn btn-primary" data-dismiss="modal">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HIT Info -->
+        <div id="hit-info-modal" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">HIT Information</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-condensed">
+                            <tbody>
+                                <tr>
+                                    <td>                                            
+                                        Title
+                                    </td>
+                                    <td id="hit-info-title"></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                        
+                                    </div>
+                                        Requester
+                                    </td>
+                                    <td id="hit-info-requester"></td>
+                                </tr>
+                                <tr>
+                                    <td>Reward</td>
+                                    <td id="hit-info-reward"></td>
+                                </tr>
+                                <tr>
+                                    <td>Duration</td>
+                                    <td id="hit-info-duration"></td>
+                                </tr>
+                                <tr>
+                                    <td>Available</td>
+                                    <td id="hit-info-available"></td>
+                                </tr>
+                                <tr>
+                                    <td>Description</td>
+                                    <td id="hit-info-description"></td>
+                                </tr>
+                                <tr>
+                                    <td>Requirements</td>
+                                    <td id="hit-info-requirements"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="container">
+                            <div class="row">
+                                <button type="button" id="hit-info-block-hit" class="btn btn-sm btn-danger col m-1" data-toggle="modal" data-target="#block-list-add-modal">Block HIT</button>
+                                <button type="button" id="hit-info-block-requester" class="btn btn-sm btn-danger col m-1" data-toggle="modal" data-target="#block-list-add-modal">Block Req</button>
+                                <button type="button" id="hit-info-include-hit" class="btn btn-sm btn-success col m-1" data-toggle="modal" data-target="#include-list-add-modal">Include HIT</button>
+                                <button type="button" id="hit-info-include-requester" class="btn btn-sm btn-success col m-1" data-toggle="modal" data-target="#include-list-add-modal">Include Req</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="hit-sharer-modal" class="modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Share HIT</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-6 mb-2">
+                                    <button class="btn btn-primary w-100 hit-sharer" id="hit-export-short">Short</button>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <button class="btn btn-primary w-100 hit-sharer" id="hit-export-plain">Plain</button>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <button class="btn btn-primary w-100 hit-sharer" id="hit-export-bbcode">BBCode</button>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <button class="btn btn-primary w-100 hit-sharer" id="hit-export-markdown">Markdown</button>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <button class="btn btn-primary w-100 hit-sharer" id="hit-export-turkerhub">Turker Hub</button>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <button class="btn btn-primary w-100 hit-sharer" id="hit-export-mturkcrowd">Mturk Crowd</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Settings</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="nav nav-tabs nav-justified">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-toggle="tab" href="#settings-filter">Filter</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#settings-alert">Alerts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#settings-display">Display</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3">
+                            <div class="tab-pane fade show active" id="settings-filter">
+                                    <div class="container">
+                                            <div class="row mb-2">
+                                                <div class="col-xs-12 col-lg-6">
+                                                    <label class="small mb-0">Search Terms</label>
+                                                    <input type="text" id="filter-search-term" class="form-control">
+                                                </div>
+                                                <div class="col-xs-12 col-lg-6">
+                                                    <label class="small mb-0">Sort by</label>
+                                                    <select id="filter-sort" class="custom-select w-100">
+                                                        <option value="updated_asc">Creation date: oldest first</option>
+                                                        <option value="updated_desc">Creation date: newest first</option>
+                                                        <option value="reward_asc">Reward amount: lowest first</option>
+                                                        <option value="reward_desc">Reward amount: highest first</option>
+                                                        <option value="num_hits_asc">HITs: least first</option>
+                                                        <option value="num_hits_desc">HITs: most first</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-2">
+                                                <div class="col-xs-12 col-lg-6">
+                                                    <label class="small mb-0">Page Size</label>
+                                                    <input type="number" id="filter-page-size" class="form-control" step="1" min="1" max="100">
+                                                </div>
+                                                <div class="col-xs-12 col-lg-6">
+                                                    <label class="small mb-0">Minimum HITs Available</label>
+                                                    <input type="number" id="filter-min-available" class="form-control" step="1" min="0">
+                                                </div>
+                                            </div>
+                                            <div class="row mb-2">
+                                                <div class="col-xs-12 col-lg-6">
+                                                    <label class="small mb-0">Minimum Reward</label>
+                                                    <input type="number" id="filter-min-reward" class="form-control" step=".01" min="0">
+                                                </div>
+                                                <div class="col-xs-12 col-lg-6">
+                                                    <label class="small mb-0">Minimum Requester Rating</label>
+                                                    <input type="number" id="filter-min-requester-rating" class="form-control" step=".1" min="0" max="5">
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="small col-12">HITs that</div>
+                                                <div class="col-xs-12 col-lg-6">
+                                                    <label class="custom-control custom-checkbox">
+                                                        <input type="checkbox" id="filter-qualified" class="custom-control-input">
+                                                        <span class="custom-control-indicator"></span>
+                                                        <span class="custom-control-description">I'm qualified to work on</span>
+                                                    </label>
+                                                </div>
+                                                <div class="col-xs-12 col-lg-6">
+                                                    <label class="custom-control custom-checkbox">
+                                                        <input type="checkbox" id="filter-masters" class="custom-control-input">
+                                                        <span class="custom-control-indicator"></span>
+                                                        <span class="custom-control-description">Require Masters Qualification</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                            </div>
+                            <div class="tab-pane fade" id="settings-alert">
+                                <div class="container mt-1">
+                                    <div class="row mb-2">
+                                        <div class="col-6">
+                                            <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
+                                                   title="Sound to play when a new HIT is found">
+                                                New HIT Sound
+                                            </label>
+                                            <select id="alert-new-sound" class="custom-select w-100">
+                                                <option value="none">None</option>
+                                                <option value="sound-1">Sound 1</option>
+                                                <option value="sound-2">Sound 2</option>
+                                                <option value="sound-3">Sound 3</option>
+                                                <option value="sound-4">Sound 4</option>
+                                                <option value="sound-5">Sound 5</option>
+                                                <option value="sound-6">Sound 6</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2">
+                                        <div class="col-6">
+                                            <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
+                                                   title="How long in minutes before the include list with match a specific HIT">
+                                                Match Notification Delay
+                                            </label>
+                                            <input id="alert-delay" type="number" class="form-control" step="1" min="1" value="60">
+                                        </div>
+
+                                        <div class="col-6">
+                                            <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
+                                                   title="Sound to play when an include list match is found">
+                                                Include Match Sound
+                                            </label>
+                                            <select id="alert-include-sound" class="custom-select w-100">
+                                                <option value="voice">Voice</option>
+                                                <option value="sound-1">Sound 1</option>
+                                                <option value="sound-2">Sound 2</option>
+                                                <option value="sound-3">Sound 3</option>
+                                                <option value="sound-4">Sound 4</option>
+                                                <option value="sound-5">Sound 5</option>
+                                                <option value="sound-6">Sound 6</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
+                                                   title="Send a message to pushbullet when an include list match is found">
+                                                Pushbullet
+                                            </label>
+                                            <select id="alert-pushbullet-state" class="custom-select w-100">
+                                                <option value="on">On</option>
+                                                <option value="off" selected>Off</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-6">
+                                            <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
+                                                   title="Your pushbullet access token">
+                                                Access Token
+                                            </label>
+                                            <input id="alert-pushbullet-token" type="text" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6 offset-3">
+                                            <button id="alarm-on" class="btn btn-danger w-100">Alarm</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="settings-display">
+                                <div class="container">
+                                    <div class="row mb-3">
+                                        <div class="col-3">
+                                            <label class="custom-control custom-checkbox">
+                                                <input type="checkbox" id="display-colored-rows" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Colored Rows</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
+                                                   title="Toggle the visibilty for columns in the Recent HITs table">
+                                                Recent HITs Columns
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline col-2">
+                                                <input type="checkbox" id="display-recent-column-time" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Time</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-recent-column-requester" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Requester</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-recent-column-title" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Title</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-recent-column-available" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Available</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-recent-column-reward" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Reward</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-recent-column-masters" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Masters</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
+                                                   title="Toggle the visibilty for columns in the Recent HITs table">
+                                                Logged HITs Columns
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline col-2">
+                                                <input type="checkbox" id="display-logged-column-time" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Time</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-logged-column-requester" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Requester</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-logged-column-title" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Title</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-logged-column-available" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Available</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-logged-column-reward" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Reward</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-logged-column-masters" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Masters</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
+                                                   title="Toggle the visibilty for columns in the Logged HITs table">
+                                                Included HITs Columns
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline col-2">
+                                                <input type="checkbox" id="display-included-column-time" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Time</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-included-column-requester" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Requester</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-included-column-title" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Title</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-included-column-available" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Available</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-included-column-reward" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Reward</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col">
+                                            <label class="custom-control custom-checkbox custom-control-inline">
+                                                <input type="checkbox" id="display-included-column-masters" class="custom-control-input">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Masters</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button id="settings-apply" class="btn btn-primary" data-dismiss="modal">Apply</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="requester-review-modal" class="modal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b class="col-4">Reviews</b>
+                        <small id="review-who" class="col-8 text-muted overflow"></small>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container-fluid">
+                            <div class="row small text-nowrap">
+                                <div id="review-turkerview" class="col-3">
+                                    <h5><a id="review-turkerview-link" class="text-primary font-weight-bold" target="_blank">Turkerview</a></h5>
+                                    <div id="review-turkerview-review">
+                                        <div class="row">
+                                            <div class="col">Hourly</div>
+                                            <div id="review-turkerview-ratings-hourly" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Pay</div>
+                                            <div id="review-turkerview-ratings-pay" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Fast</div>
+                                            <div id="review-turkerview-ratings-fast" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Comm</div>
+                                            <div id="review-turkerview-ratings-comm" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Rejections</div>
+                                            <div id="review-turkerview-rejections" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">ToS</div>
+                                            <div id="review-turkerview-tos" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Blocks</div>
+                                            <div id="review-turkerview-blocks" class="col"></div>
+                                        </div>
+                                    </div>
+                                    <div id="review-turkerview-no-reviews">
+                                        No Reviews
+                                    </div>
+                                </div>
+                                <div id="review-turkopticon" class="col-3">
+                                    <h5><a id="review-turkopticon-link" class="text-primary font-weight-bold" target="_blank">Turkopticon</a></h5>
+                                    <div id="review-turkopticon-review">
+                                        <div class="row">
+                                            <div class="col">Pay</div>
+                                            <div id="review-turkopticon-attrs-pay" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Fast</div>
+                                            <div id="review-turkopticon-attrs-fast" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Comm</div>
+                                            <div id="review-turkopticon-attrs-comm" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Fair</div>
+                                            <div id="review-turkopticon-attrs-fair" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Reviews</div>
+                                            <div id="review-turkopticon-reviews" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">ToS</div>
+                                            <div id="review-turkopticon-tos_flags" class="col"></div>
+                                        </div>
+                                    </div>
+                                    <div id="review-turkopticon-no-reviews">
+                                        No Reviews
+                                    </div>
+                                </div>
+                                <div id="review-turkopticon2" class="col-6">
+                                    <h5><a id="review-turkopticon2-link" class="text-primary font-weight-bold" target="_blank">Turkopticon 2</a> <small>(Recent/All)</small></h5>
+                                    <div id="review-turkopticon2-review">
+                                        <div class="row">
+                                            <div class="col">Hourly</div>
+                                            <div id="review-turkopticon2-recent-reward" class="col"></div>
+                                            <div id="review-turkopticon2-all-reward" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Pending</div>
+                                            <div id="review-turkopticon2-recent-pending" class="col"></div>
+                                            <div id="review-turkopticon2-all-pending" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Response</div>
+                                            <div id="review-turkopticon2-recent-comm" class="col"></div>
+                                            <div id="review-turkopticon2-all-comm" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Recommend</div>
+                                            <div id="review-turkopticon2-recent-recommend" class="col"></div>
+                                            <div id="review-turkopticon2-all-recommend" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Rejected</div>
+                                            <div id="review-turkopticon2-recent-rejected" class="col"></div>
+                                            <div id="review-turkopticon2-all-rejected" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">ToS</div>
+                                            <div id="review-turkopticon2-recent-tos" class="col"></div>
+                                            <div id="review-turkopticon2-all-tos" class="col"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">Broken</div>
+                                            <div id="review-turkopticon2-recent-broken" class="col"></div>
+                                            <div id="review-turkopticon2-all-broken" class="col"></div>
+                                        </div>
+                                    </div>
+                                    <div id="review-turkopticon2-no-reviews">
+                                        No Reviews
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+
+    <script src="/hit-finder/hit-finder.js"></script>
+</html>
