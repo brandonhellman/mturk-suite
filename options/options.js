@@ -77,20 +77,16 @@ function storageScripts(object) {
 function storageThemes(object) {
     storage.themes = object;
 
-    const theme = document.getElementById(`theme`);
     const themes = document.getElementById(`themes`);
     const themesMts = document.getElementById(`themes-mts`);
     const themesMturk = document.getElementById(`themes-mturk`);
 
-    theme.href = `/bootstrap/css/${storage.themes.mts}.min.css`;
     themesMts.value = storage.themes.mts;
     themesMturk.value = storage.themes.mturk;
 
     themes.addEventListener(`change`, (e) => {
         storage.themes.mts = themesMts.value;
         storage.themes.mturk = themesMturk.value;
-
-        theme.href = `/bootstrap/css/${storage.themes.mts}.min.css`;
 
         chrome.storage.local.set({
             themes: storage.themes
