@@ -30,18 +30,18 @@
     border-width: 1px !important;
 }
 
-.table-success a:any-link,
-.table-warning a:any-link,
-.table-danger a:any-link,
-.table-default a:any-link {
+.table-success a,
+.table-warning a,
+.table-danger a,
+.table-default a {
     color: #0000EE !important;
     text-decoration: underline !important;
 }
 
-.table-success a:any-link:active,
-.table-warning a:any-link:active,
-.table-danger a:any-link:active,
-.table-default a:any-link:active {
+.table-success a:active,
+.table-warning a:active,
+.table-danger a:active,
+.table-default a:active {
     color: #FF0000 !important;
     text-decoration: underline !important;
 }
