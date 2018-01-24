@@ -34,7 +34,7 @@
 .table-warning a:any-link,
 .table-danger a:any-link,
 .table-default a:any-link {
-    color: -webkit-link !important;
+    color: #0000EE !important;
     text-decoration: underline !important;
 }
 
@@ -42,7 +42,7 @@
 .table-warning a:any-link:active,
 .table-danger a:any-link:active,
 .table-default a:any-link:active {
-    color: -webkit-activelink !important;
+    color: #FF0000 !important;
     text-decoration: underline !important;
 }
 
