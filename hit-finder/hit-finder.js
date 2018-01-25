@@ -81,7 +81,7 @@ function finderNextFetch () {
 
 function finderLoggedOut () {
   finderToggle()
-  window.textToSpeech(`HIT Finder Stopped, you are logged out of MTurk.`)
+  window.textToSpeech(`HIT Finder Stopped, you are logged out of MTurk.`, `Google US English`)
 }
 
 async function finderFetch () {
@@ -379,7 +379,7 @@ function includedAlert (il, hit) {
 
   if (il.sound === true) {
     if (storage.hitFinder[`alert-include-sound`] === `voice`) {
-      window.textToSpeech(`Include list match found! ${il.name}`)
+      window.textToSpeech(`Include list match found! ${il.name}`, `Google US English`)
     } else {
       const audio = new window.Audio()
       audio.src = `/media/audio/${storage.hitFinder[`alert-include-sound`]}.ogg`
