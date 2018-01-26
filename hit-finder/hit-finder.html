@@ -4,12 +4,12 @@
         <title>HIT Finder</title>
 
         <link href="/hit-finder/hit-finder.css" rel="stylesheet">
+        <link href="/fontawesome/css/fontawesome-all.css" rel="stylesheet">
 
         <script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
         <script src="/bootstrap/js/popper.min.js"></script>
         <script src="/bootstrap/js/bootstrap.min.js"></script>
         <script src="/bootstrap/js/nested-modals.js"></script>
-        <script src="/fontawesome/fontawesome-all.min.js"></script>
 
         <script src="/js/theme.js"></script>
         <script src="/js/text-to-speech.js"></script>
@@ -49,7 +49,7 @@
                         <th>Requester</th>
                         <th>Title</th>
                         <th class="text-center w-1">HITs</th>
-                        <th class="text-center">Reward</th>
+                        <th class="text-center">Accept</th>
                         <th class="text-center w-1">M</th>
                     </thead>
                     <tbody id="include-list-hits-tbody"></tbody>
@@ -77,7 +77,7 @@
                         <th>Requester</th>
                         <th>Title</th>
                         <th class="text-center w-1">HITs</th>
-                        <th class="text-center">Reward</th>
+                        <th class="text-center">Accept</th>
                         <th class="text-center w-1">M</th>
                     </thead>
                     <tbody id="recent-hits-tbody"></tbody>
@@ -106,7 +106,7 @@
                         <th>Requester</th>
                         <th>Title</th>
                         <th class="text-center w-1">HITs</th>
-                        <th class="text-center">Reward</th>
+                        <th class="text-center">Accept</th>
                         <th class="text-center w-1">M</th>
                     </thead>
                     <tbody id="logged-hits-tbody"></tbody>
@@ -588,9 +588,9 @@
                                         <div class="col-6">
                                             <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
                                                    title="How long in minutes before the include list with match a specific HIT">
-                                                Match Notification Delay
+                                                Include Match Delay
                                             </label>
-                                            <input id="alert-delay" type="number" class="form-control" step="1" min="1" value="60">
+                                            <input id="alert-include-delay" type="number" class="form-control" step="1" min="1" value="60">
                                         </div>
 
                                         <div class="col-6">
@@ -614,7 +614,7 @@
                                         <div class="col-6">
                                             <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
                                                    title="Send a message to pushbullet when an include list match is found">
-                                                Pushbullet
+                                                Pushbullet State
                                             </label>
                                             <select id="alert-pushbullet-state" class="custom-select w-100">
                                                 <option value="on">On</option>
@@ -625,7 +625,7 @@
                                         <div class="col-6">
                                             <label class="small mb-0" data-toggle="tooltip" style="cursor: help;"
                                                    title="Your pushbullet access token">
-                                                Access Token
+                                                   Pushbullet Token
                                             </label>
                                             <input id="alert-pushbullet-token" type="text" class="form-control">
                                         </div>

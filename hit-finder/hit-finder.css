@@ -14,10 +14,10 @@
     border: 2px solid #009900 !important;
 }
 
-.table-success *:not(svg):not(path):not(a):not(.btn),
-.table-warning *:not(svg):not(path):not(a):not(.btn),
-.table-danger *:not(svg):not(path):not(a):not(.btn),
-.table-default *:not(svg):not(path):not(a):not(.btn) {
+.table-success *:not(i):not(svg):not(path):not(a):not(.btn),
+.table-warning *:not(i):not(svg):not(path):not(a):not(.btn),
+.table-danger *:not(i):not(svg):not(path):not(a):not(.btn),
+.table-default *:not(i):not(svg):not(path):not(a):not(.btn) {
     color: black !important;
 }
 
