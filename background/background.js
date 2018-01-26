@@ -20,7 +20,7 @@ chrome.contextMenus.create({
     contexts: [`editable`],
     onclick(info, tab) {
         chrome.tabs.executeScript(tab.id, {
-            code: `elem = document.activeElement; elem.value += '${storage.workerID}'; elem.dispatchEvent(new Event('change', { bubbles: true }));`,
+            code: `elem = document.activeElement; elem.value += '${storage.workerId}'; elem.dispatchEvent(new Event('change', { bubbles: true }));`,
             frameId: info.frameId,
         });
     }
