@@ -1,11 +1,12 @@
-
-
 ### Mturk Suite
+Mturk Suite is an open source extension made to enhance and optimize the Worker's experience on the Amazon Mechanical Turk (MTurk) marketplace.
 
 ---
 
 ### Documentation
 Visit the [Wiki](https://github.com/Kadauchi/mturk-suite/wiki) for documentation.
+
+---
 
 ### Installing
 - [Chrome](https://chrome.google.com/webstore/detail/mturk-suite/iglbakfobmoijpbigmlfklckogbefnlf)
@@ -14,5 +15,6 @@ Visit the [Wiki](https://github.com/Kadauchi/mturk-suite/wiki) for documentation
 ----
 
 ### Issues & Improvements
+You can submit an issue or improvement request [here](https://github.com/Kadauchi/mturk-suite/issues).
 
 
