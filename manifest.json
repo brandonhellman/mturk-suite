@@ -3,7 +3,7 @@
 
     "name": "MTurk Suite",
 
-    "version": "2.1.5",
+    "version": "2.1.6",
 
     "description": "Enchances Mechanical Turk to increase your efficiency and earnings.",
 
@@ -90,7 +90,7 @@
         },
 
         {
-            "js": ["mturk/contextMenuWorkerId.js"],
+            "js": ["mturk/context-menu-worker-id.js"],
             "matches": ["https://worker.mturk.com/*"],
             "run_at": "document_start"
         },
