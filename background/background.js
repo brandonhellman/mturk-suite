@@ -1151,7 +1151,7 @@ const storage = {
 
     addListener() {
         chrome.storage.onChanged.addListener((changes) => {
-            for (const value of [`reviews`, `scripts`, `workerID`]) {
+            for (const value of [`reviews`, `scripts`, `workerId`]) {
                 if (changes[value] !== undefined) {
                     storage[value] = changes[value].newValue;
                 }
