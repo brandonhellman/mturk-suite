@@ -1035,8 +1035,8 @@ const storage = {
             "filter-min-available": `0`,
             "filter-min-requester-rating": `0`,
 
-            "alert-delay": `30`,
             "alert-new-sound": `sound-1`,
+            "alert-include-delay": `30`,
             "alert-include-sound": `voice`,
             "alert-pushbullet-state": `off`,
             "alert-pushbullet-token": ``,
