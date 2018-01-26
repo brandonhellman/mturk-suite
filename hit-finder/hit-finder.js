@@ -369,12 +369,12 @@ function includedAlert (il, hit) {
   const alerted = includeAlerted.includes(hit.hit_set_id)
   const pushbulleted = includePushbulleted.includes(hit.hit_set_id)
 
-  if (alarm && il.alarm === true) {
-    alarmSound()
-  }
-
   if (alerted) {
     return
+  }
+
+  if (alarm && il.alarm === true) {
+    alarmSound()
   }
 
   if (il.sound === true) {
@@ -439,7 +439,7 @@ function includedAlert (il, hit) {
 
   setTimeout(() => {
     includeAlerted.pop()
-  }, Number(storage.hitFinder[`alert-delay`]) * 60000)
+  }, Number(storage.hitFinder[`alert-include-delay`]) * 60000)
 }
 
 function strictCompare (string, array) {
