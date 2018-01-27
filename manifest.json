@@ -144,7 +144,7 @@
         },
 
         {
-            "js": ["mturk/queueInfoEnhancer.js"],
+            "js": ["mturk/queue-info-enhancer.js"],
             "matches": ["https://worker.mturk.com/tasks"],
             "run_at": "document_start"
         },
