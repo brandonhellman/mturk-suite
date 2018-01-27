@@ -1,4 +1,4 @@
-(async () => {
+(async function () {
   await ready({ enabled: `queueInfoEnhancer` })
 
   const react = await require(`reactComponents/taskQueueTable/TaskQueueTable`)
