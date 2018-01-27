@@ -1066,7 +1066,7 @@ const storage = {
         };
 
         for (const prop in template) {
-            if (object && object[prop] && typeof(object[prop]) === typeof(template[prop])) {
+            if (object !== undefined && object[prop] !== undefined && typeof(object[prop]) === typeof(template[prop])) {
                 template[prop] = object[prop];
             }
         }
@@ -1082,7 +1082,7 @@ const storage = {
         };
 
         for (const prop in template) {
-            if (object && object[prop] && typeof(object[prop]) === typeof(template[prop])) {
+            if (object !== undefined && object[prop] !== undefined && typeof(object[prop]) === typeof(template[prop])) {
                 template[prop] = object[prop];
             }
         }
@@ -1108,7 +1108,7 @@ const storage = {
         };
 
         for (const prop in template) {
-            if (object && object[prop] && typeof(object[prop]) === typeof(template[prop])) {
+            if (object !== undefined && object[prop] !== undefined && typeof(object[prop]) === typeof(template[prop])) {
                 template[prop] = object[prop];
             }
         }
@@ -1123,7 +1123,7 @@ const storage = {
         };
 
         for (const prop in template) {
-            if (object && object[prop] && typeof(object[prop]) === typeof(template[prop])) {
+            if (object !== undefined && object[prop] !== undefined && typeof(object[prop]) === typeof(template[prop])) {
                 template[prop] = object[prop];
             }
         }
