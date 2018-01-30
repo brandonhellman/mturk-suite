@@ -35,7 +35,6 @@
 .table-danger a,
 .table-default a {
     color: #0000EE !important;
-    text-decoration: underline !important;
 }
 
 .table-success a:active,
@@ -51,7 +50,6 @@
 .table-danger a:visited,
 .table-default a:visited {
     color: #551A8B !important;
-    text-decoration: underline !important;
 }
 
 .table-default td {
