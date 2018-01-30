@@ -1,7 +1,7 @@
 async function textToSpeech () {
   const [text, name] = arguments
 
-  const utterThis = new SpeechSynthesisUtterance(text)
+  const utterThis = new window.SpeechSynthesisUtterance(text)
 
   utterThis.voice = await new Promise((resolve) => {
     function getVoice () {

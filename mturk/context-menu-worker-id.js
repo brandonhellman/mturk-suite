@@ -1,9 +1,10 @@
-/* globals chrome */
+/* globals chrome mturkReact */
 
 (async function () {
-  const react = await require(`reactComponents/common/CopyText`)
+  const react = await mturkReact(`reactComponents/common/CopyText`)
+  const reactProps = await react.getProps()
 
   chrome.storage.local.set({
-    workerId: react.reactProps.textToCopy
+    workerId: reactProps.textToCopy
   })
 })()

@@ -1,9 +1,15 @@
-(async () => {
-  await ready({ enabled: `hitTracker`, document: `interactive`, matches: [`/projects/*/tasks/*`] })
+/* globals chrome mturkReact scriptEnabled */
 
-  const react = await require(`reactComponents/common/ShowModal`)
-  const hitId = await require(`reactComponents/workPipeline/TaskSubmitter`)
-  const timer = await require(`reactComponents/common/CompletionTimer`)
+(async function () {
+  const enabled = await scriptEnabled(`hitTracker`)
+  if (!enabled) return
+
+  const react = await mturkReact(`reactComponents/common/ShowModal`)
+  const reactProps = await react.getProps()
+  const hitId = await mturkReact(`reactComponents/workPipeline/TaskSubmitter`)
+  const hitIdProps = await hitId.getProps()
+  const timer = await mturkReact(`reactComponents/common/CompletionTimer`)
+  const timerProps = await timer.getProps()
 
   const assignmentId = new window.URLSearchParams(window.location.search).get(`assignment_id`)
 
@@ -31,21 +37,21 @@
       const date = year + month + day
 
       return date
-    })(timer.reactProps.originalTimeToCompleteInSeconds - timer.reactProps.timeRemainingInSeconds)
+    })(timerProps.originalTimeToCompleteInSeconds - timerProps.timeRemainingInSeconds)
 
     const message = {
       function: `hitTrackerUpdate`,
       arguments: {
         hit: {
-          hit_id: hitId.reactProps.hiddenFormParams.task_id,
-          requester_id: new window.URLSearchParams(react.reactProps.modalOptions.contactRequesterUrl).get(`hit_type_message[requester_id]`),
-          requester_name: react.reactProps.modalOptions.requesterName,
+          hit_id: hitIdProps.hiddenFormParams.task_id,
+          requester_id: new window.URLSearchParams(reactProps.modalOptions.contactRequesterUrl).get(`hit_type_message[requester_id]`),
+          requester_name: reactProps.modalOptions.requesterName,
           reward: {
-            amount_in_dollars: react.reactProps.modalOptions.monetaryReward.amountInDollars,
-            currency_code: react.reactProps.modalOptions.monetaryReward.currencyCode
+            amount_in_dollars: reactProps.modalOptions.monetaryReward.amountInDollars,
+            currency_code: reactProps.modalOptions.monetaryReward.currencyCode
           },
           state: `Assigned`,
-          title: react.reactProps.modalOptions.projectTitle,
+          title: reactProps.modalOptions.projectTitle,
 
           date: mturkDate
         },
@@ -59,7 +65,7 @@
       message.arguments.hit.source = source.src
     }
 
-    window.chrome.runtime.sendMessage(message)
+    chrome.runtime.sendMessage(message)
 
     document.addEventListener(`submit`, (event) => {
       const returning = event.target.querySelector(`[value="delete"]`)
@@ -67,7 +73,7 @@
       if (returning) {
         message.arguments.hit.state = `Returned`
 
-        window.chrome.runtime.sendMessage(message)
+        chrome.runtime.sendMessage(message)
       }
     })
 
@@ -76,14 +82,14 @@
         const data = JSON.parse(event.data)
 
         if (data.answer !== undefined && data.assignmentId !== undefined) {
-          window.chrome.runtime.sendMessage({
+          chrome.runtime.sendMessage({
             function: `hitTrackerSubmitted`,
             arguments: {
               data: data
             }
           })
         }
-      } catch (error) {}
+      } catch (error) { /* empty catch */ }
     })
   }
 })()
