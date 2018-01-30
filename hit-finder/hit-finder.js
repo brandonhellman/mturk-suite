@@ -1,3 +1,5 @@
+/* globals chrome $ */
+
 const finderDB = {}
 const reviewsDB = {}
 const includeAlerted = []
@@ -12,7 +14,7 @@ let finderTimeout = null
 
 const storage = {}
 
-window.chrome.storage.local.get([`hitFinder`, `blockList`, `includeList`, `reviews`], (keys) => {
+chrome.storage.local.get([`hitFinder`, `blockList`, `includeList`, `reviews`], (keys) => {
   for (const key of Object.keys(keys)) {
     storage[key] = keys[key]
   }
@@ -21,7 +23,7 @@ window.chrome.storage.local.get([`hitFinder`, `blockList`, `includeList`, `revie
   blockListUpdate()
   includeListUpdate()
 
-  window.chrome.storage.onChanged.addListener((changes) => {
+  chrome.storage.onChanged.addListener((changes) => {
     if (changes.reviews) {
       storage.reviews = changes.reviews.newValue
       updateRequesterReviews(reviewsDB)
@@ -34,7 +36,7 @@ function finderApply () {
     storage.hitFinder[prop] = document.getElementById(prop)[typeof (storage.hitFinder[prop]) === `boolean` ? `checked` : `value`]
   }
 
-  window.chrome.storage.local.set({
+  chrome.storage.local.set({
     hitFinder: storage.hitFinder
   })
 }
@@ -388,7 +390,7 @@ function includedAlert (il, hit) {
   }
 
   if (il.notification) {
-    window.chrome.notifications.create(
+    chrome.notifications.create(
             hit.hit_set_id,
       {
         type: `list`,
@@ -408,7 +410,7 @@ function includedAlert (il, hit) {
       },
             (id) => {
               setTimeout(() => {
-                window.chrome.notifications.clear(id)
+                chrome.notifications.clear(id)
               }, 15000)
             }
         )
@@ -518,7 +520,7 @@ function blockListUpdate () {
     }
   }
 
-  window.chrome.storage.local.set({
+  chrome.storage.local.set({
     blockList: storage.blockList
   })
 }
@@ -566,7 +568,7 @@ function includeListUpdate () {
     }
   }
 
-  window.chrome.storage.local.set({
+  chrome.storage.local.set({
     includeList: storage.includeList
   })
 }
@@ -628,7 +630,7 @@ function toDurationString () {
   return durationString.trim()
 }
 
-window.chrome.notifications.onButtonClicked.addListener((id, btn) => {
+chrome.notifications.onButtonClicked.addListener((id, btn) => {
   if (btn === 0) {
     window.open(`https://worker.mturk.com/projects/${id}/tasks`)
   }
@@ -636,7 +638,7 @@ window.chrome.notifications.onButtonClicked.addListener((id, btn) => {
     window.open(`https://worker.mturk.com/projects/${id}/tasks/accept_random`)
   }
 
-  window.chrome.notifications.clear(id)
+  chrome.notifications.clear(id)
 })
 
 let requesterReviewsDB = (() => {
@@ -1082,7 +1084,7 @@ document.getElementById(`find`).addEventListener(`click`, finderToggle)
 document.getElementById(`speed`).addEventListener(`change`, (event) => {
   storage.hitFinder.speed = event.target.value
 
-  window.chrome.storage.local.set({
+  chrome.storage.local.set({
     finder: storage.hitFinder
   })
 })
@@ -1285,7 +1287,7 @@ document.getElementById(`hit-export-short`).addEventListener(`click`, (event) =>
   const key = event.target.dataset.key
   const hit = finderDB[key]
 
-  window.chrome.runtime.sendMessage({
+  chrome.runtime.sendMessage({
     function: `hitExportShort`,
     arguments: {
       hit: hit
@@ -1297,7 +1299,7 @@ document.getElementById(`hit-export-plain`).addEventListener(`click`, (event) =>
   const key = event.target.dataset.key
   const hit = finderDB[key]
 
-  window.chrome.runtime.sendMessage({
+  chrome.runtime.sendMessage({
     function: `hitExportPlain`,
     arguments: {
       hit: hit
@@ -1309,7 +1311,7 @@ document.getElementById(`hit-export-bbcode`).addEventListener(`click`, (event) =
   const key = event.target.dataset.key
   const hit = finderDB[key]
 
-  window.chrome.runtime.sendMessage({
+  chrome.runtime.sendMessage({
     function: `hitExportBBCode`,
     arguments: {
       hit: hit
@@ -1321,7 +1323,7 @@ document.getElementById(`hit-export-markdown`).addEventListener(`click`, (event)
   const key = event.target.dataset.key
   const hit = finderDB[key]
 
-  window.chrome.runtime.sendMessage({
+  chrome.runtime.sendMessage({
     function: `hitExportMarkdown`,
     arguments: {
       hit: hit
@@ -1336,7 +1338,7 @@ document.getElementById(`hit-export-turkerhub`).addEventListener(`click`, (event
     const key = event.target.dataset.key
     const hit = finderDB[key]
 
-    window.chrome.runtime.sendMessage({
+    chrome.runtime.sendMessage({
       function: `hitExportTurkerHub`,
       arguments: {
         hit: hit
@@ -1352,7 +1354,7 @@ document.getElementById(`hit-export-mturkcrowd`).addEventListener(`click`, (even
     const key = event.target.dataset.key
     const hit = finderDB[key]
 
-    window.chrome.runtime.sendMessage({
+    chrome.runtime.sendMessage({
       function: `hitExportMTurkCrowd`,
       arguments: {
         hit: hit
