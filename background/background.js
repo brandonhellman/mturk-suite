@@ -1147,18 +1147,6 @@ const storage = {
         const [string] = arguments, template = `A-------------`;
 
         storage.workerId = string || template;
-    },
-
-    addListener() {
-        chrome.storage.onChanged.addListener((changes) => {
-            for (const value of [`reviews`, `scripts`, `workerId`]) {
-                if (changes[value] !== undefined) {
-                    storage[value] = changes[value].newValue;
-                }
-            }
-        });
-
-        delete storage.addListener;
     }
 };
 
@@ -1180,6 +1168,13 @@ chrome.storage.local.get(null, (keys) => {
     }
 });
 
+chrome.storage.onChanged.addListener((changes) => {
+    for (const value of [`reviews`, `scripts`, `workerId`]) {
+        if (changes[value] !== undefined) {
+            storage[value] = changes[value].newValue;
+        }
+    }
+});
 
 //********** HIT Tracker **********//
 let hitTrackerDB;
