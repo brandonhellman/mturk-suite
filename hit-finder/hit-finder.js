@@ -275,12 +275,13 @@ async function finderProcess () {
 
     recentFragment.appendChild(recentRow)
 
-    if (finderDB[hit.hit_set_id] === undefined) {
+    const loggedElement = document.getElementById(`logged-${hit.hit_set_id}`)
+    if (loggedElement) loggedElement.replaceWith(loggedRow)
+    else loggedFragment.appendChild(loggedRow)
+
+    if (!finderDB[hit.hit_set_id]) {
       sound = true
       finderDB[hit.hit_set_id] = hit
-      loggedFragment.appendChild(loggedRow)
-    } else {
-      document.getElementById(`logged-${hit.hit_set_id}`).replaceWith(loggedRow)
     }
 
     if (included && !includeAlerted.includes(hit.hit_set_id)) {
