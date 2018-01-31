@@ -20,7 +20,7 @@ https://addons.mozilla.org/en-US/firefox/addon/mturk-suite/
 **Install**
 1. Download https://github.com/Kadauchi/mturk-suite/archive/master.zip
 2. Extract `...Downloads\mturk-suite-master.zip`
-3. Open `...Downloads\mturk-suite-master`
+3. Open (opened automatically after extract in most cases) `...Downloads\mturk-suite-master`
 4. Rename `...Downloads\mturk-suite-master\mturk-suite-master` to `...Downloads\mturk-suite-master\mturk-suite`
 5. Move `...Downloads\mturk-suite-master\mturk-suite` to `...\Desktop\mturk-suite`
 6. Open a Chrome tab to `chrome://extensions/`
@@ -32,7 +32,7 @@ https://addons.mozilla.org/en-US/firefox/addon/mturk-suite/
 **Update**
 1. Download https://github.com/Kadauchi/mturk-suite/archive/master.zip
 2. Extract `...Downloads\mturk-suite-master.zip`
-3. Open `...Downloads\mturk-suite-master`
+3. Open (opened automatically after extract in most cases) `...Downloads\mturk-suite-master`
 4. Rename `...Downloads\mturk-suite-master\mturk-suite-master` to `...Downloads\mturk-suite-master\mturk-suite`
 5. Move `...Downloads\mturk-suite-master\mturk-suite` to `...\Desktop\mturk-suite` and replace all
 6. Open a Chrome tab to `chrome://extensions/`
