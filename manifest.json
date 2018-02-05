@@ -3,7 +3,7 @@
 
     "name": "MTurk Suite",
 
-    "version": "2.1.8",
+    "version": "2.1.10",
 
     "description": "Enchances Mechanical Turk to increase your efficiency and earnings.",
 
@@ -93,6 +93,7 @@
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
                 "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects?*",
                 "https://worker.mturk.com/projects/?*",
                 "https://worker.mturk.com/tasks*"
             ],
@@ -122,6 +123,7 @@
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
                 "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects?*",
                 "https://worker.mturk.com/projects/?*",
                 "https://worker.mturk.com/tasks*"
             ],
@@ -135,6 +137,7 @@
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
                 "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects?*",
                 "https://worker.mturk.com/projects/?*"
             ],
             "run_at": "document_start"
@@ -153,6 +156,7 @@
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
                 "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects?*",
                 "https://worker.mturk.com/projects/?*",
                 "https://worker.mturk.com/tasks*"
             ],
@@ -166,6 +170,7 @@
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
                 "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects?*",
                 "https://worker.mturk.com/projects/?*",
                 "https://worker.mturk.com/tasks*"
             ],
@@ -209,6 +214,7 @@
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
                 "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects?*",
                 "https://worker.mturk.com/projects/?*",
                 "https://worker.mturk.com/tasks*",
                 "https://worker.mturk.com/status_details/*",
@@ -236,6 +242,7 @@
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
                 "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects?*",
                 "https://worker.mturk.com/projects/?*",
                 "https://worker.mturk.com/tasks*",
                 "https://worker.mturk.com/status_details/*"
