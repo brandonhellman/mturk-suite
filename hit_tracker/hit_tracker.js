@@ -589,8 +589,8 @@ function getWeek () {
   const endDate = new Date(today.setDate(today.getDate() + 6)).toISOString().slice(0, 10).replace(/-/g, ``)
 
   return {
-    start: `20180128`,
-    end: `20180203`
+    start: `20180204`,
+    end: `20180210`
   }
 }
 
