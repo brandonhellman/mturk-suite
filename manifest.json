@@ -92,7 +92,9 @@
                 "https://worker.mturk.com/",
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects?*"
+                "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects/?*",
+                "https://worker.mturk.com/tasks*"
             ],
             "run_at": "document_start"
         },
@@ -119,7 +121,9 @@
                 "https://worker.mturk.com/",
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects?*"
+                "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects/?*",
+                "https://worker.mturk.com/tasks*"
             ],
             "run_at": "document_start"
         },
@@ -130,7 +134,8 @@
                 "https://worker.mturk.com/",
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects?*"
+                "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects/?*"
             ],
             "run_at": "document_start"
         },
@@ -147,8 +152,9 @@
                 "https://worker.mturk.com/",
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects?*",
-                "https://worker.mturk.com/tasks"
+                "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects/?*",
+                "https://worker.mturk.com/tasks*"
             ],
             "run_at": "document_start"
         },
@@ -159,8 +165,9 @@
                 "https://worker.mturk.com/",
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects?*",
-                "https://worker.mturk.com/tasks"
+                "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects/?*",
+                "https://worker.mturk.com/tasks*"
             ],
             "run_at": "document_start"
         },
@@ -201,7 +208,9 @@
                 "https://worker.mturk.com/",
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects?*",
+                "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects/?*",
+                "https://worker.mturk.com/tasks*",
                 "https://worker.mturk.com/status_details/*",
                 "https://worker.mturk.com/qualifications/*"
             ],
@@ -210,7 +219,7 @@
 
         {
             "js": ["mturk/queue-info-enhancer.js"],
-            "matches": ["https://worker.mturk.com/tasks"],
+            "matches": ["https://worker.mturk.com/tasks*"],
             "run_at": "document_start"
         },
 
@@ -226,8 +235,9 @@
                 "https://worker.mturk.com/",
                 "https://worker.mturk.com/?*",
                 "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects?*",
-                "https://worker.mturk.com/tasks",
+                "https://worker.mturk.com/projects/",
+                "https://worker.mturk.com/projects/?*",
+                "https://worker.mturk.com/tasks*",
                 "https://worker.mturk.com/status_details/*"
             ],
             "run_at": "document_start"
