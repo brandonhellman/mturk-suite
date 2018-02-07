@@ -173,6 +173,7 @@ async function hitExportShort () {
   const [args] = arguments
 
   const hit = args.hit
+  const masters = hit.project_requirements.filter((o) => [`2F1QJWKUDD8XADTFD2Q0G6UTO95ALH`, `2NDP2L92HECWY8NS8H3CK0CP5L9GHO`, `21VZU98JHSTLZ5BPP4A9NOBJEK3DPG`].includes(o.qualification_type_id)).length ? `MASTERS • ` : ``
 
   const fetchUrl = new window.URL(`https://ns4t.net/yourls-api.php?action=bulkshortener&title=MTurk&signature=39f6cf4959`)
   fetchUrl.searchParams.append(`urls[]`, `https://worker.mturk.com/requesters${hit.requester_id}/projects`)
