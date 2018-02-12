@@ -1109,7 +1109,7 @@ const storage = {
         dashboardEnhancer: true,
         hitExporter: true,
         hitTracker: true,
-        hitDetailsEnhancer: true,
+        hitDetailsSticky: true,
         paginationLastPage: true,
         queueInfoEnhancer: true,
         rateLimitReloader: true,
