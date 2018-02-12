@@ -102,7 +102,7 @@ async function finderFetch () {
 
     if (~response.url.indexOf(`https://worker.mturk.com`)) {
       if (response.ok) {
-        finderProcess(await response.json())
+        await finderProcess(await response.json())
       }
       if (response.status === 429) {
         document.getElementById(`page-request-errors`).textContent = ++pageRequestErrors
@@ -120,193 +120,197 @@ async function finderFetch () {
   }
 }
 
-async function finderProcess () {
-  const [json] = arguments
+function finderProcess () {
+  return new Promise(async (resolve) => {
+    const [json] = arguments
 
-  const recentFragment = document.createDocumentFragment()
-  const loggedFragment = document.createDocumentFragment()
-  const includedFragment = document.createDocumentFragment()
-  let sound = false
-  let blocked = 0
+    const recentFragment = document.createDocumentFragment()
+    const loggedFragment = document.createDocumentFragment()
+    const includedFragment = document.createDocumentFragment()
+    let sound = false
+    let blocked = 0
 
-  requesterReviewsCheck([...new Set(json.results.map((o) => o.requester_id))])
+    requesterReviewsCheck([...new Set(json.results.map((o) => o.requester_id))])
 
-  for (const hit of json.results) {
-    if (blockListed(hit) || minimumAvailable(hit) || minimumRequesterRating(hit)) {
-      blocked++
-      continue
+    for (const hit of json.results) {
+      if (blockListed(hit) || minimumAvailable(hit) || minimumRequesterRating(hit)) {
+        blocked++
+        continue
+      }
+
+      const included = includeListed(hit)
+      const requesterReviewClass = requesterReviewGetClass(hit.requester_id)
+      const trackerRequester = await hitTrackerMatchObject(`requester_id`, hit.requester_id)
+      const trackerTitle = await hitTrackerMatchObject(`title`, hit.title)
+
+      const row = document.createElement(`tr`)
+
+      if (included) {
+        row.classList.add(`included`)
+      }
+
+      if (storage.hitFinder[`display-colored-rows`]) {
+        row.classList.add(`table-${requesterReviewClass}`)
+      }
+
+      const actions = document.createElement(`td`)
+      actions.className = `w-1`
+      row.appendChild(actions)
+
+      const actionsContainer = document.createElement(`div`)
+      actionsContainer.className = `btn-group`
+      actions.appendChild(actionsContainer)
+
+      const hitInfo = document.createElement(`button`)
+      hitInfo.type = `button`
+      hitInfo.className = `btn btn-sm btn-primary`
+      hitInfo.dataset.toggle = `modal`
+      hitInfo.dataset.target = `#hit-info-modal`
+      hitInfo.dataset.key = hit.hit_set_id
+      actionsContainer.appendChild(hitInfo)
+
+      const hitInfoIcon = document.createElement(`i`)
+      hitInfoIcon.className = `fas fa-info-circle`
+      hitInfo.appendChild(hitInfoIcon)
+
+      const time = document.createElement(`td`)
+      time.className = `w-1`
+      time.textContent = timeNow()
+      row.appendChild(time)
+
+      const requester = document.createElement(`td`)
+      row.appendChild(requester)
+
+      const requesterContainer = document.createElement(`div`)
+      requesterContainer.className = `btn-group`
+      requester.appendChild(requesterContainer)
+
+      const requesterReviews = document.createElement(`button`)
+      requesterReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterReviewClass}`
+      requesterReviews.dataset.toggle = `modal`
+      requesterReviews.dataset.target = `#requester-review-modal`
+      requesterReviews.dataset.key = hit.requester_id
+      requesterContainer.appendChild(requesterReviews)
+
+      const requesterReviewsIcon = document.createElement(`i`)
+      requesterReviewsIcon.className = `fas fa-user`
+      requesterReviews.appendChild(requesterReviewsIcon)
+
+      const requesterTracker = document.createElement(`button`)
+      requesterTracker.type = `button`
+      requesterTracker.className = `btn btn-sm btn-${trackerRequester.color} mr-1`
+      requesterContainer.appendChild(requesterTracker)
+
+      const requesterTrackerIcon = document.createElement(`i`)
+      requesterTrackerIcon.className = `fas fa-${trackerRequester.icon}`
+      requesterTracker.appendChild(requesterTrackerIcon)
+
+      const requesterLink = document.createElement(`a`)
+      requesterLink.href = `https://worker.mturk.com/requesters/${hit.requester_id}/projects`
+      requesterLink.target = `_blank`
+      requesterLink.textContent = hit.requester_name
+      requesterContainer.appendChild(requesterLink)
+
+      const title = document.createElement(`td`)
+      row.appendChild(title)
+
+      const titleContainer = document.createElement(`div`)
+      titleContainer.className = `btn-group`
+      title.appendChild(titleContainer)
+
+      const sharer = document.createElement(`button`)
+      sharer.type = `button`
+      sharer.className = `btn btn-sm btn-primary`
+      sharer.dataset.toggle = `modal`
+      sharer.dataset.target = `#hit-sharer-modal`
+      sharer.dataset.key = hit.hit_set_id
+      titleContainer.appendChild(sharer)
+
+      const shareIcon = document.createElement(`i`)
+      shareIcon.className = `fas fa-share`
+      sharer.appendChild(shareIcon)
+
+      const titleTracker = document.createElement(`button`)
+      titleTracker.type = `button`
+      titleTracker.className = `btn btn-sm btn-${trackerTitle.color} mr-1`
+      titleContainer.appendChild(titleTracker)
+
+      const titleTrackerIcon = document.createElement(`i`)
+      titleTrackerIcon.className = `fas fa-${trackerTitle.icon}`
+      titleTracker.appendChild(titleTrackerIcon)
+
+      const titleLink = document.createElement(`a`)
+      titleLink.href = `https://worker.mturk.com/projects/${hit.hit_set_id}/tasks`
+      titleLink.target = `_blank`
+      titleLink.textContent = hit.title
+      titleContainer.appendChild(titleLink)
+
+      const available = document.createElement(`td`)
+      available.className = `text-center w-1`
+      available.textContent = hit.assignable_hits_count
+      row.appendChild(available)
+
+      const reward = document.createElement(`td`)
+      reward.className = `text-center`
+      row.appendChild(reward)
+
+      const rewardLink = document.createElement(`a`)
+      rewardLink.href = `https://worker.mturk.com/projects/${hit.hit_set_id}/tasks/accept_random`
+      rewardLink.target = `_blank`
+      rewardLink.textContent = toMoneyString(hit.monetary_reward.amount_in_dollars)
+      reward.appendChild(rewardLink)
+
+      const masters = document.createElement(`td`)
+      masters.className = `text-center w-1`
+      masters.textContent = hit.project_requirements.filter((o) => [`2F1QJWKUDD8XADTFD2Q0G6UTO95ALH`, `2NDP2L92HECWY8NS8H3CK0CP5L9GHO`, `21VZU98JHSTLZ5BPP4A9NOBJEK3DPG`].includes(o.qualification_type_id)).length > 0 ? `Y` : `N`
+      row.appendChild(masters)
+
+      const recentRow = toggleColumns(row.cloneNode(true), `recent`)
+      recentRow.id = `recent-${hit.hit_set_id}`
+
+      const loggedRow = toggleColumns(row.cloneNode(true), `logged`)
+      loggedRow.id = `logged-${hit.hit_set_id}`
+
+      const includedRow = toggleColumns(row.cloneNode(true), `included`)
+      includedRow.id = `included-${hit.hit_set_id}`
+
+      recentFragment.appendChild(recentRow)
+
+      const loggedElement = document.getElementById(`logged-${hit.hit_set_id}`)
+      if (loggedElement) loggedElement.replaceWith(loggedRow)
+      else loggedFragment.appendChild(loggedRow)
+
+      if (!finderDB[hit.hit_set_id]) {
+        sound = true
+        finderDB[hit.hit_set_id] = hit
+      }
+
+      if (included && !includeAlerted.includes(hit.hit_set_id)) {
+        includedAlert(included, hit)
+        document.getElementById(`include-list-hits-card`).style.display = ``
+        includedFragment.appendChild(includedRow)
+      }
     }
 
-    const included = includeListed(hit)
-    const requesterReviewClass = requesterReviewGetClass(hit.requester_id)
-    const trackerRequester = await hitTrackerMatchObject(`requester_id`, hit.requester_id)
-    const trackerTitle = await hitTrackerMatchObject(`title`, hit.title)
+    toggleColumns(document.getElementById(`recent-hits-thead`).children[0], `recent`)
+    toggleColumns(document.getElementById(`logged-hits-thead`).children[0], `logged`)
+    removeChildren(document.getElementById(`recent-hits-tbody`))
 
-    const row = document.createElement(`tr`)
+    document.getElementById(`recent-hits-tbody`).insertBefore(recentFragment, document.getElementById(`recent-hits-tbody`).firstChild)
+    document.getElementById(`logged-hits-tbody`).insertBefore(loggedFragment, document.getElementById(`logged-hits-tbody`).firstChild)
+    document.getElementById(`include-list-hits-tbody`).insertBefore(includedFragment, document.getElementById(`include-list-hits-tbody`).firstChild)
 
-    if (included) {
-      row.classList.add(`included`)
+    if (sound && storage.hitFinder[`alert-new-sound`] !== `none`) {
+      const audio = new window.Audio()
+      audio.src = `/media/audio/${storage.hitFinder[`alert-new-sound`]}.ogg`
+      audio.play()
     }
 
-    if (storage.hitFinder[`display-colored-rows`]) {
-      row.classList.add(`table-${requesterReviewClass}`)
-    }
+    document.getElementById(`hits-found`).textContent = `Found: ${json.num_results} | Blocked: ${blocked} | ${new Date().toLocaleTimeString()}`
+    document.getElementById(`hits-logged`).textContent = document.getElementById(`logged-hits-tbody`).children.length
 
-    const actions = document.createElement(`td`)
-    actions.className = `w-1`
-    row.appendChild(actions)
-
-    const actionsContainer = document.createElement(`div`)
-    actionsContainer.className = `btn-group`
-    actions.appendChild(actionsContainer)
-
-    const hitInfo = document.createElement(`button`)
-    hitInfo.type = `button`
-    hitInfo.className = `btn btn-sm btn-primary`
-    hitInfo.dataset.toggle = `modal`
-    hitInfo.dataset.target = `#hit-info-modal`
-    hitInfo.dataset.key = hit.hit_set_id
-    actionsContainer.appendChild(hitInfo)
-
-    const hitInfoIcon = document.createElement(`i`)
-    hitInfoIcon.className = `fas fa-info-circle`
-    hitInfo.appendChild(hitInfoIcon)
-
-    const time = document.createElement(`td`)
-    time.className = `w-1`
-    time.textContent = timeNow()
-    row.appendChild(time)
-
-    const requester = document.createElement(`td`)
-    row.appendChild(requester)
-
-    const requesterContainer = document.createElement(`div`)
-    requesterContainer.className = `btn-group`
-    requester.appendChild(requesterContainer)
-
-    const requesterReviews = document.createElement(`button`)
-    requesterReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterReviewClass}`
-    requesterReviews.dataset.toggle = `modal`
-    requesterReviews.dataset.target = `#requester-review-modal`
-    requesterReviews.dataset.key = hit.requester_id
-    requesterContainer.appendChild(requesterReviews)
-
-    const requesterReviewsIcon = document.createElement(`i`)
-    requesterReviewsIcon.className = `fas fa-user`
-    requesterReviews.appendChild(requesterReviewsIcon)
-
-    const requesterTracker = document.createElement(`button`)
-    requesterTracker.type = `button`
-    requesterTracker.className = `btn btn-sm btn-${trackerRequester.color} mr-1`
-    requesterContainer.appendChild(requesterTracker)
-
-    const requesterTrackerIcon = document.createElement(`i`)
-    requesterTrackerIcon.className = `fas fa-${trackerRequester.icon}`
-    requesterTracker.appendChild(requesterTrackerIcon)
-
-    const requesterLink = document.createElement(`a`)
-    requesterLink.href = `https://worker.mturk.com/requesters/${hit.requester_id}/projects`
-    requesterLink.target = `_blank`
-    requesterLink.textContent = hit.requester_name
-    requesterContainer.appendChild(requesterLink)
-
-    const title = document.createElement(`td`)
-    row.appendChild(title)
-
-    const titleContainer = document.createElement(`div`)
-    titleContainer.className = `btn-group`
-    title.appendChild(titleContainer)
-
-    const sharer = document.createElement(`button`)
-    sharer.type = `button`
-    sharer.className = `btn btn-sm btn-primary`
-    sharer.dataset.toggle = `modal`
-    sharer.dataset.target = `#hit-sharer-modal`
-    sharer.dataset.key = hit.hit_set_id
-    titleContainer.appendChild(sharer)
-
-    const shareIcon = document.createElement(`i`)
-    shareIcon.className = `fas fa-share`
-    sharer.appendChild(shareIcon)
-
-    const titleTracker = document.createElement(`button`)
-    titleTracker.type = `button`
-    titleTracker.className = `btn btn-sm btn-${trackerTitle.color} mr-1`
-    titleContainer.appendChild(titleTracker)
-
-    const titleTrackerIcon = document.createElement(`i`)
-    titleTrackerIcon.className = `fas fa-${trackerTitle.icon}`
-    titleTracker.appendChild(titleTrackerIcon)
-
-    const titleLink = document.createElement(`a`)
-    titleLink.href = `https://worker.mturk.com/projects/${hit.hit_set_id}/tasks`
-    titleLink.target = `_blank`
-    titleLink.textContent = hit.title
-    titleContainer.appendChild(titleLink)
-
-    const available = document.createElement(`td`)
-    available.className = `text-center w-1`
-    available.textContent = hit.assignable_hits_count
-    row.appendChild(available)
-
-    const reward = document.createElement(`td`)
-    reward.className = `text-center`
-    row.appendChild(reward)
-
-    const rewardLink = document.createElement(`a`)
-    rewardLink.href = `https://worker.mturk.com/projects/${hit.hit_set_id}/tasks/accept_random`
-    rewardLink.target = `_blank`
-    rewardLink.textContent = toMoneyString(hit.monetary_reward.amount_in_dollars)
-    reward.appendChild(rewardLink)
-
-    const masters = document.createElement(`td`)
-    masters.className = `text-center w-1`
-    masters.textContent = hit.project_requirements.filter((o) => [`2F1QJWKUDD8XADTFD2Q0G6UTO95ALH`, `2NDP2L92HECWY8NS8H3CK0CP5L9GHO`, `21VZU98JHSTLZ5BPP4A9NOBJEK3DPG`].includes(o.qualification_type_id)).length > 0 ? `Y` : `N`
-    row.appendChild(masters)
-
-    const recentRow = toggleColumns(row.cloneNode(true), `recent`)
-    recentRow.id = `recent-${hit.hit_set_id}`
-
-    const loggedRow = toggleColumns(row.cloneNode(true), `logged`)
-    loggedRow.id = `logged-${hit.hit_set_id}`
-
-    const includedRow = toggleColumns(row.cloneNode(true), `included`)
-    includedRow.id = `included-${hit.hit_set_id}`
-
-    recentFragment.appendChild(recentRow)
-
-    const loggedElement = document.getElementById(`logged-${hit.hit_set_id}`)
-    if (loggedElement) loggedElement.replaceWith(loggedRow)
-    else loggedFragment.appendChild(loggedRow)
-
-    if (!finderDB[hit.hit_set_id]) {
-      sound = true
-      finderDB[hit.hit_set_id] = hit
-    }
-
-    if (included && !includeAlerted.includes(hit.hit_set_id)) {
-      includedAlert(included, hit)
-      document.getElementById(`include-list-hits-card`).style.display = ``
-      includedFragment.appendChild(includedRow)
-    }
-  }
-
-  toggleColumns(document.getElementById(`recent-hits-thead`).children[0], `recent`)
-  toggleColumns(document.getElementById(`logged-hits-thead`).children[0], `logged`)
-  removeChildren(document.getElementById(`recent-hits-tbody`))
-
-  document.getElementById(`recent-hits-tbody`).insertBefore(recentFragment, document.getElementById(`recent-hits-tbody`).firstChild)
-  document.getElementById(`logged-hits-tbody`).insertBefore(loggedFragment, document.getElementById(`logged-hits-tbody`).firstChild)
-  document.getElementById(`include-list-hits-tbody`).insertBefore(includedFragment, document.getElementById(`include-list-hits-tbody`).firstChild)
-
-  if (sound && storage.hitFinder[`alert-new-sound`] !== `none`) {
-    const audio = new window.Audio()
-    audio.src = `/media/audio/${storage.hitFinder[`alert-new-sound`]}.ogg`
-    audio.play()
-  }
-
-  document.getElementById(`hits-found`).textContent = `Found: ${json.num_results} | Blocked: ${blocked} | ${new Date().toLocaleTimeString()}`
-  document.getElementById(`hits-logged`).textContent = document.getElementById(`logged-hits-tbody`).children.length
+    resolve()
+  })
 }
 
 function minimumAvailable () {
