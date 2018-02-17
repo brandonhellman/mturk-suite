@@ -588,9 +588,15 @@ function getWeek () {
   const startDate = new Date(today.setDate(start)).toISOString().slice(0, 10).replace(/-/g, ``)
   const endDate = new Date(today.setDate(today.getDate() + 6)).toISOString().slice(0, 10).replace(/-/g, ``)
 
-  return {
-    start: `20180211`,
-    end: `20180217`
+  const tempDate = mturkDate()
+
+  if (tempDate === `20180217`) {
+    return { start: `20180211`, end: `20180217` }
+  } else if (tempDate === `20180218`) {
+    document.querySelector(`#today > div > div > div:nth-child(2) > table > tbody > tr:nth-child(2) > td:nth-child(1)`).textContent = `Projected Earnings Last Week`
+    return { start: `20180211`, end: `20180217` }
+  } else {
+    return { start: `20180218`, end: `20180224` }
   }
 }
 
