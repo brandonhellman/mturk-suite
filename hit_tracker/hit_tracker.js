@@ -1,124 +1,116 @@
-Object.assign(Number.prototype, {
-  toMoneyString () {
-    return `$${this.toFixed(2).toLocaleString(`en-US`, { minimumFractionDigits: 2 })}`
-  }
-})
+/* globals chrome */
 
-let hitTrackerDB, updating = false;
-
-(() => {
+let hitTrackerDB = (() => {
   const open = window.indexedDB.open(`hitTrackerDB`, 1)
 
-  open.onsuccess = (e) => {
-    hitTrackerDB = e.target.result
-    getTodaysInfo()
-    getTrackerInfo()
-  }
-  open.onupgradeneeded = (e) => {
-    alert(`Something went wrong, please reload MTS`)
-  }
-  open.onerror = (e) => {
-    alert(`Something went wrong, please reload MTS`)
+  open.onsuccess = (event) => {
+    hitTrackerDB = event.target.result
+    todaysOverview()
+    trackerOverview()
   }
 })()
 
-function getTodaysInfo () {
-  const transaction = hitTrackerDB.transaction([`hit`], `readonly`)
-  const objectStore = transaction.objectStore(`hit`)
-  const index = objectStore.index(`date`)
-  const request = index.getAll(mturkDate())
-
-  request.onsuccess = (e) => {
-    displayTodaysInfo(e.target.result)
-  }
+async function todaysOverview () {
+  const data = await todaysOverviewData()
+  todaysOverviewDisplay(data)
 }
 
-function displayTodaysInfo (hits) {
-  const today = {
-    assigned: {
-      count: 0,
-      value: 0
+function todaysOverviewData () {
+  const promiseData = {
+    hits: {
+      assigned: { count: 0, value: 0 },
+      submitted: { count: 0, value: 0 },
+      approved: { count: 0, value: 0 },
+      rejected: { count: 0, value: 0 },
+      pending: { count: 0, value: 0 },
+      returned: { count: 0, value: 0 }
     },
-    submitted: {
-      count: 0,
-      value: 0
-    },
-    approved: {
-      count: 0,
-      value: 0
-    },
-    rejected: {
-      count: 0,
-      value: 0
-    },
-    pending: {
-      count: 0,
-      value: 0
-    },
-    returned: {
-      count: 0,
-      value: 0
-    }
+    requesters: {}
   }
-  const requesters = {}
 
-  for (const hit of hits) {
-    const state = hit.state
-    const reward = hit.reward.amount_in_dollars
-    const requesterId = hit.requester_id
+  const hits = promiseData.hits
+  const reqs = promiseData.requesters
 
-    if (hit.state.match(/Submitted|Pending|Approved|Paid/)) {
-      today.submitted.count ++
-      today.submitted.value += reward
+  return new Promise((resolve) => {
+    const transaction = hitTrackerDB.transaction([`hit`], `readonly`)
+    const objectStore = transaction.objectStore(`hit`)
+    const range = window.IDBKeyRange.only(mturkDate())
 
-      if (hit.state.match(/Approved|Paid/)) {
-        today.approved.count ++
-        today.approved.value += reward
-      } else if (hit.state.match(/Submitted|Pending/)) {
-        today.pending.count ++
-        today.pending.value += reward
-      }
+    objectStore.index(`date`).openCursor(range).onsuccess = (event) => {
+      const cursor = event.target.result
 
-      if (!requesters[requesterId]) {
-        requesters[requesterId] = {
-          id: requesterId,
-          name: hit.requester_name,
-          count: 1,
-          value: reward
+      if (cursor) {
+        const hit = cursor.value
+        const state = hit.state
+        const reward = hit.reward.amount_in_dollars
+        const requesterId = hit.requester_id
+
+        if (state.match(/Submitted|Pending|Approved|Paid/)) {
+          hits.submitted.count ++
+          hits.submitted.value += reward
+
+          if (state.match(/Approved|Paid/)) {
+            hits.approved.count ++
+            hits.approved.value += reward
+          } else if (state.match(/Submitted|Pending/)) {
+            hits.pending.count ++
+            hits.pending.value += reward
+          }
+
+          if (!reqs[requesterId]) {
+            reqs[requesterId] = {
+              id: requesterId,
+              name: hit.requester_name,
+              count: 1,
+              value: reward
+            }
+          } else {
+            reqs[requesterId].count ++
+            reqs[requesterId].value += reward
+          }
+        } else if (state.match(/Returned/)) {
+          hits.returned.count ++
+          hits.returned.value += reward
+        } else if (state.match(/Rejected/)) {
+          hits.rejected.count ++
+          hits.rejected.value += reward
         }
-      } else {
-        requesters[requesterId].count ++
-        requesters[requesterId].value += reward
+
+        hits.assigned.count ++
+        hits.assigned.value += reward
+        cursor.continue()
       }
-    } else if (hit.state.match(/Returned/)) {
-      today.returned.count ++
-      today.returned.value += reward
-    } else if (hit.state.match(/Rejected/)) {
-      today.rejected.count ++
-      today.rejected.value += reward
     }
 
-    today.assigned.count ++
-    today.assigned.value += reward
-  }
+    transaction.oncomplete = (event) => {
+      resolve(promiseData)
+    }
+  })
+}
 
-  document.getElementById(`assigned-count`).textContent = today.assigned.count
-  document.getElementById(`assigned-value`).textContent = today.assigned.value.toMoneyString()
+function todaysOverviewDisplay () {
+  const [data] = arguments
 
-  document.getElementById(`submitted-count`).textContent = today.submitted.count
-  document.getElementById(`submitted-value`).textContent = today.submitted.value.toMoneyString()
+  const hits = data.hits
+  const reqs = data.requesters
 
-  document.getElementById(`approved-count`).textContent = today.approved.count
-  document.getElementById(`approved-value`).textContent = today.approved.value.toMoneyString()
+  document.getElementById(`assigned-count`).textContent = hits.assigned.count
+  document.getElementById(`assigned-value`).textContent = toMoneyString(hits.assigned.value)
 
-  document.getElementById(`rejected-count`).textContent = today.rejected.count
-  document.getElementById(`rejected-value`).textContent = today.rejected.value.toMoneyString()
+  document.getElementById(`submitted-count`).textContent = hits.submitted.count
+  document.getElementById(`submitted-value`).textContent = toMoneyString(hits.submitted.value)
 
-  document.getElementById(`pending-count`).textContent = today.pending.count
-  document.getElementById(`pending-value`).textContent = today.pending.value.toMoneyString()
+  document.getElementById(`approved-count`).textContent = hits.approved.count
+  document.getElementById(`approved-value`).textContent = toMoneyString(hits.approved.value)
 
-  document.getElementById(`returned-count`).textContent = today.returned.count
-  document.getElementById(`returned-value`).textContent = today.returned.value.toMoneyString()
+  document.getElementById(`rejected-count`).textContent = hits.rejected.count
+  document.getElementById(`rejected-value`).textContent = toMoneyString(hits.rejected.value)
+
+  document.getElementById(`pending-count`).textContent = hits.pending.count
+  document.getElementById(`pending-value`).textContent = toMoneyString(hits.pending.value)
+
+  document.getElementById(`returned-count`).textContent = hits.returned.count
+  document.getElementById(`returned-value`).textContent = toMoneyString(hits.returned.value)
 
   const requesterTbody = document.getElementById(`requester-tbody`)
 
@@ -126,10 +118,10 @@ function displayTodaysInfo (hits) {
     requesterTbody.removeChild(requesterTbody.firstChild)
   }
 
-  const sorted = Object.keys(requesters).sort((a, b) => requesters[a].value - requesters[b].value)
+  const sorted = Object.keys(reqs).sort((a, b) => reqs[a].value - reqs[b].value)
 
   for (let i = sorted.length - 1; i > -1; i--) {
-    const req = requesters[sorted[i]]
+    const req = reqs[sorted[i]]
 
     const row = document.createElement(`tr`)
 
@@ -147,20 +139,106 @@ function displayTodaysInfo (hits) {
     row.appendChild(count)
 
     const value = document.createElement(`td`)
-    value.textContent = req.value.toMoneyString()
+    value.textContent = toMoneyString(req.value)
     row.appendChild(value)
 
     requesterTbody.appendChild(row)
   }
 
-  document.getElementById(`tracker-projected-today-count`).textContent = today.submitted.count
-  document.getElementById(`tracker-projected-today-value`).textContent = today.submitted.value.toMoneyString()
+  document.getElementById(`tracker-projected-today-count`).textContent = hits.submitted.count
+  document.getElementById(`tracker-projected-today-value`).textContent = toMoneyString(hits.submitted.value)
+}
 
-  chrome.storage.local.set({
-    earnings: today.submitted.value
+async function trackerOverview () {
+  const data = await trackerOverviewData()
+  trackerOverviewDisplay(data)
+}
+
+function trackerOverviewData () {
+  const promiseData = {
+    week: { count: 0, value: 0 },
+    month: { count: 0, value: 0 },
+    pending: { count: 0, value: 0 },
+    approved: { count: 0, value: 0 }
+  }
+
+  return new Promise((resolve) => {
+    const transaction = hitTrackerDB.transaction([`hit`], `readonly`)
+    const objectStore = transaction.objectStore(`hit`)
+    const week = getWeek()
+    const month = getMonth()
+
+    // pending week
+    objectStore.index(`date`).openCursor(window.IDBKeyRange.bound(week.start, week.end)).onsuccess = (event) => {
+      const cursor = event.target.result
+
+      if (cursor) {
+        if (cursor.value.state.match(/Submitted|Pending|Approved|Paid/)) {
+          promiseData.week.count ++
+          promiseData.week.value += cursor.value.reward.amount_in_dollars
+        }
+        cursor.continue()
+      }
+    }
+
+    // pending month
+    objectStore.index(`date`).openCursor(window.IDBKeyRange.bound(month.start, month.end)).onsuccess = (event) => {
+      const cursor = event.target.result
+
+      if (cursor) {
+        if (cursor.value.state.match(/Submitted|Pending|Approved|Paid/)) {
+          promiseData.month.count ++
+          promiseData.month.value += cursor.value.reward.amount_in_dollars
+        }
+        cursor.continue()
+      }
+    }
+
+    // submitted pending approval or rejection
+    objectStore.index(`state`).openCursor(window.IDBKeyRange.only(`Submitted`)).onsuccess = (event) => {
+      const cursor = event.target.result
+
+      if (cursor) {
+        promiseData.pending.count ++
+        promiseData.pending.value += cursor.value.reward.amount_in_dollars
+        cursor.continue()
+      }
+    }
+
+    // approved waiting payment
+    objectStore.index(`state`).openCursor(window.IDBKeyRange.only(`Approved`)).onsuccess = (event) => {
+      const cursor = event.target.result
+
+      if (cursor) {
+        promiseData.approved.count ++
+        promiseData.approved.value += cursor.value.reward.amount_in_dollars
+        cursor.continue()
+      }
+    }
+
+    transaction.oncomplete = (event) => {
+      resolve(promiseData)
+    }
   })
 }
 
+function trackerOverviewDisplay () {
+  const [data] = arguments
+
+  document.getElementById(`tracker-projected-week-count`).textContent = data.week.count
+  document.getElementById(`tracker-projected-week-value`).textContent = toMoneyString(data.week.value)
+
+  document.getElementById(`tracker-projected-month-count`).textContent = data.month.count
+  document.getElementById(`tracker-projected-month-value`).textContent = toMoneyString(data.month.value)
+
+  document.getElementById(`tracker-pending-count`).textContent = data.pending.count
+  document.getElementById(`tracker-pending-value`).textContent = toMoneyString(data.pending.value)
+
+  document.getElementById(`tracker-approved-count`).textContent = data.approved.count
+  document.getElementById(`tracker-approved-value`).textContent = toMoneyString(data.approved.value)
+}
+
+// refactor needed
 function syncDay (date) {
   return new Promise(async (resolve) => {
     syncingStarted()
@@ -504,83 +582,6 @@ function loggedOut () {
   sycningEnded()
 }
 
-function getTrackerInfo () {
-  const transaction = hitTrackerDB.transaction([`hit`], `readonly`)
-  const objectStore = transaction.objectStore(`hit`)
-  const indexDate = objectStore.index(`date`)
-  const indexState = objectStore.index(`state`)
-  const onlyApproved = IDBKeyRange.only(`Approved`)
-  const onlySubmitted = IDBKeyRange.only(`Submitted`)
-
-  let approvedCount = 0, approvedValue = 0
-  indexState.openCursor(onlyApproved).onsuccess = (event) => {
-    const cursor = event.target.result
-
-    if (cursor) {
-      approvedCount++
-      approvedValue += cursor.value.reward.amount_in_dollars
-      cursor.continue()
-    } else {
-      document.getElementById(`tracker-approved-count`).textContent = approvedCount
-      document.getElementById(`tracker-approved-value`).textContent = approvedValue.toMoneyString()
-    }
-  }
-
-  let submittedValue = 0, submittedCount = 0
-  indexState.openCursor(onlySubmitted).onsuccess = (event) => {
-    const cursor = event.target.result
-
-    if (cursor) {
-      submittedCount++
-      submittedValue += cursor.value.reward.amount_in_dollars
-      cursor.continue()
-    } else {
-      document.getElementById(`tracker-pending-count`).textContent = submittedCount
-      document.getElementById(`tracker-pending-value`).textContent = submittedValue.toMoneyString()
-    }
-  }
-
-  const week = getWeek(), month = getMonth()
-  const boundWeek = IDBKeyRange.bound(week.start, week.end)
-  const boundMonth = IDBKeyRange.bound(month.start, month.end)
-
-  let weekCount = 0, weekValue = 0
-  indexDate.openCursor(boundWeek).onsuccess = (event) => {
-    const cursor = event.target.result
-
-    if (cursor) {
-      if (cursor.value.state.match(/Submitted|Pending|Approved|Paid/)) {
-        weekCount++
-        weekValue += cursor.value.reward.amount_in_dollars
-      }
-      cursor.continue()
-    } else {
-      document.getElementById(`tracker-projected-week-count`).textContent = weekCount
-      document.getElementById(`tracker-projected-week-value`).textContent = weekValue.toMoneyString()
-    }
-  }
-
-  let monthCount = 0, monthValue = 0
-  indexDate.openCursor(boundMonth).onsuccess = (event) => {
-    const cursor = event.target.result
-
-    if (cursor) {
-      if (cursor.value.state.match(/Submitted|Pending|Approved|Paid/)) {
-        monthCount++
-        monthValue += cursor.value.reward.amount_in_dollars
-      }
-      cursor.continue()
-    } else {
-      document.getElementById(`tracker-projected-month-count`).textContent = monthCount
-      document.getElementById(`tracker-projected-month-value`).textContent = monthValue.toMoneyString()
-    }
-  }
-
-  transaction.oncomplete = (event) => {
-    document.getElementById(`tracker-pending-value`).textContent = submittedValue.toMoneyString()
-  }
-}
-
 function getWeek () {
   const today = mturkDateString()
   const start = today.getDate() - today.getDay()
@@ -596,7 +597,7 @@ function getWeek () {
     document.querySelector(`#today > div > div > div:nth-child(2) > table > tbody > tr:nth-child(2) > td:nth-child(1)`).textContent = `Projected Earnings Last Week`
     return { start: `20180211`, end: `20180217` }
   } else {
-    return { start: `20180218`, end: `20180224` }
+    return { start: `20180225`, end: `20180303` }
   }
 }
 
@@ -759,7 +760,7 @@ async function requesterOverview () {
         tr.appendChild(count)
 
         const value = document.createElement(`td`)
-        value.textContent = req.value.toMoneyString()
+        value.textContent = toMoneyString(req.value)
         tr.appendChild(value)
 
         results.appendChild(tr)
@@ -890,7 +891,7 @@ async function dailyOverview () {
       tr.appendChild(ret_aban)
 
       const earningsHits = document.createElement(`td`)
-      earningsHits.textContent = day.earnings.toMoneyString()
+      earningsHits.textContent = toMoneyString(day.earnings)
       tr.appendChild(earningsHits)
 
       const actions = document.createElement(`span`)
@@ -1026,7 +1027,7 @@ async function search () {
       }
 
       const reward = document.createElement(`td`)
-      reward.textContent = value.reward.amount_in_dollars.toMoneyString()
+      reward.textContent = toMoneyString(value.reward.amount_in_dollars)
       tr.appendChild(reward)
 
       const state = document.createElement(`td`)
@@ -1092,199 +1093,8 @@ function searchEnd () {
   $(modal).modal(`hide`)
 }
 
-(function updateTheme () {
-  const theme = document.getElementById(`theme`)
-
-  chrome.storage.local.get([`themes`], (keys) => {
-    theme.href = `/bootstrap/css/${keys.themes.mts}.min.css`
-
-    chrome.storage.onChanged.addListener((changes) => {
-      if (changes.themes) {
-        theme.href = `/bootstrap/css/${changes.themes.newValue.mts}.min.css`
-      }
-    })
-  })
-})()
-
-speechSynthesis.getVoices()
-
-function textToSpeech (phrase) {
-  const message = new SpeechSynthesisUtterance(phrase)
-  message.voice = speechSynthesis.getVoices().filter((voice) => voice.name == `Google US English`)[0]
-  window.speechSynthesis.speak(message)
-}
-
-document.getElementById(`import`).addEventListener(`click`, (event) => document.getElementById(`import-file`).click())
-document.getElementById(`import-file`).addEventListener(`change`, (event) => trackerImport(event.target.files[0]))
-document.getElementById(`export`).addEventListener(`click`, (event) => trackerExport())
-
-function trackerImport (file) {
-  const reader = new FileReader()
-  reader.readAsText(file)
-
-  reader.onload = async (event) => {
-    try {
-      statusStart({
-        header: `Importing`,
-        message: `Importing backup`
-      })
-
-      const json = JSON.parse(event.target.result)
-
-      if (json.hits && json.days) {
-        await trackerImportPutHit(json.hits)
-        await trackerImportPutDay(json.days)
-      } else if (json.STATS && json.HIT) {
-        const hits = json.HIT.reduce((accumulator, currentValue) => {
-          accumulator.push({
-            assignment_id: null,
-            date: currentValue.date.replace(/-/g, ``),
-            hit_id: currentValue.hitId,
-            requester_feedback: currentValue.feedback === `` ? null : currentValue.feedback,
-            requester_id: currentValue.requesterId,
-            requester_name: currentValue.requesterName,
-            reward: {
-              amount_in_dollars: currentValue.reward,
-              currency_code: null
-            },
-            state: currentValue.status.split(` `)[0].replace(`Pending`, `Submitted`),
-            title: currentValue.title
-          })
-
-          return accumulator
-        }, [])
-
-        const days = json.STATS.reduce((accumulator, currentValue) => {
-          if (currentValue.earnings !== undefined) {
-            accumulator.push({
-              day: currentValue,
-              date: currentValue.date.replace(/-/g, ``),
-
-              assigned: 0,
-              returned: 0,
-              abandoned: 0,
-
-              paid: 0,
-              approved: 0,
-              rejected: 0,
-              submitted: 0,
-
-              earnings: 0
-            })
-          } else {
-            statusEnd()
-            return alert(`Import failed! Error importing day: ${JSON.stringify(currentValue)}`)
-          }
-
-          return accumulator
-        }, [])
-
-        await trackerImportPutHit(hits)
-        await trackerImportPutDay(days)
-        statusEnd()
-      } else {
-        statusEnd()
-        return alert(`Import failed! Unrecognized format`)
-      }
-    } catch (error) {
-      statusEnd()
-      return alert(`Import failed! ${error}`)
-    }
-  }
-}
-
-function trackerImportPutHit (hits) {
-  statusUpdate({ message: `Putting HITs` })
-
-  return new Promise((resolve) => {
-    const transaction = hitTrackerDB.transaction([`hit`], `readwrite`)
-    const objectStore = transaction.objectStore(`hit`)
-
-    let count = 0, length = hits.length
-
-    for (const hit of hits) {
-      statusUpdate({ message: `Putting HIT ${++count} of ${length}` })
-
-      if (hit.hit_id && hit.requester_id) {
-        if (!hit.state.match(/Rejected|Paid/)) {
-          objectStore.put(paidAfter30(hit))
-        } else {
-          objectStore.put(hit)
-        }
-      }
-    }
-
-    transaction.oncomplete = (event) => {
-      return resolve()
-    }
-  })
-}
-
-function trackerImportPutDay (days) {
-  statusUpdate({ message: `Putting Days` })
-
-  return new Promise(async (resolve) => {
-    const transaction = hitTrackerDB.transaction([`day`], `readwrite`)
-    const objectStore = transaction.objectStore(`day`)
-
-    let count = 0, length = days.length
-
-    for (const day of days) {
-      statusUpdate({ message: `Putting Day ${++count} of ${length}` })
-
-      if (day.day && day.day.earnings && day.date) {
-        objectStore.put(day)
-      }
-    }
-
-    transaction.oncomplete = async (event) => {
-      const dates = days.reduce((accumulator, currentValue) => {
-        accumulator.push(currentValue.date)
-        return accumulator
-      }, [])
-
-      for (const date of dates) {
-        await saveDay(date)
-      }
-
-      return resolve()
-    }
-  })
-}
-
-async function trackerExport () {
-  const exportFile = document.getElementById(`export-file`)
-
-  const data = JSON.stringify({
-    hits: await trackerExportGetHit(),
-    days: await trackerExportGetDay()
-  })
-
-  exportFile.href = window.URL.createObjectURL(new Blob([data], { type: `application/json` }))
-  exportFile.download = `HIT_Tracker_Backup_${mturkDate()}.json`
-  exportFile.click()
-}
-
-function trackerExportGetHit () {
-  return new Promise((resolve) => {
-    const transaction = hitTrackerDB.transaction([`hit`], `readonly`)
-    const objectStore = transaction.objectStore(`hit`)
-
-    objectStore.getAll().onsuccess = (event) => {
-      resolve(event.target.result)
-    }
-  })
-}
-
-function trackerExportGetDay () {
-  return new Promise((resolve) => {
-    const transaction = hitTrackerDB.transaction([`day`], `readonly`)
-    const objectStore = transaction.objectStore(`day`)
-
-    objectStore.getAll().onsuccess = (event) => {
-      resolve(event.target.result)
-    }
-  })
+function formatDate (date) {
+  return [date.slice(0, 4), date.slice(4, 6), date.slice(6, 8)].join(`-`)
 }
 
 function statusStart (opts) {
@@ -1307,7 +1117,6 @@ function statusStart (opts) {
 }
 
 function statusUpdate (opts) {
-  const statusModal = document.getElementById(`status-modal`)
   const statusHeader = document.getElementById(`status-header`)
   const statusMessage = document.getElementById(`status-message`)
 
@@ -1331,17 +1140,263 @@ function statusEnd () {
   $(statusModal).modal(`hide`)
 }
 
-function paidAfter30 (hit) {
-  const isAfter30 = new Date(formatDate(hit.date)).getTime()
-  const whenAfter30 = new Date(formatDate(mturkDate())).getTime() - (31 * 24 * 60 * 60 * 1000)
+document.getElementById(`import`).addEventListener(`click`, (event) => document.getElementById(`import-file`).click())
+document.getElementById(`import-file`).addEventListener(`change`, (event) => importFile(event.target.files[0]))
+document.getElementById(`export`).addEventListener(`click`, (event) => exportFile())
 
-  if (isAfter30 < whenAfter30) {
-    hit.state = `Paid`
+// refactor needed end
+
+function importFile () {
+  const [file] = arguments
+
+  const reader = new window.FileReader()
+  reader.readAsText(file)
+
+  reader.onload = async (event) => {
+    currentStatus(`show`, `Loading File...`)
+
+    const json = JSON.parse(event.target.result)
+
+    if (json.hits && json.days) {
+      await importFileHits(json.hits)
+      await importFileDays(json.days)
+    } else if (json.HIT && json.STATS) {
+      const converted = importFileConvertHITDB(json)
+      await importFileHits(converted.hits)
+      await importFileDays(converted.days)
+    }
+
+    currentStatus(`hide`)
+  }
+}
+
+function importFileHits () {
+  const [hits] = arguments
+
+  currentStatus(`update`, `Importing HITs...`)
+
+  return new Promise((resolve) => {
+    const transaction = hitTrackerDB.transaction([`hit`], `readwrite`)
+    const objectStore = transaction.objectStore(`hit`)
+
+    for (let i = 0, keys = Object.keys(hits), length = keys.length; i < length; i++) {
+      const hit = hits[keys[i]]
+
+      if (hit.hit_id && hit.requester_id && hit.state) {
+        const autoAppHit = importFileIsHitAutoApp(hit)
+        objectStore.put(autoAppHit)
+      }
+    }
+
+    transaction.oncomplete = (event) => {
+      resolve()
+    }
+  })
+}
+
+function importFileDays () {
+  const [days] = arguments
+
+  return new Promise(async (resolve) => {
+    const datesToRecount = days.map((currentValue) => currentValue.date)
+    const recounted = await importFileDaysRecount(datesToRecount)
+
+    const transaction = hitTrackerDB.transaction([`day`], `readwrite`)
+    const objectStore = transaction.objectStore(`day`)
+
+    for (let i = 0, keys = Object.keys(days), length = keys.length; i < length; i++) {
+      const day = days[keys[i]]
+
+      if (day.day && day.day.earnings && day.date) {
+        const recountedDay = {...day, ...recounted[day.date]}
+        objectStore.put(recountedDay)
+      }
+    }
+
+    transaction.oncomplete = (event) => {
+      resolve()
+    }
+  })
+}
+
+function importFileConvertHITDB () {
+  const [json] = arguments
+
+  const hits = json.HIT.map((currentValue) => ({
+    assignment_id: null,
+    date: currentValue.date.replace(/-/g, ``),
+    hit_id: currentValue.hitId,
+    requester_feedback: currentValue.feedback === `` ? null : currentValue.feedback,
+    requester_id: currentValue.requesterId,
+    requester_name: currentValue.requesterName,
+    reward: {
+      amount_in_dollars: currentValue.reward,
+      currency_code: null
+    },
+    state: currentValue.status.split(` `)[0].replace(`Pending`, `Submitted`),
+    title: currentValue.title
+
+  }))
+
+  const days = json.STATS.map((currentValue) => ({
+    day: currentValue,
+    date: currentValue.date.replace(/-/g, ``),
+    assigned: 0,
+    returned: 0,
+    abandoned: 0,
+    paid: 0,
+    approved: 0,
+    rejected: 0,
+    submitted: 0,
+    earnings: 0
+  }))
+
+  return { hits: hits, days: days }
+}
+
+function importFileIsHitAutoApp () {
+  const [hit] = arguments
+
+  if (!hit.state.match(/Rejected|Paid/)) {
+    const isAfter30 = new Date(formatDate(hit.date)).getTime()
+    const whenAfter30 = new Date(formatDate(mturkDate())).getTime() - (31 * 24 * 60 * 60 * 1000)
+
+    if (isAfter30 < whenAfter30) {
+      hit.state = `Paid`
+    }
   }
 
   return hit
 }
 
-function formatDate (date) {
-  return [date.slice(0, 4), date.slice(4, 6), date.slice(6, 8)].join(`-`)
+function importFileDaysRecount () {
+  const [dates] = arguments
+
+  const promiseData = {}
+
+  return new Promise((resolve) => {
+    const transaction = hitTrackerDB.transaction([`hit`], `readonly`)
+    const objectStore = transaction.objectStore(`hit`)
+
+    for (let i = 0, length = dates.length; i < length; i++) {
+      const date = dates[i]
+
+      const dateCount = {
+        assigned: 0,
+        returned: 0,
+        abandoned: 0,
+        paid: 0,
+        approved: 0,
+        rejected: 0,
+        submitted: 0,
+        earnings: 0
+      }
+
+      objectStore.index(`date`).openCursor(window.IDBKeyRange.only(date)).onsuccess = (event) => {
+        const cursor = event.target.result
+
+        if (cursor) {
+          const state = cursor.value.state.toLowerCase()
+
+          dateCount[state] ++
+
+          if (state.match(/paid/)) dateCount.earnings += cursor.value.reward.amount_in_dollars
+
+          cursor.continue()
+        } else {
+          dateCount.earnings = dateCount.earnings.toFixed(2)
+          promiseData[date] = dateCount
+        }
+      }
+    }
+
+    transaction.oncomplete = (event) => {
+      resolve(promiseData)
+    }
+  })
+}
+
+async function exportFile () {
+  currentStatus(`show`, `Getting Data...`)
+
+  const data = JSON.stringify({
+    hits: await exportFileHits(),
+    days: await exportFileDays()
+  })
+
+  currentStatus(`update`, `Generating File...`)
+
+  const exportFile = document.getElementById(`export-file`)
+  exportFile.href = window.URL.createObjectURL(new window.Blob([data], { type: `application/json` }))
+  exportFile.download = `HIT_Tracker_Backup_${mturkDate()}.json`
+  exportFile.click()
+
+  currentStatus(`hide`)
+}
+
+function exportFileHits () {
+  let index = 0
+  const promiseData = []
+
+  return new Promise((resolve) => {
+    const transaction = hitTrackerDB.transaction([`hit`], `readonly`)
+    const objectStore = transaction.objectStore(`hit`)
+
+    objectStore.openCursor().onsuccess = (event) => {
+      const cursor = event.target.result
+
+      if (cursor) {
+        promiseData.push(event.target.result.value)
+        cursor.continue()
+      }
+
+      currentStatus(`update`, `Processing HITs... ${++index}`)
+    }
+
+    transaction.oncomplete = (event) => {
+      resolve(promiseData)
+    }
+  })
+}
+
+function exportFileDays () {
+  let index = 0
+  const promiseData = []
+
+  return new Promise((resolve) => {
+    const transaction = hitTrackerDB.transaction([`day`], `readonly`)
+    const objectStore = transaction.objectStore(`day`)
+
+    objectStore.openCursor().onsuccess = (event) => {
+      const cursor = event.target.result
+
+      if (cursor) {
+        promiseData.push(event.target.result.value)
+        cursor.continue()
+      }
+
+      currentStatus(`update`, `Processing Days... ${++index}`)
+    }
+
+    transaction.oncomplete = (event) => {
+      resolve(promiseData)
+    }
+  })
+}
+
+//
+function currentStatus () {
+  const [type, message] = arguments
+
+  const statusModal = document.getElementById(`status-modal`)
+
+  if (type === `show`) $(statusModal).modal({ backdrop: `static`, keyboard: false })
+  else if (type === `hide`) $(statusModal).modal(`hide`)
+
+  document.getElementById(`status-message`).textContent = message || ``
+}
+
+function toMoneyString () {
+  const [string] = arguments
+  return `$${Number(string).toFixed(2).toLocaleString(`en-US`, { minimumFractionDigits: 2 })}`
 }
