@@ -659,8 +659,8 @@ function mturkDateString () {
 document.getElementById(`sync-today`).addEventListener(`click`, async (e) => {
   await syncDay(mturkDate())
 
-  getTodaysInfo()
-  getTrackerInfo()
+  todaysOverview()
+  trackerOverview()
 
   chrome.runtime.sendMessage({
     function: `hitTrackerGetProjected`
@@ -670,8 +670,8 @@ document.getElementById(`sync-today`).addEventListener(`click`, async (e) => {
 document.getElementById(`sync-last-45-days`).addEventListener(`click`, async (e) => {
   await syncLast45()
 
-  getTodaysInfo()
-  getTrackerInfo()
+  todaysOverview()
+  trackerOverview()
 
   chrome.runtime.sendMessage({
     function: `hitTrackerGetProjected`
