@@ -1384,7 +1384,6 @@ function exportFileDays () {
   })
 }
 
-//
 function currentStatus () {
   const [type, message] = arguments
 
