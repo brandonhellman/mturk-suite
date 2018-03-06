@@ -591,14 +591,7 @@ function getWeek () {
 
   const tempDate = mturkDate()
 
-  if (tempDate === `20180217`) {
-    return { start: `20180211`, end: `20180217` }
-  } else if (tempDate === `20180218`) {
-    document.querySelector(`#today > div > div > div:nth-child(2) > table > tbody > tr:nth-child(2) > td:nth-child(1)`).textContent = `Projected Earnings Last Week`
-    return { start: `20180211`, end: `20180217` }
-  } else {
-    return { start: `20180225`, end: `20180303` }
-  }
+  return { start: `20180304`, end: `20180310` }
 }
 
 function getMonth () {
