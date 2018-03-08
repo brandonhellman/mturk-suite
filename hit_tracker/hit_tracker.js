@@ -1250,7 +1250,7 @@ function importFileConvertHITDB () {
 function importFileIsHitAutoApp () {
   const [hit] = arguments
 
-  if (!hit.state.match(/Rejected|Paid/)) {
+  if (hit.state === `Approved` || hit.state === `Submitted`) {
     const isAfter30 = new Date(formatDate(hit.date)).getTime()
     const whenAfter30 = new Date(formatDate(mturkDate())).getTime() - (31 * 24 * 60 * 60 * 1000)
 
