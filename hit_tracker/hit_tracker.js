@@ -591,7 +591,7 @@ function getWeek () {
 
   const tempDate = mturkDate()
 
-  return { start: `20180304`, end: `20180310` }
+  return { start: `20180311`, end: `20180317` }
 }
 
 function getMonth () {
