@@ -168,6 +168,8 @@ function trackerOverviewData () {
     const week = getWeek()
     const month = getMonth()
 
+    if (week.day === 0) document.getElementById(`which-week`).textContent = `Last`
+
     // pending week
     objectStore.index(`date`).openCursor(window.IDBKeyRange.bound(week.start, week.end)).onsuccess = (event) => {
       const cursor = event.target.result
@@ -583,15 +585,24 @@ function loggedOut () {
 }
 
 function getWeek () {
-  const today = mturkDateString()
-  const start = today.getDate() - today.getDay()
-  const end = start + 6
-  const startDate = new Date(today.setDate(start)).toISOString().slice(0, 10).replace(/-/g, ``)
-  const endDate = new Date(today.setDate(today.getDate() + 6)).toISOString().slice(0, 10).replace(/-/g, ``)
+  const today = mturkDate()
+  const weeks = [
+    [`20180325`, `20180326`, `20180327`, `20180328`, `20180329`, `20180330`, `20180331`],
+    [`20180401`, `20180402`, `20180403`, `20180404`, `20180405`, `20180406`, `20180407`],
+    [`20180408`, `20180409`, `20180410`, `20180411`, `20180412`, `20180413`, `20180414`],
+    [`20180415`, `20180416`, `20180417`, `20180418`, `20180419`, `20180420`, `20180421`],
+    [`20180422`, `20180423`, `20180424`, `20180425`, `20180426`, `20180427`, `20180428`],
+    [`20180429`, `20180430`, `20180501`, `20180502`, `20180503`, `20180504`, `20180505`],
+  ]
 
-  const tempDate = mturkDate()
+  for (const i in weeks) {
+    const day = weeks[i].indexOf(today)
 
-  return { start: `20180311`, end: `20180317` }
+    if (~day) {
+      const week = day === 0 ? weeks[i - 1] : weeks[i]
+      return { day: day, start: week[0], end: week[6] }
+    }
+  }
 }
 
 function getMonth () {
