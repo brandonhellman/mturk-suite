@@ -1,86 +1,45 @@
-/* globals chrome */
-
-chrome.runtime.onUpdateAvailable.addListener((details) => {
-  chrome.browserAction.setBadgeText({
-    text: `↺`
+// Create and display the update available notification.
+function createUpdateAvailableNotification (details) {
+  chrome.notifications.create(`onUpdateAvailable`, {
+    type: `basic`,
+    message: `Update v${details.version} is available for Mturk Suite!`,
+    title: `Update Available`,
+    iconUrl: `/media/icon_128.png`,
+    buttons: [
+      { title: `Update Now` }
+    ],
+    requireInteraction: true
   })
-  chrome.browserAction.setBadgeBackgroundColor({
-    color: `#28a745`
-  })
-  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.checkForUpdateAvailable) {
-      sendResponse(true)
-    }
-  })
-})
 
-//* ********* Context Menus **********//
-chrome.contextMenus.create({
-  title: `Paste Mturk Worker ID`,
-  contexts: [`editable`],
-  onclick (info, tab) {
-    chrome.tabs.executeScript(tab.id, {
-      code: `elem = document.activeElement; elem.value += '${storage.workerId}'; elem.dispatchEvent(new Event('change', { bubbles: true }));`,
-      frameId: info.frameId
-    })
+  addUpdateAvailableListeners()
+}
+
+// Adds listeners for the update available notification.
+function addUpdateAvailableListeners () {
+  if (!chrome.notifications.onClosed.hasListener(removeUpdateAvailableListeners)) {
+    chrome.notifications.onClosed.addListener(removeUpdateAvailableListeners)
   }
-})
-
-chrome.contextMenus.create({
-  title: `Contact Requester`,
-  contexts: [`link`],
-  targetUrlPatterns: [`https://worker.mturk.com/requesters/*`],
-  onclick (info, tab) {
-    const match = info.linkUrl.match(/([A-Z0-9]+)/)
-    const requesterId = match ? match[1] : null
-
-    if (requesterId) {
-      window.open(`https://worker.mturk.com/contact_requester/hit_type_messages/new?hit_type_message[hit_type_id]=YOURMTURKHIT&hit_type_message[requester_id]=${requesterId}`)
-    }
+  if (!chrome.notifications.onButtonClicked.hasListener(removeUpdateAvailableListeners)) {
+    chrome.notifications.onButtonClicked.addListener(updateAvailableButtonClicked)
   }
-})
+}
 
-chrome.contextMenus.create({
-  title: `HIT Catcher - Once`,
-  contexts: [`link`],
-  targetUrlPatterns: [`https://worker.mturk.com/projects/*/tasks*`],
-  onclick (info, tab) {
-    const match = info.linkUrl.match(/projects\/([A-Z0-9]+)\/tasks/)
-    const hitSetId = match ? match[1] : null
-
-    if (hitSetId) {
-      chrome.runtime.sendMessage({
-        hitCatcher: {
-          id: hitSetId,
-          name: ``,
-          once: true,
-          sound: true
-        }
-      })
-    }
+// Removes all the listeners created for the update available notification.
+function removeUpdateAvailableListeners (notificationId, byUser) {
+  if (notificationId === `onUpdateAvailable`) {
+    chrome.notifications.onClosed.removeListener(removeUpdateAvailableListeners)
+    chrome.notifications.onButtonClicked.removeListener(updateAvailableButtonClicked)
   }
-})
+}
 
-chrome.contextMenus.create({
-  title: `HIT Catcher - Panda`,
-  contexts: [`link`],
-  targetUrlPatterns: [`https://worker.mturk.com/projects/*/tasks*`],
-  onclick (info, tab) {
-    const match = info.linkUrl.match(/projects\/([A-Z0-9]+)\/tasks/)
-    const hitSetId = match ? match[1] : null
+// Reloads the extension when the user clicks the update available notification button.
+function updateAvailableButtonClicked (notificationId, buttonIndex) {
+  if (notificationId === `onUpdateAvailable`) chrome.runtime.reload()
+}
 
-    if (hitSetId) {
-      chrome.runtime.sendMessage({
-        hitCatcher: {
-          id: hitSetId,
-          name: ``,
-          once: false,
-          sound: false
-        }
-      })
-    }
-  }
-})
+// Fired when an update is available.
+chrome.runtime.onUpdateAvailable.addListener(createUpdateAvailableNotification)
+
 
 //* ********* Omnibox **********//
 chrome.omnibox.onInputChanged.addListener((text, suggest) => {
