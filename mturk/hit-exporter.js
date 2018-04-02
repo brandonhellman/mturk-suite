@@ -63,7 +63,7 @@
     if (confirmed) {
       chrome.runtime.sendMessage({
         function: `hitExportTurkerHub`,
-        arguments: {
+        data: {
           hit: JSON.parse(event.target.dataset.hit)
         }
       })
@@ -85,7 +85,7 @@
     if (confirmed) {
       chrome.runtime.sendMessage({
         function: `hitExportMTurkCrowd`,
-        arguments: {
+        data: {
           hit: JSON.parse(event.target.dataset.hit)
         }
       })
@@ -139,7 +139,7 @@
 
         chrome.runtime.sendMessage({
           function: pairs[storage.exports],
-          arguments: {
+          data: {
             hit: hit
           }
         })
@@ -158,7 +158,7 @@
     button.addEventListener(`click`, (event) => {
       chrome.runtime.sendMessage({
         function: stringFunction,
-        arguments: {
+        data: {
           hit: JSON.parse(event.target.dataset.hit)
         }
       })
