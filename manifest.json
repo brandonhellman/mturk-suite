@@ -3,7 +3,7 @@
 
     "name": "MTurk Suite",
 
-    "version": "2.1.17",
+    "version": "2.2.0",
 
     "description": "Enchances Mechanical Turk to increase your efficiency and earnings.",
 
@@ -21,7 +21,11 @@
     "author": "Kadauchi",
 
     "background": {
-        "scripts": ["background/background.js"],
+        "scripts": [
+            "background/background.js",
+            "background/context-menus.js",
+            "background/hit-exporter-listener.js"
+        ],
         "persistent": true
     },
 
