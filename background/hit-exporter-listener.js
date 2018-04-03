@@ -537,7 +537,7 @@ async function hitExportTurkerHub (request, sender, sendResponse) {
   }
 }
 
-async function hitExportMTurkCrowd (args, request, sender, sendResponse) {
+async function hitExportMTurkCrowd (request, sender, sendResponse) {
   async function messageHtml (hit) {
     const template = []
 
@@ -678,7 +678,7 @@ async function hitExportMTurkCrowd (args, request, sender, sendResponse) {
         credentials: `include`
       })
 
-      const hit = args.hit
+      const hit = request.data.hit
       const json = await checkPosts.json()
 
       for (const post of json.posts) {
