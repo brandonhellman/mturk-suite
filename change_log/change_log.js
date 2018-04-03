@@ -1,6 +1,14 @@
 const changeLog = []
 
 changeLog.push({
+  version: `2.2.2`,
+  date: `Tuesday, April 2, 2018`,
+  'HIT Finder': [
+    `MTC Direct Export working again.`
+  ]
+})
+
+changeLog.push({
   version: `2.2.1`,
   date: `Tuesday, April 2, 2018`,
   'HIT Finder': [
