@@ -1,6 +1,14 @@
 const changeLog = []
 
 changeLog.push({
+  version: `2.2.1`,
+  date: `Tuesday, April 2, 2018`,
+  'HIT Finder': [
+    `HIT Exports working again.`
+  ]
+})
+
+changeLog.push({
   version: `2.2.0`,
   date: `Saturday, March 31, 2018`,
   'General': [

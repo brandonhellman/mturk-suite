@@ -1294,7 +1294,7 @@ document.getElementById(`hit-export-short`).addEventListener(`click`, (event) =>
 
   chrome.runtime.sendMessage({
     function: `hitExportShort`,
-    arguments: {
+    data: {
       hit: hit
     }
   })
@@ -1306,7 +1306,7 @@ document.getElementById(`hit-export-plain`).addEventListener(`click`, (event) =>
 
   chrome.runtime.sendMessage({
     function: `hitExportPlain`,
-    arguments: {
+    data: {
       hit: hit
     }
   })
@@ -1318,7 +1318,7 @@ document.getElementById(`hit-export-bbcode`).addEventListener(`click`, (event) =
 
   chrome.runtime.sendMessage({
     function: `hitExportBBCode`,
-    arguments: {
+    data: {
       hit: hit
     }
   })
@@ -1330,7 +1330,7 @@ document.getElementById(`hit-export-markdown`).addEventListener(`click`, (event)
 
   chrome.runtime.sendMessage({
     function: `hitExportMarkdown`,
-    arguments: {
+    data: {
       hit: hit
     }
   })
@@ -1345,7 +1345,7 @@ document.getElementById(`hit-export-turkerhub`).addEventListener(`click`, (event
 
     chrome.runtime.sendMessage({
       function: `hitExportTurkerHub`,
-      arguments: {
+      data: {
         hit: hit
       }
     })
@@ -1361,7 +1361,7 @@ document.getElementById(`hit-export-mturkcrowd`).addEventListener(`click`, (even
 
     chrome.runtime.sendMessage({
       function: `hitExportMTurkCrowd`,
-      arguments: {
+      data: {
         hit: hit
       }
     })
