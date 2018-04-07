@@ -395,30 +395,19 @@ function includedAlert (il, hit) {
   }
 
   if (il.notification) {
-    chrome.notifications.create(
-            hit.hit_set_id,
-      {
-        type: `list`,
-        title: `Include list match found!`,
-        message: `Match`,
-        iconUrl: `/media/icon_128.png`,
-        items: [
-                    { title: `Title`, message: hit.title },
-                    { title: `Requester`, message: hit.requester_name },
-                    { title: `Reward`, message: toMoneyString(hit.monetary_reward.amount_in_dollars) },
-                    { title: `Available`, message: hit.assignable_hits_count.toString() }
-        ],
-        buttons: [
-                    { title: `Preview` },
-                    { title: `Accept` }
-        ]
-      },
-            (id) => {
-              setTimeout(() => {
-                chrome.notifications.clear(id)
-              }, 15000)
-            }
-        )
+    chrome.notifications.create(hit.hit_set_id, {
+      type: `list`,
+      message: `Match`,
+      title: `Include list match found!`,
+      iconUrl: `/media/icon_128.png`,
+      items: [
+        { title: `Title`, message: hit.title },
+        { title: `Requester`, message: hit.requester_name },
+        { title: `Reward`, message: toMoneyString(hit.monetary_reward.amount_in_dollars) },
+        { title: `Available`, message: hit.assignable_hits_count.toString() }
+      ],
+      ...(window.chrome ? { buttons: [{ title: `Preview` }, { title: `Accept` }] } : null)
+    })
   }
 
   if (il.pushbullet && storage.hitFinder[`alert-pushbullet-state`] === `on` && pushbulleted === false) {

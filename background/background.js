@@ -2,12 +2,10 @@
 function createUpdateAvailableNotification (details) {
   chrome.notifications.create(`onUpdateAvailable`, {
     type: `basic`,
-    message: `Update v${details.version} is available for Mturk Suite!`,
+    message: `Update v${details.version} is available! This update will be applied the next time your browser or MTurk Suite is restarted.`,
     title: `Update Available`,
     iconUrl: `/media/icon_128.png`,
-    buttons: [
-      { title: `Update Now` }
-    ],
+    ...(window.chrome ? { buttons: [{ title: `Update Now` }] } : null),
     requireInteraction: true
   })
 
