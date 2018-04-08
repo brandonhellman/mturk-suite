@@ -2,7 +2,7 @@ const changeLog = []
 
 changeLog.push({
   version: `2.2.3`,
-  date: ``,
+  date: `Sunday, April 8, 2018`,
   'HIT Finder': [
     `Fix for notifications not showing in Firefox.`
   ]
