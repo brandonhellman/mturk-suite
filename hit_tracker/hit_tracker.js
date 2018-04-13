@@ -584,16 +584,23 @@ function loggedOut () {
   sycningEnded()
 }
 
-function getWeek(moment = new Date()) {
-  const amz = new Date(moment.toLocaleString('en-US', {timeZone: "America/Los_Angeles"}))
-  const pad = p=>('0'+p).slice(-2);
-  const amzformat = d=>(d.getFullYear()+'')+pad(d.getMonth())+pad(d.getDate());
-  const offset = ()=>amz.getDate()-amz.getDay();
+function getWeek (dateToUse) {
+  const moment = dateToUse || new Date(); // If a test date isn't passed, get current one
+  const amz = new Date(moment.toLocaleString('en-US', {timeZone: 'America/Los_Angeles'})) // Set everything to Bezos time. (PST/PDT)
+  function pad (p) { // Used to pad month and day with leading 0 if necessary
+    return ('0' + p).slice(-2)
+  }
+  function amzformat (d) { // Return a string in the format YYYYMMDD
+    return (d.getFullYear() + '') + pad(d.getMonth()) + pad(d.getDate())
+  }
+  function offset () { // Calculate offset from current day to week start
+    return amz.getDate() - amz.getDay()
+  }
 
-  let start = new Date(amz.setDate(offset()));
-  let end = new Date(amz.setDate(offset()+6));
+  let start = new Date(amz.setDate(offset())) // Find Sunday of this week
+  let end = new Date(amz.setDate(offset() + 6)) // Find Saturday of this week
 
-  return {start: amzformat(start), end: amzformat(end)};
+  return {start: amzformat(start), end: amzformat(end)} // return object of {start: YYYYMMDD, end: YYYYMMDD}
 }
 
 function getWeekKludge () {
