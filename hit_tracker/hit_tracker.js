@@ -584,7 +584,19 @@ function loggedOut () {
   sycningEnded()
 }
 
-function getWeek () {
+function getWeek(moment = new Date()) {
+  const amz = new Date(moment.toLocaleString('en-US', {timeZone: "America/Los_Angeles"}))
+  const pad = p=>('0'+p).slice(-2);
+  const amzformat = d=>(d.getFullYear()+'')+pad(d.getMonth())+pad(d.getDate());
+  const offset = ()=>amz.getDate()-amz.getDay();
+
+  let start = new Date(amz.setDate(offset()));
+  let end = new Date(amz.setDate(offset()+6));
+
+  return {start: amzformat(start), end: amzformat(end)};
+}
+
+function getWeekKludge () {
   const today = mturkDate()
   const weeks = [
     [`20180325`, `20180326`, `20180327`, `20180328`, `20180329`, `20180330`, `20180331`],
