@@ -39,3 +39,7 @@ chrome.storage.local.get([`themes`], keys => {
     }
   });
 });
+
+(async function WORKER_ID() {
+  chrome.runtime.sendMessage({ workerId: (await new React(`common/CopyText`).props).textToCopy });
+})();
