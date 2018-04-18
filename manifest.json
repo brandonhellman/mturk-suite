@@ -70,18 +70,13 @@
     "content_scripts": [
         {
             "js": [
-                "js/mturk-react.js",
-                "js/mturk-script-enabled.js"
+                "mturk/_.js",
+                "mturk/amt.js",
+                "mturk/context-menu-worker-id.js"
             ],
             "matches": ["https://worker.mturk.com/*"],
             "run_at": "document_start",
             "all_frames": true
-        },
-
-        {
-            "js": ["mturk/mturk-storage.js"],
-            "matches": ["https://worker.mturk.com/*"],
-            "run_at": "document_start"
         },
 
         {
@@ -113,13 +108,6 @@
             "run_at": "document_start"
         },
 
-        {
-            "js": ["mturk/context-menu-worker-id.js"],
-            "matches": ["https://worker.mturk.com/*"],
-            "run_at": "document_start",
-            "all_frames": true
-        },
-        
         {
             "js": ["mturk/hit-catcher-buttons.js"],
             "matches": [
@@ -196,18 +184,6 @@
         {
             "js": ["mturk/hit-tracker-update-queue.js"],
             "matches": ["https://worker.mturk.com//tasks*"],
-            "run_at": "document_start"
-        },
-        
-        {
-            "js": ["mturk/mturk-logged-in.js"],
-            "matches": ["https://worker.mturk.com/*"],
-            "run_at": "document_start"
-        },
-
-        {
-            "js": ["mturk/mturk-theme.js"],
-            "matches": ["https://worker.mturk.com/*"],
             "run_at": "document_start"
         },
 
