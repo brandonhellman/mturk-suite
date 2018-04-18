@@ -1,20 +1,14 @@
-/* globals scriptEnabled */
+async function CONFIRM_RETURN_HIT() {
+  document.addEventListener(`submit`, event => {
+    if (event.target.querySelector(`[value="delete"]`)) {
+      event.preventDefault();
 
-(async function () {
-  const enabled = await scriptEnabled(`confirmReturnHIT`)
-  if (!enabled) return
-
-  document.addEventListener(`submit`, (event) => {
-    const returning = event.target.querySelector(`[value="delete"]`)
-
-    if (returning) {
-      event.preventDefault()
-
-      const confirmed = window.confirm(`Are you sure you want to return this HIT?`)
-
-      if (confirmed) {
-        event.target.submit()
+      // eslint-disable-next-line no-alert
+      if (window.confirm(`Are you sure you want to return this HIT?`)) {
+        event.target.submit();
       }
     }
-  })
-})()
+  });
+}
+
+new Script(`confirmReturnHIT`, CONFIRM_RETURN_HIT).run();

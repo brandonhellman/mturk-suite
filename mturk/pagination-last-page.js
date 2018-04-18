@@ -1,31 +1,25 @@
-/* globals mturkReact scriptEnabled */
+async function PAGINATION_LAST_PAGE() {
+  const R = new React(`reactComponents/navigation/Pagination`);
+  const { lastPage, currentPage } = await R.props;
 
-(async function () {
-  const enabled = await scriptEnabled(`paginationLastPage`)
-  if (!enabled) return
+  if (currentPage + 2 < lastPage) {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set(`page_number`, lastPage);
 
-  const react = await mturkReact(`reactComponents/navigation/Pagination`)
-  const reactProps = await react.getProps()
-  const lastPage = reactProps.lastPage
+    const pageItem = document.createElement(`li`);
+    pageItem.className = `page-item`;
 
-  if (lastPage > reactProps.currentPage + 2) {
-    const searchParams = new window.URLSearchParams(window.location.search)
-    searchParams.set(`page_number`, lastPage)
+    const pageLink = document.createElement(`a`);
+    pageLink.href = `${window.location.pathname}?${searchParams}`;
+    pageLink.className = `page-link btn btn-secondary btn-small`;
+    pageLink.textContent = lastPage;
+    pageItem.appendChild(pageLink);
 
-    const pageItem = document.createElement(`li`)
-    pageItem.className = `page-item`
+    const ellipsis = (await R.element).getElementsByClassName(`pagination-ellipsis`);
+    const lastEllipsis = ellipsis[ellipsis.length - 1];
 
-    const pageLink = document.createElement(`a`)
-    pageLink.href = `${window.location.pathname}?${searchParams}`
-    pageLink.className = `page-link btn btn-secondary btn-small`
-    pageLink.textContent = lastPage
-    pageItem.appendChild(pageLink)
-
-    const reactElement = await react.getElement()
-
-    const ellipsis = reactElement.getElementsByClassName(`pagination-ellipsis`)
-    const lastEllipsis = ellipsis[ellipsis.length - 1]
-
-    lastEllipsis.parentNode.insertBefore(pageItem, lastEllipsis.nextSibling)
+    lastEllipsis.parentNode.insertBefore(pageItem, lastEllipsis.nextSibling);
   }
-})()
+}
+
+new Script(PAGINATION_LAST_PAGE, `paginationLastPage`).run();

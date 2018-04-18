@@ -1,15 +1,10 @@
-/* globals mturkReact scriptEnabled */
+async function AUTO_ACCEPT_CHECKER() {
+  const element = await new React(`AutoAcceptCheckbox`).element;
+  const checkbox = element.getElementsByTagName(`input`)[0];
 
-(async function () {
-  const enabled = await scriptEnabled(`autoAcceptChecker`)
-  if (!enabled) return
-
-  const react = await mturkReact(`reactComponents/workPipeline/AutoAcceptCheckbox`)
-  const reactElement = await react.getElement()
-
-  const checkbox = reactElement.getElementsByTagName(`input`)[0]
-
-  if (checkbox.checked === false) {
-    checkbox.click()
+  if (!checkbox.checked) {
+    checkbox.click();
   }
-})()
+}
+
+new Script(`autoAcceptChecker`, AUTO_ACCEPT_CHECKER).run();

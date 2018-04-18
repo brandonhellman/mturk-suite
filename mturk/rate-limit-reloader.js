@@ -1,12 +1,9 @@
-/* globals scriptEnabled */
+async function RATE_LIMIT_RELOADER() {
+  const error = document.getElementsByClassName(`error-page`)[0];
 
-(async function () {
-  const enabled = await scriptEnabled(`paginationLastPage`)
-  if (!enabled) return
-
-  const error = document.getElementsByClassName(`error-page`)
-
-  if (error.length && ~error[0].textContent.indexOf(`You have exceeded`)) {
-    setTimeout(window.location.reload.bind(window.location), 1000)
+  if (error && error.textContent.includes(`You have exceeded`)) {
+    setTimeout(window.location.reload.bind(window.location), 1000);
   }
-})()
+}
+
+new Script(RATE_LIMIT_RELOADER, `rateLimitReloader`).run();
