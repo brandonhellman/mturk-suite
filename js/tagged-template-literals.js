@@ -3,7 +3,9 @@
 function HTML(strings, ...expressions) {
   return strings
     .map((string, i) => {
-      const expression = (expressions[i] || ``)
+      const expression = expressions[i] !== undefined ? expressions[i] : ``;
+      const nullToString = expression === null ? `null` : expression;
+      const newExpression = nullToString
         .toString()
         .replace(/&/g, `&amp;`)
         .replace(/</g, `&lt;`)
@@ -11,7 +13,7 @@ function HTML(strings, ...expressions) {
         .replace(/"/g, `&quot;`)
         .replace(/'/g, `&#039;`);
 
-      return string + expression;
+      return string + newExpression;
     })
     .join(``);
 }
@@ -19,7 +21,7 @@ function HTML(strings, ...expressions) {
 function ENCODE(strings, ...expressions) {
   return strings
     .map((string, i) => {
-      const expression = (expressions[i] || ``).toString();
+      const expression = expressions[i] !== undefined ? expressions[i] : ``;
       return string + encodeURIComponent(expression);
     })
     .join(``);
