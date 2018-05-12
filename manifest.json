@@ -71,8 +71,7 @@
         {
             "js": [
                 "mturk/_.js",
-                "mturk/amt.js",
-                "mturk/context-menu-worker-id.js"
+                "mturk/amt.js"
             ],
             "matches": ["https://worker.mturk.com/*"],
             "run_at": "document_start",
