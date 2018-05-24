@@ -221,7 +221,7 @@
         "https://worker.mturk.com/projects/",
         "https://worker.mturk.com/projects?*",
         "https://worker.mturk.com/projects/?*",
-        "https://worker.mturk.com/tasks*",
+        "https://worker.mturk.com/tasks?*",
         "https://worker.mturk.com/requesters/*",
         "https://worker.mturk.com/status_details/*",
         "https://worker.mturk.com/qualifications/*"
