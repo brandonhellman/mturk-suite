@@ -44,7 +44,7 @@ async function hitTrackerGetProjected() {
   const transaction = db.transaction([`hit`], `readonly`);
   const objectStore = transaction.objectStore(`hit`);
   const index = objectStore.index(`date`);
-  const range = IDBKeyRange.only(mturkDate());
+  const range = IDBKeyRange.only(MturkDate());
 
   index.openCursor(range).onsuccess = event => {
     const cursor = event.target.result;
