@@ -3,6 +3,16 @@ const changeLog = []
 changeLog.push({
   version: `2.2.3`,
   date: `Sunday, April 8, 2018`,
+  'General': [
+    `HIT Exporter should no longer break on direct exports if there is a special character on the export.`,
+    `HIT Exporter Direct export options now have the option to leave a message along with the `,
+    `HIT Exporter contact links now properly link to the correct constact requester URL.`
+  ]
+})
+
+changeLog.push({
+  version: `2.2.3`,
+  date: `Sunday, April 8, 2018`,
   'HIT Finder': [
     `Fix for notifications not showing in Firefox.`
   ]
