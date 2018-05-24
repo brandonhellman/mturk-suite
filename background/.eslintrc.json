@@ -1,0 +1,10 @@
+{
+  "globals": {
+    "Fetch": false,
+    "StorageGetKey": false,
+    "mturkDate": false,
+
+    "HTML": false,
+    "ENCODE": false
+  }
+}

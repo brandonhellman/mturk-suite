@@ -1,0 +1,14 @@
+{
+  "globals": {
+    "StorageGetKey": false,
+
+    "HTML": false,
+
+    "ReactDOM": false,
+    "ReactProps": false,
+
+    "Enabled": false,
+
+    "mturkDate": false
+  }
+}
