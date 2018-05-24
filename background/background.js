@@ -32,7 +32,7 @@ chrome.storage.local.get(`options`, keys => {
   if (!keys.options || keys.options.version !== 1) {
     chrome.storage.local.set({
       options: {
-        autoAcceptChecker: true,
+        autoAcceptUnchecker: false,
         blockListOnMturk: true,
         confirmReturnHIT: true,
         dashboardEnhancer: true,
