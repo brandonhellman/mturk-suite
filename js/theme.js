@@ -1,17 +1,17 @@
 /* globals chrome */
 
-(function () {
-  const theme = document.createElement(`link`)
-  theme.rel = `stylesheet`
-  document.head.prepend(theme)
+(function themee() {
+  const theme = document.createElement(`link`);
+  theme.rel = `stylesheet`;
+  document.head.prepend(theme);
 
-  chrome.storage.local.get([`themes`], (keys) => {
-    theme.href = `/bootstrap/css/${keys.themes.mts}.min.css`
+  chrome.storage.local.get([`options`], keys => {
+    theme.href = `/bootstrap/css/${keys.options.themeMts}.min.css`;
 
-    chrome.storage.onChanged.addListener((changes) => {
-      if (changes.themes) {
-        theme.href = `/bootstrap/css/${changes.themes.newValue.mts}.min.css`
+    chrome.storage.onChanged.addListener(changes => {
+      if (changes.options) {
+        theme.href = `/bootstrap/css/${changes.options.newValue.themeMts}.min.css`;
       }
-    })
-  })
-})()
+    });
+  });
+})();
