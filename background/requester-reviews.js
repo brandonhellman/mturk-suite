@@ -3,13 +3,10 @@ function reviewsDB() {
     const open = indexedDB.open(`requesterReviewsDB`, 1);
 
     open.onsuccess = event => {
-      console.log(`success`);
       resolve(event.target.result);
     };
 
     open.onupgradeneeded = event => {
-      // create transaction, wait to finish then resolve else error on first load
-      console.log(`onupgradeneeded`);
       const db = event.target.result;
       db.createObjectStore(`requester`, { keyPath: `id` });
       resolve(db);
