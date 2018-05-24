@@ -1,111 +1,103 @@
-async function HIT_EXPORTER() {
-  // Returns a script to be injected that uses the pages Bootstrap to make a popover.
-  // Popoover contains the HIT Exporter buttons for it's HIT.
-  function popover(hit) {
-    const id = hit.hit_set_id;
-    const title = `HIT Exporter <span style="font-size: 8px;">[${id}]</span>`;
-    const content =
-      `<div style="display: flex; flex-flow: row wrap; justify-content: space-around; width: 250px;">` +
-      `<button class="btn btn-primary btn-sm btn-hit-exporter" style="width: 75px; margin-bottom: 3px;" data-id="${id}" data-type="short">Short</button>` +
-      `<button class="btn btn-primary btn-sm btn-hit-exporter" style="width: 75px; margin-bottom: 3px;" data-id="${id}" data-type="plain">Plain</button>` +
-      `<button class="btn btn-primary btn-sm btn-hit-exporter" style="width: 75px; margin-bottom: 3px;" data-id="${id}" data-type="markdown">Markdown</button>` +
-      `<button class="btn btn-primary btn-sm btn-hit-exporter" style="width: 75px;" data-id="${id}" data-type="bbcode">BBCode</button>` +
-      `<button class="btn btn-primary btn-sm btn-hit-exporter" style="width: 75px;" data-id="${id}" data-type="turkerhub">Turker Hub</button>` +
-      `<button class="btn btn-primary btn-sm btn-hit-exporter" style="width: 75px;" data-id="${id}" data-type="mturkcrowd">MTurk Crowd</button>` +
-      `</div>`;
+function hitExporterPopover(button, hit) {
+  const { hit_set_id } = hit;
+  const json = JSON.stringify(hit);
 
-    const script = document.createElement(`script`);
-    script.textContent = `$(document.currentScript).parent().popover({html: true, trigger: 'focus', contiainer: 'body', title: '${title}', content: '${content}'});`;
-    return script;
-  }
+  const title = HTML`HIT Exporter <span style="font-size: 8px;">[${hit_set_id}]</span>`;
+  const content = HTML`<div>
+    <button class="btn btn-primary btn-sm" data-hit-json="${json}" data-type="short">Short</button>
+    <button class="btn btn-primary btn-sm" data-hit-json="${json}" data-type="plain">Plain</button>
+    <button class="btn btn-primary btn-sm" data-hit-json="${json}" data-type="markdown">Markdown</button>
+    <button class="btn btn-primary btn-sm" data-hit-json="${json}" data-type="bbcode">BBCode</button>
+    <button class="btn btn-primary btn-sm" data-hit-json="${json}" data-type="turkerhub">Turker Hub</button>
+    <button class="btn btn-primary btn-sm" data-hit-json="${json}" data-type="mturkcrowd">MTurk Crowd</button>
+    </div>`;
 
-  // Changes the color of the exported HIT's button.
-  function markExport(response) {
-    const { id, success } = response;
+  const script = document.createElement(`script`);
+  script.textContent = `$(document.currentScript).parent().popover({
+    html: true,
+    trigger: \`focus\`,
+    contiainer: \`body\`,
+    title: \`${title}\`,
+    content: \`${content}\`
+  });`;
 
-    const button = document.getElementById(`hit-exporter-${id}`);
-    button.classList.remove(`btn-primary`);
-    button.classList.remove(`btn-success`);
-    button.classList.remove(`btn-danger`);
-    button.classList.add(`btn-${success ? `success` : `danger`}`);
-  }
+  button.appendChild(script);
+}
 
-  // Sends the HIT to the background to be copied in the selected export.
-  function copyExport(type, id, hits) {
-    const hit = hits[id];
-    chrome.runtime.sendMessage({ hit, hitExporter: type }, markExport);
-  }
+function hitExporterMarkButton(response) {
+  const { id, success } = response;
 
-  // Confirms before sending the HIT directly to the selected forum with a message if provided.
-  function directExport(type, id, hits) {
-    const hit = hits[id];
-    const domain = type === `turkerhub` ? `TurkerHub` : `MTurkCrowd`;
+  const button = document.querySelector(`[data-hit*="${id}"]`);
+  button.classList.remove(`btn-primary`);
+  button.classList.remove(`btn-success`);
+  button.classList.remove(`btn-danger`);
+  button.classList.add(`btn-${success ? `success` : `danger`}`);
+}
 
-    // Replace with a modal or popover at somepoint in the future.
+function hitExporterPopoverButton(event, type, json) {
+  const hit = json || JSON.parse(event.target.dataset.hitJson);
+  const method = type || event.target.dataset.type;
+
+  if (method === `turkerhub` || method === `mturkcrowd`) {
     // eslint-disable-next-line no-alert
-    const result = window.prompt(`Are you sure you want to export this HIT to ${domain}.com?`);
+    const result = window.prompt(
+      `Are you sure you want to export this HIT to ${method}.com?`
+    );
 
-    if (result) chrome.runtime.sendMessage({ hit, message: result, hitExporter: type }, markExport);
-  }
-
-  // Checks if the selected export is a direct export.
-  function whichExport(type, id, hits) {
-    switch (type) {
-      case `turkerhub`:
-      case `mturkcrowd`:
-        directExport(type, id, hits);
-        break;
-      default:
-        copyExport(type, id, hits);
+    if (result) {
+      chrome.runtime.sendMessage(
+        { hit, hitExporter: method, message: result },
+        hitExporterMarkButton
+      );
     }
-  }
-
-  // Extracts the id and type from the event.
-  function extractExport(event, hits) {
-    const { id, type } = event.target.dataset;
-    whichExport(type, id, hits);
-  }
-
-  const dom = (await new React(`HitSetTable`).dom) || (await new React(`TaskQueueTable`).dom);
-  const props = (await new React(`HitSetTable`).props) || (await new React(`TaskQueueTable`).props);
-  const exportType = await new Storage(`exports`).value
-  const exportHITs = {};
-
-  const projects = dom.getElementsByClassName(`table-row`);
-  const { bodyData } = props;
-
-  // Loops through all the HITs on the page and add the HIT Exporter button before their Title.
-  for (let i = 0; i < projects.length; i += 1) {
-    const hit = bodyData[i].project ? bodyData[i].project : bodyData[i];
-    exportHITs[hit.hit_set_id] = hit;
-    const project = projects[i].getElementsByClassName(`project-name-column`);
-
-    const button = document.createElement(`button`);
-    button.id = `hit-exporter-${hit.hit_set_id}`;
-    button.type = `button`;
-    button.className = `btn btn-primary btn-sm fa fa-share`;
-    button.style.marginRight = `2px`;
-    project[0].prepend(button);
-
-    if (exportType === `all`) {
-      button.addEventListener(`click`, event => {
-        event.stopImmediatePropagation();
-      });
-      button.appendChild(popover(hit));
-    } else {
-      button.addEventListener(`click`, event => {
-        event.stopImmediatePropagation();
-        whichExport(exportType, hit.hit_set_id, exportHITs);
-      });
-    }
-  }
-
-  // Adds a listener for the buttons inside the HIT Exporter popup.
-  if (exportType === `all`) {
-    document.addEventListener(`click`, event => {
-      if (event.target.matches(`.btn-hit-exporter`)) extractExport(event, exportHITs);
-    });
+  } else {
+    chrome.runtime.sendMessage(
+      { hit, hitExporter: method },
+      hitExporterMarkButton
+    );
   }
 }
 
-new Script(HIT_EXPORTER, `hitExporter`).run();
+async function hitExporter() {
+  const [dom, props, options] = await Promise.all([
+    ReactDOM(`HitSetTable`, `TaskQueueTable`),
+    ReactProps(`HitSetTable`, `TaskQueueTable`),
+    StorageGetKey(`options`),
+    Enabled(`autoAcceptChecker`)
+  ]);
+
+  const { bodyData } = props;
+  const { hitExporterType } = options;
+
+  [...dom.querySelectorAll(`.table-row`)].forEach((row, i) => {
+    const hit = JSON.stringify(bodyData[i].project || bodyData[i]);
+
+    row
+      .querySelector(`.project-name-column`)
+      .insertAdjacentHTML(
+        `afterbegin`,
+        HTML`<span class="btn btn-sm fa fa-share text-primary" tabIndex="0" data-hit="${hit}"></span>`
+      );
+  });
+
+  [...dom.querySelectorAll(`[data-hit]`)].forEach(button => {
+    const hit = JSON.parse(button.dataset.hit);
+
+    button.addEventListener(`click`, event => {
+      event.stopImmediatePropagation();
+
+      if (hitExporterType !== `all`)
+        hitExporterPopoverButton(null, hitExporterType, hit);
+    });
+
+    if (hitExporterType === `all`) hitExporterPopover(button, hit);
+  });
+
+  document.addEventListener(`click`, event => {
+    if (event.target.matches(`[data-hit-json]`)) {
+      hitExporterPopoverButton(event);
+    }
+  });
+}
+
+hitExporter();

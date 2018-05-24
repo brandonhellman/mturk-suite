@@ -1,239 +1,266 @@
 {
-    "manifest_version": 2,
+  "manifest_version": 2,
 
-    "name": "MTurk Suite",
+  "name": "MTurk Suite",
 
-    "version": "2.2.3",
+  "version": "2.3.0",
 
-    "description": "Enchances Mechanical Turk to increase your efficiency and earnings.",
+  "description":
+    "Enchances Mechanical Turk to increase your efficiency and earnings.",
 
-    "icons": {
-        "16": "media/icon_16.png",
-        "128": "media/icon_128.png"
-    },
+  "icons": {
+    "16": "media/icon_16.png",
+    "128": "media/icon_128.png"
+  },
 
-    "browser_action": {
-        "default_icon": "media/icon_128.png",
-        "default_title": "MTurk Suite",
-        "default_popup": "popup/popup.html"
-    },
+  "browser_action": {
+    "default_icon": "media/icon_128.png",
+    "default_title": "MTurk Suite",
+    "default_popup": "popup/popup.html"
+  },
 
-    "author": "Kadauchi",
+  "author": "Kadauchi",
 
-    "background": {
-        "scripts": [
-            "background/background.js",
-            "background/context-menus.js",
-            "background/hit-exporter-listener.js"
-        ],
-        "persistent": true
-    },
-
-    "minimum_chrome_version": "61",
-
-    "offline_enabled": true,
-
-    "omnibox": {
-        "keyword" : "mturk"
-    },
-
-    "options_page": "options/options.html",
-
-    "permissions": [
-        "tabs",
-        "activeTab",
-        "storage",
-        "webRequest",
-        "webRequestBlocking",
-        "contextMenus",
-        "notifications",
-        "clipboardWrite",
-        "*://*.mturk.com/*",
-        "*://*.turkerhub.com/*",
-        "*://*.mturkcrowd.com/*"
+  "background": {
+    "scripts": [
+      "js/fetch-with-timeout.js",
+      "js/mturk-date.js",
+      "js/storage.js",
+      "js/tagged-template-literals.js",
+      "background/background.js",
+      "background/context-menus.js",
+      "background/hit-exporter.js",
+      "background/hit-tracker.js",
+      "background/omnibox.js",
+      "background/requester-reviews.js"
     ],
+    "persistent": true
+  },
 
-    "short_name": "MTS",
+  "minimum_chrome_version": "61",
 
-    "externally_connectable": {
-        "matches": [
-            "https://worker.mturk.com/*",
-            "https://turkerhub.com/*",
-            "http://www.mturkcrowd.com/*"
-        ]
-    },
+  "offline_enabled": true,
 
-    "web_accessible_resources": [
-        "bootstrap/css/*"
-    ],
+  "omnibox": {
+    "keyword": "mturk"
+  },
 
-    "content_scripts": [
-        {
-            "js": [
-                "mturk/_.js",
-                "mturk/amt.js",
-                "mturk/context-menu-worker-id.js"
-            ],
-            "matches": ["https://worker.mturk.com/*"],
-            "run_at": "document_start",
-            "all_frames": true
-        },
+  "options_page": "options/options.html",
 
-        {
-            "js": ["mturk/auto-accept-checker.js"],
-            "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
-            "run_at": "document_start"
-        },
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "storage",
+    "webRequest",
+    "webRequestBlocking",
+    "contextMenus",
+    "notifications",
+    "clipboardWrite",
+    "*://*.mturk.com/*",
+    "*://*.turkerhub.com/*",
+    "*://*.mturkcrowd.com/*"
+  ],
 
-        {
-            "js": ["mturk/block-list-on-mturk.js"],
-            "matches": [
-                "https://worker.mturk.com/",
-                "https://worker.mturk.com/?*",
-                "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects/",
-                "https://worker.mturk.com/projects?*",
-                "https://worker.mturk.com/projects/?*",
-                "https://worker.mturk.com/tasks*"
-            ],
-            "run_at": "document_start"
-        },
+  "short_name": "MTS",
 
-        {
-            "js": ["mturk/confirm-return-hit.js"],
-            "matches": [
-                "https://worker.mturk.com/tasks*",
-                "https://worker.mturk.com/projects/*/tasks/*"
-            ],
-            "run_at": "document_start"
-        },
-
-        {
-            "js": ["mturk/hit-catcher-buttons.js"],
-            "matches": [
-                "https://worker.mturk.com/",
-                "https://worker.mturk.com/?*",
-                "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects/",
-                "https://worker.mturk.com/projects?*",
-                "https://worker.mturk.com/projects/?*",
-                "https://worker.mturk.com/tasks*"
-            ],
-            "run_at": "document_start"
-        },
-
-        {
-            "js": ["mturk/hit-catcher-buttons-missed.js"],
-            "matches": [
-                "https://worker.mturk.com/",
-                "https://worker.mturk.com/?*",
-                "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects/",
-                "https://worker.mturk.com/projects?*",
-                "https://worker.mturk.com/projects/?*"
-            ],
-            "run_at": "document_start"
-        },
-        
-        {
-            "js": ["mturk/hit-details-sticky.js"],
-            "matches": ["https://worker.mturk.com/projects/*/tasks*"],
-            "run_at": "document_start"
-        },
-        
-        {
-            "js": ["mturk/hit-exporter.js"],
-            "matches": [
-                "https://worker.mturk.com/",
-                "https://worker.mturk.com/?*",
-                "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects/",
-                "https://worker.mturk.com/projects?*",
-                "https://worker.mturk.com/projects/?*",
-                "https://worker.mturk.com/tasks*"
-            ],
-            "run_at": "document_start"
-        },
-        
-        {
-            "js": ["mturk/hit-tracker-display-counts.js"],
-            "matches": [
-                "https://worker.mturk.com/",
-                "https://worker.mturk.com/?*",
-                "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects/",
-                "https://worker.mturk.com/projects?*",
-                "https://worker.mturk.com/projects/?*",
-                "https://worker.mturk.com/tasks*"
-            ],
-            "run_at": "document_start"
-        },
-
-        {
-            "js": ["mturk/hit-tracker-display-earnings.js"],
-            "matches": ["https://worker.mturk.com/*"],
-            "run_at": "document_end"
-        },
-        
-        {
-            "js": ["mturk/hit-tracker-update-hit.js"],
-            "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
-            "run_at": "document_start"
-        },
-        
-        {
-            "js": ["mturk/hit-tracker-update-queue.js"],
-            "matches": ["https://worker.mturk.com//tasks*"],
-            "run_at": "document_start"
-        },
-
-        {
-            "js": ["mturk/pagination-last-page.js"],
-            "matches": [
-                "https://worker.mturk.com/",
-                "https://worker.mturk.com/?*",
-                "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects/",
-                "https://worker.mturk.com/projects?*",
-                "https://worker.mturk.com/projects/?*",
-                "https://worker.mturk.com/tasks*",
-                "https://worker.mturk.com/status_details/*",
-                "https://worker.mturk.com/qualifications/*"
-            ],
-            "run_at": "document_start"
-        },
-
-        {
-            "js": ["mturk/queue-info-enhancer.js"],
-            "matches": ["https://worker.mturk.com/tasks*"],
-            "run_at": "document_start"
-        },
-
-        {
-            "js": ["mturk/rate-limit-reloader.js"],
-            "matches": ["https://worker.mturk.com/*"],
-            "run_at": "document_end"
-        },
-
-        {
-            "js": ["mturk/requester-reviews.js"],
-            "matches": [
-                "https://worker.mturk.com/",
-                "https://worker.mturk.com/?*",
-                "https://worker.mturk.com/projects",
-                "https://worker.mturk.com/projects/",
-                "https://worker.mturk.com/projects?*",
-                "https://worker.mturk.com/projects/?*",
-                "https://worker.mturk.com/tasks*",
-                "https://worker.mturk.com/status_details/*"
-            ],
-            "run_at": "document_start"
-        },
-        
-        {
-            "js": ["mturk/workspace-expander.js"],
-            "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
-            "run_at": "document_end"
-        }
+  "externally_connectable": {
+    "matches": [
+      "https://worker.mturk.com/*",
+      "https://turkerhub.com/*",
+      "http://www.mturkcrowd.com/*"
     ]
+  },
+
+  "web_accessible_resources": [
+    "bootstrap/js/*",
+    "bootstrap/css/*",
+    "fontawesome/webfonts/*",
+    "hit_tracker/hit_tracker.html"
+  ],
+
+  "content_scripts": [
+    {
+      "js": [
+        "js/mturk-date.js",
+        "js/react-dom-props.js",
+        "js/storage.js",
+        "js/tagged-template-literals.js"
+      ],
+      "matches": ["https://worker.mturk.com/*"],
+      "run_at": "document_start",
+      "all_frames": true
+    },
+
+    {
+      "js": ["mturk/auto-accept-checker.js"],
+      "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/block-list-on-mturk.js"],
+      "matches": [
+        "https://worker.mturk.com/",
+        "https://worker.mturk.com/?*",
+        "https://worker.mturk.com/projects",
+        "https://worker.mturk.com/projects/",
+        "https://worker.mturk.com/projects?*",
+        "https://worker.mturk.com/projects/?*"
+      ],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/confirm-return-hit.js"],
+      "matches": [
+        "https://worker.mturk.com/tasks*",
+        "https://worker.mturk.com/projects/*/tasks/*"
+      ],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/context-menu-worker-id.js"],
+      "matches": ["https://worker.mturk.com/*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/hit-catcher-buttons.js"],
+      "matches": [
+        "https://worker.mturk.com/",
+        "https://worker.mturk.com/?*",
+        "https://worker.mturk.com/projects",
+        "https://worker.mturk.com/projects/",
+        "https://worker.mturk.com/projects?*",
+        "https://worker.mturk.com/projects/?*",
+        "https://worker.mturk.com/tasks*"
+      ],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/hit-catcher-buttons-missed.js"],
+      "matches": [
+        "https://worker.mturk.com/",
+        "https://worker.mturk.com/?*",
+        "https://worker.mturk.com/projects",
+        "https://worker.mturk.com/projects/",
+        "https://worker.mturk.com/projects?*",
+        "https://worker.mturk.com/projects/?*"
+      ],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/hit-details-sticky.js"],
+      "matches": ["https://worker.mturk.com/projects/*/tasks*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/hit-exporter.js"],
+      "matches": [
+        "https://worker.mturk.com/",
+        "https://worker.mturk.com/?*",
+        "https://worker.mturk.com/projects",
+        "https://worker.mturk.com/projects/",
+        "https://worker.mturk.com/projects?*",
+        "https://worker.mturk.com/projects/?*",
+        "https://worker.mturk.com/tasks*",
+        "https://worker.mturk.com/requesters/*"
+      ],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/hit-tracker-display-counts.js"],
+      "matches": [
+        "https://worker.mturk.com/",
+        "https://worker.mturk.com/?*",
+        "https://worker.mturk.com/projects",
+        "https://worker.mturk.com/projects/",
+        "https://worker.mturk.com/projects?*",
+        "https://worker.mturk.com/projects/?*",
+        "https://worker.mturk.com/tasks*",
+        "https://worker.mturk.com/requesters/*"
+      ],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/hit-tracker-display-earnings.js"],
+      "matches": ["https://worker.mturk.com/*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/hit-tracker-update-hit.js"],
+      "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/hit-tracker-update-queue.js"],
+      "matches": ["https://worker.mturk.com/tasks*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/logged-in.js"],
+      "matches": ["https://worker.mturk.com/*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/pagination-last-page.js"],
+      "matches": [
+        "https://worker.mturk.com/",
+        "https://worker.mturk.com/?*",
+        "https://worker.mturk.com/projects",
+        "https://worker.mturk.com/projects/",
+        "https://worker.mturk.com/projects?*",
+        "https://worker.mturk.com/projects/?*",
+        "https://worker.mturk.com/tasks*",
+        "https://worker.mturk.com/requesters/*",
+        "https://worker.mturk.com/status_details/*",
+        "https://worker.mturk.com/qualifications/*"
+      ],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/queue-info-enhancer.js"],
+      "matches": ["https://worker.mturk.com/tasks*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/rate-limit-reloader.js"],
+      "matches": ["https://worker.mturk.com/*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/requester-reviews.js"],
+      "matches": [
+        "https://worker.mturk.com/",
+        "https://worker.mturk.com/?*",
+        "https://worker.mturk.com/projects",
+        "https://worker.mturk.com/projects/",
+        "https://worker.mturk.com/projects?*",
+        "https://worker.mturk.com/projects/?*",
+        "https://worker.mturk.com/tasks*",
+        "https://worker.mturk.com/requesters/*",
+        "https://worker.mturk.com/status_details/*"
+      ],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["mturk/workspace-expander.js"],
+      "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
+      "run_at": "document_end"
+    }
+  ]
 }

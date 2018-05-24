@@ -1,15 +1,20 @@
-async function WORKSPACE_EXPANDER() {
+async function workspaceExpander() {
+  const [options] = await Promise.all([
+    StorageGetKey(`options`),
+    Enabled(`workspaceExpander`)
+  ]);
+
   const workspace =
-    document.getElementsByClassName(`task-question-iframe-container`)[0] ||
+    document.querySelector(`.task-question-iframe-container`) ||
     document.getElementById(`hit-wrapper`);
   workspace.style.height = `100vh`;
   workspace.children[0].focus();
   workspace.scrollIntoView();
 
-  if ((await new Storage(`scripts`).value).hitDetailsSticky) {
-    const detailBar = document.getElementsByClassName(`project-detail-bar`)[0];
+  if (options.hitDetailsSticky) {
+    const detailBar = document.querySelector(`.project-detail-bar`);
     window.scrollBy(0, -Math.abs(detailBar.offsetHeight));
   }
 }
 
-new Script(WORKSPACE_EXPANDER, `workspaceExpander`).run();
+workspaceExpander();

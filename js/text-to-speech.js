@@ -1,25 +1,22 @@
-async function textToSpeech () {
-  const [text, name] = arguments
+/* eslint-disable no-unused-vars */
 
-  const utterThis = new window.SpeechSynthesisUtterance(text)
+function getVoice(name) {
+  const voices = speechSynthesis.getVoices();
+  const filtered = voices.filter(v => v.name === (name || v.name));
+  const voice = filtered[0] || voices[0];
+  return voice;
+}
 
-  utterThis.voice = await new Promise((resolve) => {
-    function getVoice () {
-      const voices = window.speechSynthesis.getVoices()
-      const filtered = voices.filter((voice) => voice.name === (name || voice.name))
-      return (filtered[0] || voices[0])
-    }
+function getSpeechVoice(name) {
+  return new Promise(resolve => {
+    const voice = getVoice(name);
+    if (voice) resolve(voice);
+    else window.speechSynthesis.onvoiceschanged = () => resolve(getVoice());
+  });
+}
 
-    const voice = getVoice()
-
-    if (voice) {
-      resolve(voice)
-    } else {
-      window.speechSynthesis.onvoiceschanged = (event) => {
-        resolve(getVoice())
-      }
-    }
-  })
-
-  window.speechSynthesis.speak(utterThis)
+async function textToSpeech(text, name) {
+  const utterThis = new SpeechSynthesisUtterance(text);
+  utterThis.voice = await getSpeechVoice(name);
+  window.speechSynthesis.speak(utterThis);
 }

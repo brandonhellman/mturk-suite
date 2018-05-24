@@ -1,25 +1,25 @@
-async function PAGINATION_LAST_PAGE() {
-  const R = new React(`reactComponents/navigation/Pagination`);
-  const { lastPage, currentPage } = await R.props;
+async function paginationLastPage() {
+  const [dom, props] = await Promise.all([
+    ReactDOM(`Pagination`),
+    ReactProps(`Pagination`),
+    Enabled(`paginationLastPage`)
+  ]);
 
-  if (currentPage + 2 < lastPage) {
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set(`page_number`, lastPage);
+  if (props) {
+    const { lastPage, currentPage } = props;
 
-    const pageItem = document.createElement(`li`);
-    pageItem.className = `page-item`;
+    if (lastPage > currentPage + 2) {
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set(`page_number`, lastPage);
 
-    const pageLink = document.createElement(`a`);
-    pageLink.href = `${window.location.pathname}?${searchParams}`;
-    pageLink.className = `page-link btn btn-secondary btn-small`;
-    pageLink.textContent = lastPage;
-    pageItem.appendChild(pageLink);
-
-    const ellipsis = (await R.element).getElementsByClassName(`pagination-ellipsis`);
-    const lastEllipsis = ellipsis[ellipsis.length - 1];
-
-    lastEllipsis.parentNode.insertBefore(pageItem, lastEllipsis.nextSibling);
+      dom.querySelector(`.pagination > :last-child`).insertAdjacentHTML(
+        `beforebegin`,
+        HTML`<li class="page-item">
+          <a href="/?${searchParams}" class="page-link btn btn-secondary btn-small">${lastPage}</a>
+        </li>`
+      );
+    }
   }
 }
 
-new Script(PAGINATION_LAST_PAGE, `paginationLastPage`).run();
+paginationLastPage();

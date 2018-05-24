@@ -1,4 +1,6 @@
-async function CONFIRM_RETURN_HIT() {
+async function confirmReturnHIT() {
+  await Enabled(`confirmReturnHIT`);
+
   document.addEventListener(`submit`, event => {
     if (event.target.querySelector(`[value="delete"]`)) {
       event.preventDefault();
@@ -11,4 +13,4 @@ async function CONFIRM_RETURN_HIT() {
   });
 }
 
-new Script(`confirmReturnHIT`, CONFIRM_RETURN_HIT).run();
+confirmReturnHIT();

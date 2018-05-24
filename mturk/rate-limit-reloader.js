@@ -1,4 +1,6 @@
-async function RATE_LIMIT_RELOADER() {
+async function rateLimitReloader() {
+  await Enabled(`rateLimitReloader`);
+
   const error = document.getElementsByClassName(`error-page`)[0];
 
   if (error && error.textContent.includes(`You have exceeded`)) {
@@ -6,4 +8,4 @@ async function RATE_LIMIT_RELOADER() {
   }
 }
 
-new Script(RATE_LIMIT_RELOADER, `rateLimitReloader`).run();
+rateLimitReloader();

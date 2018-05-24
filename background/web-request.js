@@ -1,0 +1,88 @@
+let requestsDB = {};
+
+chrome.webRequest.onBeforeRequest.addListener(
+  details => {
+    const match = details.url.match(
+      /https:\/\/worker.mturk.com\/projects\/([A-Z0-9]+)\/tasks/
+    );
+
+    if (match) {
+      requestsDB[details.requestId] = {
+        tabId: details.tabId,
+        hit_set_id: match[1]
+      };
+    }
+  },
+  {
+    urls: [`https://worker.mturk.com/projects/*/tasks*`],
+    types: [`main_frame`]
+  },
+  [`requestBody`]
+);
+
+chrome.webRequest.onCompleted.addListener(
+  details => {
+    const request = requestsDB[details.requestId];
+
+    if (request) {
+      const catcher = chrome.extension
+        .getViews()
+        .map(o => o.location.pathname)
+        .includes(`/hit_catcher/hit_catcher.html`);
+
+      if (
+        catcher &&
+        details.url.indexOf(
+          `https://worker.mturk.com/projects/${request.hit_set_id}/tasks`
+        ) === -1
+      ) {
+        setTimeout(() => {
+          chrome.tabs.sendMessage(request.tabId, {
+            hitMissed: request.hit_set_id
+          });
+        }, 250);
+      }
+    }
+  },
+  {
+    urls: [`https://worker.mturk.com/*`],
+    types: [`main_frame`]
+  },
+  [`responseHeaders`]
+);
+
+let filterParams = ``;
+
+chrome.webRequest.onCompleted.addListener(
+  details => {
+    const url = new window.URL(details.url);
+
+    if (!details.url.match(/format=json|\.json/)) {
+      const params = new window.URLSearchParams(url.search);
+      params.delete(`page_number`);
+      params.delete(`filters[search_term]`);
+
+      filterParams = params;
+    }
+  },
+  {
+    urls: [`https://worker.mturk.com/?*`, `https://worker.mturk.com/projects*`],
+    types: [`main_frame`]
+  },
+  [`responseHeaders`]
+);
+
+chrome.webRequest.onBeforeRequest.addListener(
+  details => {
+    if (storage.scripts.rememberFilter) {
+      return {
+        redirectUrl: `${details.url}?${filterParams}`
+      };
+    }
+  },
+  {
+    urls: [`https://worker.mturk.com/`, `https://worker.mturk.com/projects`],
+    types: [`main_frame`]
+  },
+  [`blocking`]
+);

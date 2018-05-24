@@ -12,18 +12,17 @@ chrome.runtime.onUpdateAvailable.addListener(details => {
 
 chrome.storage.local.get(`blockList`, keys => {
   const { blockList } = keys;
+  if (!blockList) chrome.storage.local.set({ blockList: {} });
+});
 
-  if (!blockList) {
-    chrome.storage.local.set({ blockList: {} });
-  }
+chrome.storage.local.get(`earnings`, keys => {
+  const { earnings } = keys;
+  if (!earnings) chrome.storage.local.set({ earnings: 0 });
 });
 
 chrome.storage.local.get(`includeList`, keys => {
   const { includeList } = keys;
-
-  if (!includeList) {
-    chrome.storage.local.set({ includeList: {} });
-  }
+  if (!includeList) chrome.storage.local.set({ includeList: {} });
 });
 
 chrome.storage.local.get(`options`, keys => {

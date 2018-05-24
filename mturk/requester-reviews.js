@@ -1,164 +1,215 @@
-/* globals chrome storage mturkReact scriptEnabled */
+/* eslint-disable camelcase */
+function requesterReviewsClass(review) {
+  const { average } = review;
+  if (average > 3.75) return `success`;
+  if (average > 2.0) return `warning`;
+  if (average > 0.0) return `danger`;
+  return `muted`;
+}
 
-(async function () {
-  const enabled = await scriptEnabled(`requesterReviews`)
-  if (!enabled) return
+function requesterReviewsTurkerViewHTML(hit, review, options) {
+  const { requester_id } = hit;
+  const { turkerview } = review;
+  const { requesterReviewsTurkerview } = options;
 
-  const react = await mturkReact(`reactComponents/hitSetTable/HitSetTable`) || await mturkReact(`reactComponents/taskQueueTable/TaskQueueTable`) || await mturkReact(`reactComponents/hitStatusDetailsTable/HitStatusDetailsTable`)
-  const reactProps = await react.getProps()
+  if (!requesterReviewsTurkerview) return ``;
 
-  const requesters = [...new Set(reactProps.bodyData.map((currentValue) => currentValue.project ? currentValue.project.requester_id : currentValue.requester_id))]
+  if (!turkerview)
+    return HTML`<div class="col-xs-4" style="width: 150px;">
+      <h2>
+        <a class="text-primary" href="https://turkerview.com/requesters/${requester_id}" target="_blank">TurkerView</a>
+      </h2>
+      <div>No Reviews</div>
+      <div>
+        <a href="https://turkerview.com/review.php" target="_blank">Review on TV</a>
+      </div>
+    </div>`;
 
-  const requesterReviews = await new Promise((resolve) => chrome.runtime.sendMessage({
-    function: `requesterReviewsGet`,
-    arguments: {
-      requesters: requesters
-    }
-  }, resolve))
+  const { ratings, rejections, tos, blocks } = turkerview;
+  const { hourly, pay, fast, comm } = ratings;
 
-  const reactElement = await react.getElement()
-  const hitRows = reactElement.getElementsByClassName(`table-row`)
+  return HTML`<div class="col-xs-4" style="width: 150px;">
+    <h2>
+      <a class="text-primary" href="https://turkerview.com/requesters/${requester_id}" target="_blank">TurkerView</a>
+    </h2>
+    <div>
+      <table style="width: 100%">
+        <tr> <td>Hourly</td> <td>$${hourly}</td>    </tr>
+        <tr> <td>Pay</td>    <td>${pay}</td>        </tr>
+        <tr> <td>Fast</td>   <td>${fast}</td>       </tr>
+        <tr> <td>Comm</td>   <td>${comm}</td>       </tr>
+        <tr> <td>Rej</td>    <td>${rejections}</td> </tr>
+        <tr> <td>ToS</td>    <td>${tos}</td>        </tr>
+        <tr> <td>Blocks</td> <td>${blocks}</td>     </tr>
+      </table>
+    </div>
+    <div>
+      <a href="https://turkerview.com/review.php" target="_blank">Review on TV</a>
+    </div>
+  </div>`;
+}
 
-  for (let i = 0; i < hitRows.length; i++) {
-    const hit = reactProps.bodyData[i].project ? reactProps.bodyData[i].project : reactProps.bodyData[i]
+function requesterReviewsTurkopticonHTML(hit, review, options) {
+  const { requester_id, requester_name, hit_set_id, title } = hit;
+  const { turkopticon } = review;
+  const { requesterReviewsTurkopticon } = options;
 
-    const review = requesterReviews[hit.requester_id]
+  if (!requesterReviewsTurkopticon) return ``;
 
-    const turkerview = ((object) => {
-      let template = ``
+  const url = new URL(`https://turkopticon.ucsd.edu/report`);
+  url.searchParams.set(`report[hit_id]`, hit_set_id);
+  url.searchParams.set(`report[hit_names]`, title);
+  url.searchParams.set(`requester[amzn_id]`, requester_id);
+  url.searchParams.set(`requester[amzn_name]`, requester_name);
 
-      if (storage.reviews.turkerview === true) {
-        if (object instanceof Object) {
-          template = buildColumns([
-                        [`Hourly`, object.ratings.hourly],
-                        [`Pay`, object.ratings.pay],
-                        [`Fast`, object.ratings.fast],
-                        [`Comm`, object.ratings.comm],
-                        [`Rej`, object.rejections],
-                        [`ToS`, object.tos],
-                        [`Blocks`, object.blocks]
-          ])
-        } else {
-          template = `No Reviews`
-        }
-        return `<div class="col-xs-4" style="width: 150px;"><h2><a class="text-primary" href="https://turkerview.com/requesters/${hit.requester_id}" target="_blank">TurkerView</a></h2>${template}<div><a href="https://turkerview.com/review.php?rname=${encodeURIComponent(hit.requester_name)}&rid=${hit.requester_id}&title=${hit.title}" target="_blank">Review on TV</a></div></div>`
-      }
-      return ``
-    })(review.turkerview)
+  if (!turkopticon)
+    return HTML`<div class="col-xs-4" style="width: 150px;">
+      <h2>
+        <a class="text-primary" href="https://turkopticon.ucsd.edu/${requester_id}" target="_blank">Turkopticon</a>
+      </h2>
+      <div>No Reviews</div>
+      <div>
+        <a href="${url.toString()}" target="_blank">Review on TO</a>
+      </div>
+    </div>`;
 
-    const turkopticon = ((object) => {
-      let template = ``
+  const { attrs, reviews, tos_flags } = turkopticon;
+  const { pay, fast, comm, fair } = attrs;
 
-      if (storage.reviews.turkopticon === true) {
-        if (object instanceof Object) {
-          template = buildColumns([
-                        [`Pay`, `${object.attrs.pay} / 5`],
-                        [`Fast`, `${object.attrs.fast} / 5`],
-                        [`Comm`, `${object.attrs.comm} / 5`],
-                        [`Fair`, `${object.attrs.fair} / 5`],
-                        [`Reviews`, object.reviews],
-                        [`ToS`, object.tos_flags]
-          ])
-        } else {
-          template = `No Reviews`
-        }
-        return `<div class="col-xs-4" style="width: 150px;"><h2><a class="text-primary" href="https://turkopticon.ucsd.edu/${hit.requester_id}" target="_blank">Turkopticon</a></h2>${template}<div class="col-xs-12">&nbsp;</div><div><a href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${hit.requester_id}&requester[amzn_name]=${encodeURIComponent(hit.requester_name)}" target="_blank">Review on TO</a></div></div>`
-      }
-      return ``
-    })(review.turkopticon)
+  return HTML`<div class="col-xs-4" style="width: 150px;">
+    <h2>
+      <a class="text-primary" href="https://turkopticon.ucsd.edu/${requester_id}" target="_blank">Turkopticon</a>
+    </h2>
+    <div>
+      <table style="width: 100%">
+        <tr> <td>Pay</td>     <td>${pay}</td>       </tr>
+        <tr> <td>Fast</td>    <td>${fast}</td>      </tr>
+        <tr> <td>Comm</td>    <td>${comm}</td>      </tr>
+        <tr> <td>Fair</td>    <td>${fair}</td>      </tr>
+        <tr> <td>Reviews</td> <td>${reviews}</td>   </tr>
+        <tr> <td>ToS</td>     <td>${tos_flags}</td> </tr>
+      </table>
+    </div>
+    <div>
+      <a href="${url.toString()}" target="_blank">Review on TO</a>
+    </div>
+  </div>`;
+}
 
-    const turkopticon2 = ((object) => {
-      let template = ``
+function requesterReviewsTurkopticon2HTML(hit, review, options) {
+  const { requester_id, requester_name } = hit;
+  const { turkopticon2 } = review;
+  const { requesterReviewsTurkopticon2 } = options;
 
-      if (storage.reviews.turkopticon2 === true) {
-        if (object instanceof Object) {
-          const all = object.all
-          const recent = object.recent
-          template = buildColumns([
-            [
-              `Hourly`,
-              recent.reward[1] > 0 ? `$${(recent.reward[0] / recent.reward[1] * 3600).toFixed(2)}` : `---`,
-              all.reward[1] > 0 ? `$${(all.reward[0] / all.reward[1] * 3600).toFixed(2)}` : `---`
-            ],
-                        [`Pending`, object.recent.pending > 0 ? `${(object.recent.pending / 86400).toFixed(2)} days` : `---`],
-                        [`Response`, object.recent.comm[1] > 0 ? `${Math.round(object.recent.comm[0] / object.recent.comm[1] * 100)}% of ${object.recent.comm[1]}` : `---`],
-                        [`Recommend`, object.recent.recommend[1] > 0 ? `${Math.round(object.recent.recommend[0] / object.recent.recommend[1] * 100)}% of ${object.recent.recommend[1]}` : `---`],
-                        [`Rejected`, object.recent.rejected[0]],
-                        [`ToS`, object.recent.tos[0]],
-                        [`Broken`, object.recent.broken[0]]
-          ])
-        } else {
-          template = `No Reviews`
-        }
-        return `<div class="col-xs-4" style="width: 225px;"><h2><a class="text-primary" href="https://turkopticon.info/requesters/${hit.requester_id}" target="_blank">Turkopticon 2</a></h2>${template}<div><a href="https://turkopticon.info/reviews/new?name=${encodeURIComponent(hit.requester_name)}&rid=${hit.requester_id}" target="_blank">Review on TO2</a></div></div>`
-      }
-      return ``
-    })(review.turkopticon2)
+  if (!requesterReviewsTurkopticon2) return ``;
 
-    for (const el of hitRows[i].getElementsByClassName(`expand-button`)) {
-      const button = document.createElement(`button`)
-      button.className = `btn btn-sm btn-${requesterReviewGetClass(hit.requester_id)} fa fa-user`
-      button.dataset.toggle = `popover`
-      button.style.marginRight = `5px`
-      button.addEventListener(`click`, (event) => {
-        event.target.closest(`.desktop-row`).click()
-      })
+  const url = new URL(`https://turkopticon.info/reviews/new`);
+  url.searchParams.set(`rid`, requester_id);
+  url.searchParams.set(`name`, requester_name);
 
-      const script = document.createElement(`script`)
-      script.textContent = `$(document.currentScript).parent().popover({ html: true, trigger: 'hover focus', title: '${hit.requester_name} [${hit.requester_id}]', content: '<div class="container">${turkerview + turkopticon + turkopticon2}</div>' });`
-      button.appendChild(script)
+  if (!turkopticon2)
+    return HTML`<div class="col-xs-4" style="width: 150px;">
+      <h2>
+        <a class="text-primary" href="https://turkopticon.info/requesters/${requester_id}" target="_blank">Turkopticon 2</a>
+      </h2>
+      <div>No Reviews</div>
+      <div>
+        <a href="${url.toString()}" target="_blank">Review on TO2</a>
+      </div>
+    </div>`;
 
-      el.parentElement.insertBefore(button, el)
-      el.style.display = `none`
-    }
-  }
+  const {
+    tos,
+    broken,
+    rejected,
+    pending,
+    hourly,
+    comm,
+    recommend
+  } = turkopticon2.all;
 
-  const style = document.createElement(`style`)
-  style.innerHTML = `.popover { max-width: 1000px; }`
-  document.head.appendChild(style)
+  return HTML`<div class="col-xs-4" style="width: 150px;">
+    <h2>
+      <a class="text-primary" href="https://turkopticon.info/requesters/${requester_id}" target="_blank">Turkopticon 2</a>
+    </h2>
+    <div>
+      <table style="width: 100%">
+        <tr> <td>Hourly</td>    <td>$${hourly}</td>   </tr>
+        <tr> <td>Pending</td>   <td>${pending}</td>   </tr>
+        <tr> <td>Response</td>  <td>${comm}</td>      </tr>
+        <tr> <td>Recommend</td> <td>${recommend}</td> </tr>
+        <tr> <td>Rejected</td>  <td>${rejected}</td>  </tr>
+        <tr> <td>ToS</td>       <td>${tos}</td>       </tr>
+        <tr> <td>Broken</td>    <td>${broken}</td>    </tr>
+      </table>
+    </div>
+    <div>
+      <a href="${url.toString()}" target="_blank">Review on TO2</a>
+    </div>
+  </div>`;
+}
 
-  function buildColumns () {
-    const [columns] = arguments
+async function requesterReviews() {
+  const [dom, props] = await Promise.all([
+    ReactDOM(`HitSetTable`, `TaskQueueTable`, `HitStatusDetailsTable`),
+    ReactProps(`HitSetTable`, `TaskQueueTable`, `HitStatusDetailsTable`),
+    Enabled(`requesterReviews`)
+  ]);
 
-    let templateLabels = ``
-    let templateValues = ``
+  const rids = [
+    ...new Set(
+      props.bodyData.map(
+        cV => (cV.project ? cV.project.requester_id : cV.requester_id)
+      )
+    )
+  ];
 
-    for (const value of columns) {
-      templateLabels += `<div>${value[0]}</div>`
-      templateValues += `<div>${value[1]}</div>`
-    }
+  const response = await new Promise(resolve =>
+    chrome.runtime.sendMessage({ getRequesterReviews: rids }, resolve)
+  );
 
-    return `<div class="col-xs-6">${templateLabels}</div><div class="col-xs-6">${templateValues}</div>`
-  }
+  const options = await StorageGetKey(`options`);
 
-  function requesterRatingAverage () {
-    const [requesterId] = arguments
+  dom.querySelectorAll(`.table-row`).forEach((row, i) => {
+    const hit = props.bodyData[i].project || props.bodyData[i];
+    const { requester_id, requester_name } = hit;
+    const review = response.reviews[requester_id];
 
-    const review = requesterReviews[requesterId]
+    row.querySelectorAll(`.expand-button`).forEach(btn => {
+      const button = document.createElement(`i`);
+      button.roll = `button`;
+      button.tabIndex = 0;
+      button.className = `btn btn-sm fa fa-users text-${requesterReviewsClass(
+        review
+      )}`;
+      button.addEventListener(`click`, event => {
+        event.stopImmediatePropagation();
+      });
 
-    if (review) {
-      const tv = storage.reviews.turkerview ? review.turkerview : null
-      const to = storage.reviews.turkopticon ? review.turkopticon : null
-      const to2 = storage.reviews.turkopticon2 ? review.turkopticon2 : null
+      const script = document.createElement(`script`);
+      script.textContent = `$(document.currentScript).parent().popover({
+        html: true,
+        delay: { show: 500, hide: 100 },
+        trigger: \`hover focus\`,
+        title: \`${requester_name} [${requester_id}]\`,
+        content: \`<div class="container">
+            ${requesterReviewsTurkerViewHTML(hit, review, options)}
+            ${requesterReviewsTurkopticonHTML(hit, review, options)}
+            ${requesterReviewsTurkopticon2HTML(hit, review, options)}
+          </div>\`
+      });`;
+      button.appendChild(script);
 
-      const tvPay = tv ? tv.ratings.pay : null
-      const tvHrly = tv ? (tv.ratings.hourly / 3) : null
-      const toPay = to ? to.attrs.pay : null
-      const to2Hrly = to2 ? to2.recent.reward[1] > 0 ? ((to2.recent.reward[0] / to2.recent.reward[1] * 3600) / 3) : to2.all.reward[1] > 0 ? ((to2.all.reward[0] / to2.all.reward[1] * 3600) / 3) : null : null
+      const expand = btn;
+      expand.parentElement.insertAdjacentElement(`afterend`, button);
+      expand.style.display = `none`;
+    });
+  });
 
-      if (tvPay || tvHrly || toPay || to2Hrly) {
-        const average = [tvPay, tvHrly, toPay, to2Hrly].filter(Boolean).map((currentValue, index, array) => Number(currentValue) / array.length).reduce((a, b) => a + b)
-        return average
-      }
-    }
+  document.head.insertAdjacentHTML(
+    `beforeend`,
+    HTML`<style>.popover { max-width: 1000px; }</style>`
+  );
+}
 
-    return 0
-  }
-
-  function requesterReviewGetClass () {
-    const [requesterId] = arguments
-
-    const average = requesterRatingAverage(requesterId)
-    return (average > 3.75 ? `success` : average > 2 ? `warning` : average > 0 ? `danger` : `default`)
-  }
-})()
+requesterReviews();

@@ -1,14 +1,18 @@
-/* globals chrome */
+let hitTrackerDB
 
-let hitTrackerDB = (() => {
-  const open = window.indexedDB.open(`hitTrackerDB`, 1)
-
-  open.onsuccess = (event) => {
-    hitTrackerDB = event.target.result
-    todaysOverview()
-    trackerOverview()
-  }
+(async function initialize () {
+  hitTrackerDB = await openDatabase(`hitTrackerDB`, 1)
+  todaysOverview()
+  trackerOverview()
 })()
+
+// Opens the specified IndexedDB
+function openDatabase (name, version) {
+  return new Promise((resolve) => {
+    const request = window.indexedDB.open(name, version)
+    request.onsuccess = (event) => resolve(event.target.result)
+  })
+}
 
 async function todaysOverview () {
   const data = await todaysOverviewData()
@@ -165,7 +169,7 @@ function trackerOverviewData () {
   return new Promise((resolve) => {
     const transaction = hitTrackerDB.transaction([`hit`], `readonly`)
     const objectStore = transaction.objectStore(`hit`)
-    const week = getWeek()
+    const week = getWeekKludge()
     const month = getMonth()
 
     if (week.day === 0) document.getElementById(`which-week`).textContent = `Last`
