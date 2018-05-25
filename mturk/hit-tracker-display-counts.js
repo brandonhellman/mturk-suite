@@ -1,28 +1,17 @@
-async function hitTrackerDisplayCounts() {
-  function setIcon(response, icon) {
-    const { Approved, Paid, Rejected } = response;
-    const { classList } = icon;
+function hitTrackerIcon(response, title) {
+  const keys = Object.keys(response);
+  const { Approved, Paid, Rejected } = response;
 
-    if (Approved || Paid) {
-      classList.add(`text-success`);
-      classList.replace(`fa-ellipsis-h`, `fa-check`);
-    } else if (Rejected) {
-      classList.add(`text-info`);
-      classList.replace(`fa-ellipsis-h`, `fa-exclamation`);
-    } else {
-      classList.add(`text-muted`);
-      classList.replace(
-        `fa-ellipsis-h`,
-        `fa-${Object.keys(response).length ? `question` : `minus`}`
-      );
-    }
-  }
+  if (keys.length) {
+    const span = document.createElement(`span`);
+    span.className = `m-r-xs fa fa-question text-muted`;
 
-  function setPopover(response, icon, title) {
-    const content =
-      Object.keys(response)
-        .map(key => `<div class="row">${key}: ${response[key]}</div>`)
-        .join(``) || `No Work Found`;
+    if (Approved || Paid) span.className = `m-r-xs fa fa-check text-success`;
+    else if (Rejected) span.className = `m-r-xs fa fa-exclamation text-danger`;
+
+    const content = keys
+      .map(key => HTML`<div class="row">${key}: ${response[key]}</div>`)
+      .join(``);
 
     const script = document.createElement(`script`);
     script.textContent = `$(document.currentScript).parent().popover({
@@ -35,9 +24,15 @@ async function hitTrackerDisplayCounts() {
       title: '${title}',
       content: '<div class="container">${content}</div>'
     });`;
-    icon.appendChild(script);
+    span.appendChild(script);
+
+    return span;
   }
 
+  return undefined;
+}
+
+async function hitTrackerDisplayCounts() {
   const [dom, props] = await Promise.all([
     ReactDOM(`HitSetTable`, `TaskQueueTable`),
     ReactProps(`HitSetTable`, `TaskQueueTable`),
@@ -48,33 +43,27 @@ async function hitTrackerDisplayCounts() {
     const json = props.bodyData[i].project || props.bodyData[i];
     const { requester_id, requester_name, title } = json;
 
-    const requesterEl = row.querySelector(`a[href^="/requesters/"]`);
-    requesterEl.insertAdjacentHTML(
-      `beforebegin`,
-      // eslint-disable-next-line camelcase
-      HTML`<span class="m-r-xs fa fa-ellipsis-h" data-hit-tracker-requester_id="${requester_id}" style="font-size: 12px;"></span>`
-    );
+    const reqMsg = { trackerGetCounts: { requester_id } };
+    const titleMsg = { trackerGetCounts: { title } };
 
-    const titleEl = row.querySelector(`.project-name-column`);
-    titleEl.children[titleEl.children.length - 1].insertAdjacentHTML(
-      `afterend`,
-      HTML`<span class="m-r-xs fa fa-ellipsis-h" data-hit-tracker-title="${title}"></span>`
-    );
+    chrome.runtime.sendMessage(reqMsg, response => {
+      const el = row.querySelector(`a[href^="/requesters/"]`);
+      const icon = hitTrackerIcon(
+        response,
+        HTML`${requester_name} [${requester_id}]`
+      );
 
-    chrome.runtime.sendMessage(
-      { trackerGetCounts: { requester_id } },
-      response => {
-        const icon = row.querySelector(`[data-hit-tracker-requester_id]`);
-        setIcon(response, icon);
-        // eslint-disable-next-line camelcase
-        setPopover(response, icon, HTML`${requester_name} [${requester_id}]`);
+      if (icon) el.insertAdjacentElement(`beforebegin`, icon);
+    });
+
+    chrome.runtime.sendMessage(titleMsg, response => {
+      const el = row.querySelector(`.project-name-column`);
+      const icon = hitTrackerIcon(response, HTML`${title}`);
+
+      if (icon) {
+        const insert = el.children[el.children.length - 1];
+        insert.insertAdjacentElement(`afterend`, icon);
       }
-    );
-
-    chrome.runtime.sendMessage({ trackerGetCounts: { title } }, response => {
-      const icon = row.querySelector(`[data-hit-tracker-title]`);
-      setIcon(response, icon);
-      setPopover(response, icon, HTML`${title}`);
     });
   });
 }
