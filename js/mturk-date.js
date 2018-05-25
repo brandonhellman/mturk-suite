@@ -8,7 +8,7 @@ function MturkDate(offset = 0) {
 
   const isPST = new Date(toPST);
   const yyyy = isPST.getFullYear();
-  const mm = `0${isPST.getMonth()}`.slice(-2);
+  const mm = `0${isPST.getMonth() + 1}`.slice(-2);
   const dd = `0${isPST.getDate()}`.slice(-2);
 
   return `${yyyy}${mm}${dd}`;
