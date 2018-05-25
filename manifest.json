@@ -195,13 +195,13 @@
     },
 
     {
-      "js": ["mturk/hit-tracker-update-hit.js"],
+      "js": ["mturk/hit-tracker-live-update-hit.js"],
       "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
       "run_at": "document_end"
     },
 
     {
-      "js": ["mturk/hit-tracker-update-queue.js"],
+      "js": ["mturk/hit-tracker-live-update-queue.js"],
       "matches": ["https://worker.mturk.com/tasks*"],
       "run_at": "document_end"
     },
