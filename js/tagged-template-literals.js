@@ -20,9 +20,10 @@ function HTML(strings, ...expressions) {
 
 function ENCODE(strings, ...expressions) {
   return strings
-    .map((string, i) => {
-      const expression = expressions[i] !== undefined ? expressions[i] : ``;
-      return string + encodeURIComponent(expression);
-    })
+    .map(
+      (string, i) =>
+        string +
+        encodeURIComponent(expressions[i] !== undefined ? expressions[i] : ``)
+    )
     .join(``);
 }
