@@ -28,10 +28,10 @@ function hitExporterMarkButton(response) {
   const { id, success } = response;
 
   const button = document.querySelector(`[data-hit*="${id}"]`);
-  button.classList.remove(`btn-primary`);
-  button.classList.remove(`btn-success`);
-  button.classList.remove(`btn-danger`);
-  button.classList.add(`btn-${success ? `success` : `danger`}`);
+  button.classList.remove(`text-primary`);
+  button.classList.remove(`text-success`);
+  button.classList.remove(`text-danger`);
+  button.classList.add(`text-${success ? `success` : `danger`}`);
 }
 
 function hitExporterPopoverButton(event, type, json) {
@@ -44,7 +44,7 @@ function hitExporterPopoverButton(event, type, json) {
       `Are you sure you want to export this HIT to ${method}.com?`
     );
 
-    if (result) {
+    if (result !== undefined) {
       chrome.runtime.sendMessage(
         { hit, hitExporter: method, message: result },
         hitExporterMarkButton

@@ -58,7 +58,8 @@ function hitExporterNotification(title, body) {
   window.setTimeout(notification.close.bind(notification), 7500);
 }
 
-function hitExporterToClipboard(exporter, string, hitId, sendResponse) {
+function hitExporterToClipboard(string, hit, sendResponse) {
+  const hitId = hit.hit_set_id;
   const cleaned = hitExporterCleanString(string);
   const textarea = document.createElement(`textarea`);
   textarea.textContent = cleaned;
@@ -68,7 +69,7 @@ function hitExporterToClipboard(exporter, string, hitId, sendResponse) {
   document.body.removeChild(textarea);
   hitExporterNotification(
     `HIT Export Successful!`,
-    `${exporter} export has been copied to your clipboard.`
+    `Export has been copied to your clipboard.`
   );
   sendResponse({ success: true, id: hitId });
 }
@@ -92,7 +93,6 @@ function templateTurkopticon(review) {
   const { attrs, reviews, tos_flags } = review;
   const { pay, fast, comm, fair } = attrs;
 
-  // eslint-disable-next-line camelcase
   return `[Pay=${pay}] [Fast=${fast}] [Comm=${comm}] [Fair=${fair}] [Reviews=${reviews}] [ToS=${tos_flags}]`;
 }
 
@@ -158,11 +158,9 @@ function shortTemplate(hit) {
     try {
       const urls = await shortTemplateURLs(hit);
       const [reqLink, prevLink, accLink] = urls;
-      // eslint-disable-next-line camelcase
       const template = `${masters}${requester_name} ${reqLink} • ${title} ${prevLink} • ${reward} • Accept: ${accLink} • ${hit_set_id}`;
       resolve(template);
     } catch (error) {
-      // eslint-disable-next-line camelcase
       const template = `${masters}${requester_name} • ${title} • ${reward} • Preview: https://worker.mturk.com/projects/${hit_set_id}/tasks • Accept: https://worker.mturk.com/projects/${hit_set_id}/tasks/accept_random`;
       resolve(template);
     }
@@ -171,7 +169,7 @@ function shortTemplate(hit) {
 
 async function hitExporterShort(request, sender, sendResponse) {
   const template = await shortTemplate(request.hit);
-  hitExporterToClipboard(`Short`, template, request, sender, sendResponse);
+  hitExporterToClipboard(template, request.hit, sendResponse);
 }
 
 /*
@@ -250,7 +248,7 @@ function plainTemplate(hit) {
 
 async function hitExporterPlain(request, sender, sendResponse) {
   const template = await plainTemplate(request.hit);
-  hitExporterToClipboard(`Plain`, template, sendResponse);
+  hitExporterToClipboard(template, request.hit, sendResponse);
 }
 
 /*
@@ -327,7 +325,7 @@ function bbCodeTemplate(hit) {
 
 async function hitExporterBBCode(request, sender, sendResponse) {
   const template = await bbCodeTemplate(request.hit);
-  hitExporterToClipboard(`BBCode`, template, request, sender, sendResponse);
+  hitExporterToClipboard(template, request.hit, sendResponse);
 }
 
 /*
@@ -411,7 +409,7 @@ function markdownTemplate(hit) {
 
 async function hitExporterMarkdown(request, sender, sendResponse) {
   const template = await markdownTemplate(request.hit);
-  hitExporterToClipboard(`Markdown`, template, request, sender, sendResponse);
+  hitExporterToClipboard(template, request.hit, sendResponse);
 }
 
 /*
@@ -463,7 +461,7 @@ function turkerHubCheckPosts(hit, thread) {
       const json = await response.json();
 
       json.posts.forEach(post => {
-        if (post.message.indexOf(hit.hit_set_id)) {
+        if (post.message.includes(hit.hit_set_id)) {
           throw new Error(`HIT was recently posted`);
         }
       });
@@ -566,7 +564,7 @@ function mturkCrowdCheckPosts(hit, thread) {
       const json = await response.json();
 
       json.posts.forEach(post => {
-        if (post.message.indexOf(hit.hit_set_id)) {
+        if (post.message.includes(hit.hit_set_id)) {
           throw new Error(`HIT was recently posted`);
         }
       });
