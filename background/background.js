@@ -38,6 +38,7 @@ chrome.storage.local.get(`options`, keys => {
         dashboardEnhancer: true,
         hitExporter: true,
         hitExporterType: `all`,
+        hitTracker: true,
         hitTrackerAutoSync: true,
         hitTrackerDisplayCounts: true,
         hitTrackerDisplayEarnings: true,
