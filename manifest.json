@@ -258,6 +258,12 @@
     },
 
     {
+      "js": ["mturk/theme.js"],
+      "matches": ["https://worker.mturk.com/*"],
+      "run_at": "document_start"
+    },
+
+    {
       "js": ["mturk/workspace-expander.js"],
       "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
       "run_at": "document_end"

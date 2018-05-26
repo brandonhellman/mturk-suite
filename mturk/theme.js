@@ -14,12 +14,11 @@ function setTheme(style) {
 
 async function theme() {
   const { themeMturk } = await StorageGetKey(`options`);
-
   if (themeMturk !== `default`) setTheme(themeMturk);
 
   chrome.storage.onChanged.addListener(changes => {
     if (changes.options && changes.options.newValue.themeMturk) {
-      setTheme(themeMturk);
+      setTheme(changes.options.newValue.themeMturk);
     }
   });
 }
