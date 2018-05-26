@@ -1,7 +1,7 @@
 async function hitTrackerLiveUpdateQueue() {
   const [reactProps] = await Promise.all([
     ReactProps(`TaskQueueTable`),
-    Enabled(`hitTracker`)
+    Enabled(`hitTrackerLiveUpdate`)
   ]);
 
   const hits = reactProps.bodyData.reduce((accumulator, currentValue) => {
