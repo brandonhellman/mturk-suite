@@ -63,7 +63,7 @@ async function hitExporter() {
     ReactDOM(`HitSetTable`, `TaskQueueTable`),
     ReactProps(`HitSetTable`, `TaskQueueTable`),
     StorageGetKey(`options`),
-    Enabled(`autoAcceptChecker`)
+    Enabled(`hitExporter`)
   ]);
 
   const { bodyData } = props;
