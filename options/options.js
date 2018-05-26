@@ -1,108 +1,43 @@
-const storage = new Object();
-
-function storageExports(string) {
-    storage.exports = string;
-
-    document.getElementById(string).checked = true;
-    
-    document.getElementById(`hit-exporter`).addEventListener(`change`, (e) => {
-        storage.exports = e.target.id;
-
-        chrome.storage.local.set({
-            exports: storage.exports
-        });
-    });
-}
-
-function storageReviews(object) {
-    storage.reviews = object;
-
-    for (const key in object) {
-        if (object.hasOwnProperty(key)) {
-            const element = document.getElementById(key);
-
-            if (element !== null) {
-                element.checked = object[key];
-            }
-        }
-    }
-    
-    document.getElementById(`requester-reviews`).addEventListener(`change`, (e) => {
-        storage.reviews[e.target.id] = e.target.checked;
-
-        chrome.storage.local.set({
-            reviews: storage.reviews
-        });
-    });
-}
-
-function storageScripts(object) {
-    storage.scripts = object;
-
-    for (const key in object) {
-        if (object.hasOwnProperty(key)) {            
-            const element = document.getElementById(key);
-
-            if (element !== null) {
-                element.checked = object[key];
-            }
-        }
-    }
-
-    if (object.hitExporter === true) {
-        document.getElementById(`hit-exporter`).hidden = false;
-    }
-    
-    if (object.requesterReviews === true) {
-        document.getElementById(`requester-reviews`).hidden = false;
-    }
-
-    document.getElementById(`scripts`).addEventListener(`change`, (e) => {
-        storage.scripts[e.target.id] = e.target.checked;
-
-        if (e.target.id === `hitExporter`) {
-            document.getElementById(`hit-exporter`).hidden = !document.getElementById(`hit-exporter`).hidden 
-        }
-
-        if (e.target.id === `requesterReviews`) {
-            document.getElementById(`requester-reviews`).hidden = !document.getElementById(`requester-reviews`).hidden;
-        }
-
-        chrome.storage.local.set({
-            scripts: storage.scripts
-        });
-    });
-}
-
-function storageThemes(object) {
-    storage.themes = object;
-
-    const themes = document.getElementById(`themes`);
-    const themesMts = document.getElementById(`themes-mts`);
-    const themesMturk = document.getElementById(`themes-mturk`);
-
-    themesMts.value = storage.themes.mts;
-    themesMturk.value = storage.themes.mturk;
-
-    themes.addEventListener(`change`, (e) => {
-        storage.themes.mts = themesMts.value;
-        storage.themes.mturk = themesMturk.value;
-
-        chrome.storage.local.set({
-            themes: storage.themes
-        });
-    });
-}
-
-chrome.storage.local.get([`exports`, `reviews`, `scripts`, `themes`], (keys) => {
-    storageExports(keys.exports);
-    storageReviews(keys.reviews);
-    storageScripts(keys.scripts);
-    storageThemes(keys.themes);
+document.getElementById(`hitTracker`).addEventListener(`change`, event => {
+  document.getElementById(`hit-tracker`).hidden = !event.target.checked;
 });
 
-$(`[data-toggle="tooltip"]`).tooltip({
-    delay: {
-        show: 500
-    }
+document.getElementById(`hitExporter`).addEventListener(`change`, event => {
+  document.getElementById(`hit-exporter`).hidden = !event.target.checked;
+});
+
+document
+  .getElementById(`requesterReviews`)
+  .addEventListener(`change`, event => {
+    document.getElementById(`requester-reviews`).hidden = !event.target.checked;
+  });
+
+chrome.storage.local.get(`options`, keys => {
+  const { options } = keys;
+
+  [...document.querySelectorAll(`input[type="checkbox"]`)].forEach(el => {
+    if (options[el.id]) el.click();
+
+    el.addEventListener(`change`, event => {
+      options[event.target.id] = event.target.checked;
+      chrome.storage.local.set({ options });
+    });
+  });
+
+  [...document.querySelectorAll(`input[name="export"]`)].forEach(el => {
+    if (options.hitExporterType === el.id) el.click();
+
+    el.addEventListener(`change`, event => {
+      options.hitExporterType = event.target.id;
+      chrome.storage.local.set({ options });
+    });
+  });
+
+  [...document.querySelectorAll(`select`)].forEach(el => {
+    el.value = options[el.id];
+    el.addEventListener(`change`, event => {
+      options[event.target.id] = event.target.value;
+      chrome.storage.local.set({ options });
+    });
+  });
 });
