@@ -34,6 +34,7 @@ chrome.storage.local.get(`options`, keys => {
   });
 
   [...document.querySelectorAll(`select`)].forEach(el => {
+    // eslint-disable-next-line no-param-reassign
     el.value = options[el.id];
     el.addEventListener(`change`, event => {
       options[event.target.id] = event.target.value;

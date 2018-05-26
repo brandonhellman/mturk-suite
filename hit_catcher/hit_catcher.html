@@ -1,164 +1,175 @@
 <!doctype html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>HIT Catcher</title>
 
-        <link id="theme" href="/bootstrap/css/default.min.css" rel="stylesheet">
-        <link href="/bootstrap/css/glyphicons.css" rel="stylesheet" media="screen">
-        <link href="hit_catcher.css" rel="stylesheet" media="screen">
+<head>
+    <meta charset="utf-8">
+    <title>HIT Catcher</title>
 
-        <script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
-        <script src="/bootstrap/js/popper.min.js"></script>
-        <script src="/bootstrap/js/bootstrap.min.js"></script>
-        <script src="/bootstrap/js/bootbox.js"></script>
-    </head>
-    <body style="padding: 3px;">
-        <!-- Buttons -->
-        <div>
+    <link href="/bootstrap/css/glyphicons.css" rel="stylesheet" media="screen">
+    <link href="hit_catcher.css" rel="stylesheet" media="screen">
 
-            <div class="float-left" style="padding: 4px;">
-                <div class="input-group input-group-xs form-group">
-                    <div class="input-group-addon">Speed</div>
-                    <input id="speed" type="number" class="form-control" step="100" min="500" value="1000">
-                    <div class="input-group-addon">ms</div>
-                </div>
-            </div>
+    <script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
+    <script src="/bootstrap/js/popper.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/bootstrap/js/bootbox.js"></script>
 
-            <button id="pause" type="button" class="btn btn-xxs btn-default">Pause</button>
-            <button id="add-watcher" type="button" class="btn btn-xxs btn-primary">Add Watcher</button>
-            <button id="advanced_settings" class="btn btn-xxs btn-primary">Advanced Settings</button>
+    <script src="/js/theme.js"></script>
+</head>
 
-        </div>
+<body style="padding: 3px;">
+    <!-- Buttons -->
+    <div>
 
-        <br>
-
-        <!-- Watchers -->
-        <div id="watchers" class="row"></div>
-
-        <!-- Watcher Settings -->
-        <div id="watcher-settings-modal" class="modal">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary">
-                        Watcher Settings
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="margin-top: -10px;">×</button>
-                    </div>
-                    <div class="modal-body row">
-
-                        <!-- Nickname -->
-                        <div class="col-sm-9">
-                            <div class="input-group input-group-sm form-group">
-                                <div class="input-group-addon">Nickname</div>
-                                <input id="watcher-settings-nickname" type="text" class="form-control">
-                            </div>
-                        </div>
-
-                        <!-- Once -->
-                        <div class="col-sm-3" style="position:relative; top: 3px;">
-                            <div class="form-group">
-                                <input id="watcher-settings-once" name="watcher-settings-once" type="checkbox" autocomplete="off" />
-                                <div class="btn-group btn-group-sm">
-                                    <label for="watcher-settings-once" class="btn btn-default active">Once</label>
-                                    <label for="watcher-settings-once" class="btn btn-default">
-                                        <span class="glyphicon glyphicon-ok"></span>
-                                        <span> </span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Requester Name -->
-                        <div class="col-sm-12">
-                            <b>Requester Name:</b> <span id="watcher-settings-requester-name"></span>
-                        </div>
-
-                        <!-- Requester Id -->
-                        <div class="col-sm-12">
-                            <b>Requester Id:</b> <span id="watcher-settings-requester-id"></span>
-                        </div>
-
-                        <!-- Title -->
-                        <div class="col-sm-12">
-                            <b>Title:</b> <span id="watcher-settings-title"></span>
-                        </div>
-
-                        <!-- HIT Set Id -->
-                        <div class="col-sm-12">
-                            <b>HIT Set Id:</b> <span id="watcher-settings-hit-set-id"></span>
-                        </div>
-
-                        <!-- Reward -->
-                        <div class="col-sm-12">
-                            <b>Reward:</b> <span id="watcher-settings-reward"></span>
-                        </div>
-
-                        <!-- Duration -->
-                        <div class="col-sm-12">
-                            <b>Duration:</b> <span id="watcher-settings-duration"></span>
-                        </div>
-
-                        <!-- Requirements -->
-                        <div class="col-sm-12">
-                            <b>Requirements:</b> <span id="watcher-settings-requirements"></span>
-                        </div>
-                    </div>
-                </div>
+        <div class="float-left" style="padding: 4px;">
+            <div class="input-group input-group-xs form-group">
+                <div class="input-group-addon">Speed</div>
+                <input id="speed" type="number" class="form-control" step="100" min="500" value="1000">
+                <div class="input-group-addon">ms</div>
             </div>
         </div>
 
-        <div id="add-watcher-modal" class="modal">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary">
-                        Add Watcher
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="margin-top: -10px;">×</button>
-                    </div>
-                    <div class="modal-body row">
+        <button id="pause" type="button" class="btn btn-xxs btn-default">Pause</button>
+        <button id="add-watcher" type="button" class="btn btn-xxs btn-primary">Add Watcher</button>
+        <button id="advanced_settings" class="btn btn-xxs btn-primary">Advanced Settings</button>
 
+    </div>
+
+    <br>
+
+    <!-- Watchers -->
+    <div id="watchers" class="row"></div>
+
+    <!-- Watcher Settings -->
+    <div id="watcher-settings-modal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    Watcher Settings
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="margin-top: -10px;">×</button>
+                </div>
+                <div class="modal-body row">
+
+                    <!-- Nickname -->
+                    <div class="col-sm-9">
+                        <div class="input-group input-group-sm form-group">
+                            <div class="input-group-addon">Nickname</div>
+                            <input id="watcher-settings-nickname" type="text" class="form-control">
+                        </div>
+                    </div>
+
+                    <!-- Once -->
+                    <div class="col-sm-3" style="position:relative; top: 3px;">
+                        <div class="form-group">
+                            <input id="watcher-settings-once" name="watcher-settings-once" type="checkbox" autocomplete="off" />
+                            <div class="btn-group btn-group-sm">
+                                <label for="watcher-settings-once" class="btn btn-default active">Once</label>
+                                <label for="watcher-settings-once" class="btn btn-default">
+                                    <span class="glyphicon glyphicon-ok"></span>
+                                    <span> </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Requester Name -->
+                    <div class="col-sm-12">
+                        <b>Requester Name:</b>
+                        <span id="watcher-settings-requester-name"></span>
+                    </div>
+
+                    <!-- Requester Id -->
+                    <div class="col-sm-12">
+                        <b>Requester Id:</b>
+                        <span id="watcher-settings-requester-id"></span>
+                    </div>
+
+                    <!-- Title -->
+                    <div class="col-sm-12">
+                        <b>Title:</b>
+                        <span id="watcher-settings-title"></span>
+                    </div>
+
+                    <!-- HIT Set Id -->
+                    <div class="col-sm-12">
+                        <b>HIT Set Id:</b>
+                        <span id="watcher-settings-hit-set-id"></span>
+                    </div>
+
+                    <!-- Reward -->
+                    <div class="col-sm-12">
+                        <b>Reward:</b>
+                        <span id="watcher-settings-reward"></span>
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="col-sm-12">
+                        <b>Duration:</b>
+                        <span id="watcher-settings-duration"></span>
+                    </div>
+
+                    <!-- Requirements -->
+                    <div class="col-sm-12">
+                        <b>Requirements:</b>
+                        <span id="watcher-settings-requirements"></span>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Advanced Settings -->
-        <div id="advanced_settings_modal" class="modal">
+    <div id="add-watcher-modal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    Add Watcher
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="margin-top: -10px;">×</button>
+                </div>
+                <div class="modal-body row">
 
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary">
-                        Advanced Settings
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="margin-top: -10px;">×</button>
-                    </div>
-                    <div class="modal-body row">
-                        <!-- Captcha Popup -->
-                        <div class="col-sm-6">
-                            <div class="input-group input-group-sm form-group">
-                                <input id="captcha-popup" name="captcha-popup" type="checkbox" autocomplete="off" />
-                                <div class="btn-group btn-group-sm">
-                                    <label for="captcha-popup" class="btn btn-default">
-                                        <span class="glyphicon glyphicon-ok"></span>
-                                        <span> </span>
-                                    </label>
-                                    <label for="captcha-popup" class="btn btn-default active">Popup HIT On Captcha</label>
-                                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Settings -->
+    <div id="advanced_settings_modal" class="modal">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    Advanced Settings
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="margin-top: -10px;">×</button>
+                </div>
+                <div class="modal-body row">
+                    <!-- Captcha Popup -->
+                    <div class="col-sm-6">
+                        <div class="input-group input-group-sm form-group">
+                            <input id="captcha-popup" name="captcha-popup" type="checkbox" autocomplete="off" />
+                            <div class="btn-group btn-group-sm">
+                                <label for="captcha-popup" class="btn btn-default">
+                                    <span class="glyphicon glyphicon-ok"></span>
+                                    <span> </span>
+                                </label>
+                                <label for="captcha-popup" class="btn btn-default active">Popup HIT On Captcha</label>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Captcha Override -->
-                        <div class="col-sm-6">
-                            <div class="input-group input-group-sm form-group">
-                                <div class="input-group-addon">GroupId</div>
-                                <input id="captcha-hitSetId" type="text" class="form-control" placeholder="Group id for popup">
-                            </div>
+                    <!-- Captcha Override -->
+                    <div class="col-sm-6">
+                        <div class="input-group input-group-sm form-group">
+                            <div class="input-group-addon">GroupId</div>
+                            <input id="captcha-hitSetId" type="text" class="form-control" placeholder="Group id for popup">
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
 
-    </body>
+    </div>
 
-    <script src="hit_catcher.js"></script>
+</body>
+
+<script src="hit_catcher.js"></script>
+
 </html>
