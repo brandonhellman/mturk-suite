@@ -41,7 +41,7 @@ async function hitTrackerLiveUpdateHIT() {
     const source = document.querySelector(`iframe.embed-responsive-item`);
 
     if (source) {
-      message.hitTrackerUpdate.hit.source = source.src;
+      message.trackerUpdate.hit.source = source.src;
     }
     chrome.runtime.sendMessage(message);
 
@@ -49,7 +49,7 @@ async function hitTrackerLiveUpdateHIT() {
       const returning = event.target.querySelector(`[value="delete"]`);
 
       if (returning) {
-        message.hitTrackerUpdate.hit.state = `Returned`;
+        message.trackerUpdate.hit.state = `Returned`;
 
         chrome.runtime.sendMessage(message);
       }

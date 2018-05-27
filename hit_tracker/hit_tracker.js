@@ -701,7 +701,7 @@ document.getElementById(`sync-today`).addEventListener(`click`, async (e) => {
   trackerOverview()
 
   chrome.runtime.sendMessage({
-    function: `hitTrackerGetProjected`
+    hitTrackerGetProjected: true
   })
 })
 

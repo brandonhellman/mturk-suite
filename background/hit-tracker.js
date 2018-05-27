@@ -99,8 +99,8 @@ async function getTrackerCounts(request, sendResponse) {
 const accepted = {};
 
 async function hitTrackerSubmitted(args) {
-  const { data } = args;
-  const hitId = accepted[data.assignmentId];
+  const { answer, assignmentId } = args;
+  const hitId = accepted[assignmentId];
 
   if (typeof hitId === `string`) {
     const db = await trackerDB();
@@ -112,7 +112,7 @@ async function hitTrackerSubmitted(args) {
     request.onsuccess = event => {
       const { result } = event.target;
 
-      result.answer = data.answer;
+      result.answer = answer;
       result.state = `Submitted`;
 
       objectStore.put(result);
@@ -135,8 +135,6 @@ async function hitTrackerUpdate(args) {
   objectStore.put(hit);
 }
 
-hitTrackerGetProjected();
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const { trackerGetCounts, trackerSubmitted, trackerUpdate } = request;
 
@@ -146,14 +144,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (trackerSubmitted) {
-    hitTrackerSubmitted(trackerUpdate);
+    hitTrackerSubmitted(trackerSubmitted);
   }
 
   if (trackerUpdate) {
     hitTrackerUpdate(trackerUpdate);
   }
 
+  if (request.hitTrackerGetProjected) {
+    hitTrackerGetProjected();
+  }
+
   return false;
 });
 
 trackerDB();
+hitTrackerGetProjected();
