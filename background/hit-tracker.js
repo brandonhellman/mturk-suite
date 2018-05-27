@@ -74,7 +74,7 @@ async function getTrackerCounts(request, sendResponse) {
   const key = Object.keys(request)[0];
   const value = request[key];
 
-  let counts = {};
+  const counts = {};
 
   objectStore
     .index(key)
@@ -155,3 +155,5 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   return false;
 });
+
+trackerDB();
