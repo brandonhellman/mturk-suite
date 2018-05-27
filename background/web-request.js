@@ -1,4 +1,4 @@
-let requestsDB = {};
+const requestsDB = {};
 
 chrome.webRequest.onBeforeRequest.addListener(
   details => {
@@ -21,7 +21,7 @@ chrome.webRequest.onBeforeRequest.addListener(
 );
 
 chrome.webRequest.onCompleted.addListener(
-  details => {
+  async details => {
     const request = requestsDB[details.requestId];
 
     if (request) {
@@ -73,8 +73,11 @@ chrome.webRequest.onCompleted.addListener(
 );
 
 chrome.webRequest.onBeforeRequest.addListener(
-  details => {
-    if (storage.scripts.rememberFilter) {
+  // eslint-disable-next-line consistent-return
+  async details => {
+    const { rememberFilter } = await StorageGetKey(`options`);
+
+    if (rememberFilter) {
       return {
         redirectUrl: `${details.url}?${filterParams}`
       };
