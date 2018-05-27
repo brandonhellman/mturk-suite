@@ -30,8 +30,7 @@ async function hitTrackerLiveUpdateQueue() {
     };
 
     chrome.runtime.sendMessage({
-      function: `hitTrackerUpdate`,
-      arguments: {
+      trackerUpdate: {
         hit: accumulator[assignmentId],
         assignment_id: assignmentId
       }
@@ -52,8 +51,7 @@ async function hitTrackerLiveUpdateQueue() {
         hits[assignmentId].state = `Returned`;
 
         chrome.runtime.sendMessage({
-          function: `hitTrackerUpdate`,
-          arguments: {
+          trackerUpdate: {
             hit: hits[assignmentId],
             assignment_id: assignmentId
           }

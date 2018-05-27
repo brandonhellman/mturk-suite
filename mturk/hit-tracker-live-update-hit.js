@@ -18,8 +18,7 @@ async function hitTrackerLiveUpdateHIT() {
     const mturkDate = MturkDate(offset);
 
     const message = {
-      function: `hitTrackerUpdate`,
-      arguments: {
+      trackerUpdate: {
         hit: {
           hit_id: submitter.hiddenFormParams.task_id,
           requester_id: new URLSearchParams(
@@ -42,16 +41,15 @@ async function hitTrackerLiveUpdateHIT() {
     const source = document.querySelector(`iframe.embed-responsive-item`);
 
     if (source) {
-      message.arguments.hit.source = source.src;
+      message.hitTrackerUpdate.hit.source = source.src;
     }
-
     chrome.runtime.sendMessage(message);
 
     document.addEventListener(`submit`, event => {
       const returning = event.target.querySelector(`[value="delete"]`);
 
       if (returning) {
-        message.arguments.hit.state = `Returned`;
+        message.hitTrackerUpdate.hit.state = `Returned`;
 
         chrome.runtime.sendMessage(message);
       }
@@ -63,8 +61,7 @@ async function hitTrackerLiveUpdateHIT() {
 
         if (data.answer !== undefined && data.assignmentId !== undefined) {
           chrome.runtime.sendMessage({
-            function: `hitTrackerSubmitted`,
-            arguments: { data }
+            trackerSubmitted: data
           });
         }
       } catch (error) {
