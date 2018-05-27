@@ -61,6 +61,18 @@ chrome.storage.local.get(`options`, keys => {
   }
 });
 
+chrome.storage.local.get(`version`, keys => {
+  const { version } = chrome.runtime.getManifest();
+
+  if (!keys.version || keys.version !== version) {
+    chrome.storage.local.set({ version });
+    
+    chrome.tabs.create({
+      url: chrome.runtime.getURL(`/change_log/change_log.html`)
+    });
+  }
+});
+
 chrome.storage.local.get(`hitFinder`, keys => {
   if (!keys.hitFinder) {
     chrome.storage.local.set({
