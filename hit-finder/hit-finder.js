@@ -1439,7 +1439,9 @@ document.getElementById(`hit-export-turkerhub`).addEventListener(`click`, (event
   if (result) {
     const key = event.target.dataset.key
     const hit = finderDB[key]
-    chrome.runtime.sendMessage({ hit, hitExporter: `turkerhub`, message: result });
+    chrome.runtime.sendMessage({ hit, hitExporter: `turkerhub`, message: result }, (response) => {
+      /* mark as exported eventually */
+    });
   }
 })
 
@@ -1449,6 +1451,8 @@ document.getElementById(`hit-export-mturkcrowd`).addEventListener(`click`, (even
   if (result) {
     const key = event.target.dataset.key
     const hit = finderDB[key]
-    chrome.runtime.sendMessage({ hit, hitExporter: `mturkcrowd`, message: result });
+    chrome.runtime.sendMessage({ hit, hitExporter: `mturkcrowd`, message: result }, (response) => {
+      /* mark as exported eventually */
+    });
   }
 })
