@@ -130,7 +130,7 @@ function finderProcess () {
     let sound = false
     let blocked = 0
 
-    requesterReviewsCheck([...new Set(json.results.map((o) => o.requester_id))])
+    reviewsForFinder([...new Set(json.results.map((o) => o.requester_id))])
 
     for (const hit of json.results) {
       if (blockListed(hit) || minimumAvailable(hit) || minimumRequesterRating(hit)) {
@@ -139,17 +139,18 @@ function finderProcess () {
       }
 
       const included = includeListed(hit)
-      const requesterReviewClass = requesterReviewGetClass(hit.requester_id)
+      const requesterReviewClass = await requesterReviewGetClass(hit.requester_id)
       const trackerRequester = await hitTrackerMatchObject(`requester_id`, hit.requester_id)
       const trackerTitle = await hitTrackerMatchObject(`title`, hit.title)
+      const hfOptions = await StorageGetKey(`hitFinder`);
 
       const row = document.createElement(`tr`)
 
       if (included) {
         row.classList.add(`included`)
       }
-
-      if (storage.hitFinder[`display-colored-rows`]) {
+      console.log(requesterReviewClass)
+      if (hfOptions[`display-colored-rows`]) {
         row.classList.add(`table-${requesterReviewClass}`)
       }
 
@@ -170,7 +171,7 @@ function finderProcess () {
       actionsContainer.appendChild(hitInfo)
 
       const hitInfoIcon = document.createElement(`i`)
-      hitInfoIcon.className = `fas fa-info-circle`
+      hitInfoIcon.className = `fa fa-info-circle`
       hitInfo.appendChild(hitInfoIcon)
 
       const time = document.createElement(`td`)
@@ -193,7 +194,7 @@ function finderProcess () {
       requesterContainer.appendChild(requesterReviews)
 
       const requesterReviewsIcon = document.createElement(`i`)
-      requesterReviewsIcon.className = `fas fa-user`
+      requesterReviewsIcon.className = `fa fa-user`
       requesterReviews.appendChild(requesterReviewsIcon)
 
       const requesterTracker = document.createElement(`button`)
@@ -202,7 +203,7 @@ function finderProcess () {
       requesterContainer.appendChild(requesterTracker)
 
       const requesterTrackerIcon = document.createElement(`i`)
-      requesterTrackerIcon.className = `fas fa-${trackerRequester.icon}`
+      requesterTrackerIcon.className = `fa fa-${trackerRequester.icon}`
       requesterTracker.appendChild(requesterTrackerIcon)
 
       const requesterLink = document.createElement(`a`)
@@ -227,7 +228,7 @@ function finderProcess () {
       titleContainer.appendChild(sharer)
 
       const shareIcon = document.createElement(`i`)
-      shareIcon.className = `fas fa-share`
+      shareIcon.className = `fa fa-share`
       sharer.appendChild(shareIcon)
 
       const titleTracker = document.createElement(`button`)
@@ -236,7 +237,7 @@ function finderProcess () {
       titleContainer.appendChild(titleTracker)
 
       const titleTrackerIcon = document.createElement(`i`)
-      titleTrackerIcon.className = `fas fa-${trackerTitle.icon}`
+      titleTrackerIcon.className = `fa fa-${trackerTitle.icon}`
       titleTracker.appendChild(titleTrackerIcon)
 
       const titleLink = document.createElement(`a`)
@@ -635,60 +636,204 @@ chrome.notifications.onButtonClicked.addListener((id, btn) => {
   chrome.notifications.clear(id)
 })
 
-let requesterReviewsDB = (() => {
-  const open = window.indexedDB.open(`requesterReviewsDB`, 1)
+function getReviewsDB() {
+  return new Promise(resolve => {
+    const open = indexedDB.open(`requesterReviewsDB`, 1);
 
-  open.onsuccess = (event) => {
-    requesterReviewsDB = event.target.result
+    open.onsuccess = event => {
+      resolve(event.target.result);
+    };
 
-    const transaction = requesterReviewsDB.transaction([`requester`], `readonly`)
-    const objectStore = transaction.objectStore(`requester`)
-    const request = objectStore.getAll()
+    open.onupgradeneeded = event => {
+      const db = event.target.result;
+      db.createObjectStore(`requester`, { keyPath: `id` });
+      resolve(db);
+    };
+  });
+}
 
-    request.onsuccess = (event) => {
-      if (event.target.result) {
-        for (const review of event.target.result) {
-          reviewsDB[review.id] = review
+function getReviews(rids) {
+  return new Promise(async resolve => {
+    const db = await getReviewsDB();
+    const transaction = db.transaction([`requester`], `readonly`);
+    const objectStore = transaction.objectStore(`requester`);
+
+    const reviews = {};
+
+    rids.forEach(rid => {
+      objectStore.get(rid).onsuccess = event => {
+        reviews[rid] = event.target.result || { id: rid, time: 0 };
+      };
+    });
+
+    transaction.oncomplete = () => resolve(reviews);
+  });
+}
+
+async function saveReviews(reviews) {
+  const db = await getReviewsDB();
+  const transaction = db.transaction([`requester`], `readwrite`);
+  const objectStore = transaction.objectStore(`requester`);
+  const time = new Date().getTime();
+
+  Object.keys(reviews).forEach(rid => {
+    const review = reviews[rid];
+    review.id = rid;
+    review.time = time;
+    objectStore.put(review);
+  });
+}
+
+function updateCheck(reviews) {
+  return new Promise(async resolve => {
+    const time = new Date().getTime() - 1800000;
+    const update = Object.keys(reviews).some(rid => reviews[rid].time < time);
+    resolve(update);
+  });
+}
+
+function formatResponse(response) {
+  return new Promise(async resolve => {
+    const json = await response.json();
+
+    if (response.url.includes(`https://api.turkopticon.info/`)) {
+      const formattedTO2 = json.data.reduce((readable, requester) => {
+        const { aggregates } = requester.attributes;
+        const reviews = Object.keys(aggregates).reduce((review, time) => {
+          const {
+            broken,
+            comm,
+            pending,
+            recommend,
+            rejected,
+            reward,
+            tos
+          } = aggregates[time];
+
+          const reformatted = {
+            tos: tos[0],
+            broken: broken[0],
+            rejected: rejected[0],
+            pending:
+              pending > 0 ? `${(pending / 86400).toFixed(2)} days` : null,
+            hourly:
+              reward[1] > 0 ? (reward[0] / reward[1] * 3600).toFixed(2) : null,
+            comm:
+              comm[1] > 0 ? `${Math.round(comm[0] / comm[1] * 100)}%` : null,
+            recommend:
+              recommend[1] > 0
+                ? `${Math.round(recommend[0] / recommend[1] * 100)}%`
+                : null
+          };
+
+          return { ...review, [time]: reformatted };
+        }, {});
+
+        return { ...readable, [requester.id]: reviews };
+      }, {});
+
+      resolve(formattedTO2);
+    } else {
+      resolve(json);
+    }
+  });
+}
+
+function fetchReviews(site, url) {
+  return new Promise(async resolve => {
+    try {
+      const response = await Fetch(url, undefined, 5000);
+      const json = response.ok ? await formatResponse(response) : null;
+      resolve({ site, json });
+    } catch (error) {
+      resolve({ site, json: null });
+    }
+  });
+}
+
+function averageReviews(reviews) {
+  return new Promise(async resolve => {
+    const {
+      requesterReviewsTurkerview,
+      requesterReviewsTurkopticon,
+      requesterReviewsTurkopticon2
+    } = await StorageGetKey(`options`);
+
+    const avg = Object.keys(reviews).reduce((obj, rid) => {
+      const review = reviews[rid];
+
+      if (review) {
+        const tv = requesterReviewsTurkerview ? review.turkerview : null;
+        const to = requesterReviewsTurkopticon ? review.turkopticon : null;
+        const to2 = requesterReviewsTurkopticon2 ? review.turkopticon2 : null;
+
+        const tvPay = tv ? tv.ratings.pay : null;
+        const tvHrly = tv ? tv.ratings.hourly / 3 : null;
+        const toPay = to ? to.attrs.pay : null;
+        const to2Pay = to2 ? to2.all.hourly / 3 : null;
+
+        if (tvPay || tvHrly || toPay || to2Pay) {
+          const average = [tvPay, tvHrly, toPay, to2Pay]
+            .filter(pay => pay !== null)
+            .map((pay, i, filtered) => Number(pay) / filtered.length)
+            .reduce((a, b) => a + b);
+          review.average = average;
         }
       }
-    }
-  }
-})()
 
-function requesterReviewsCheck (requesters) {
-  const time = new Date().getTime()
-  const reviews = {}
-  const transaction = requesterReviewsDB.transaction([`requester`], `readonly`)
-  const objectStore = transaction.objectStore(`requester`)
+      if (!review.average) review.average = 0;
 
-  let update = false
+      return { ...obj, [rid]: review };
+    }, {});
 
-  for (let i = 0; i < requesters.length; i++) {
-    const id = requesters[i]
-    const request = objectStore.get(id)
+    resolve(avg);
+  });
+}
 
-    request.onsuccess = (event) => {
-      if (event.target.result) {
-        reviews[id] = event.target.result
+function updateReviews(reviews) {
+  return new Promise(async resolve => {
+    const rids = Object.keys(reviews);
 
-        if (event.target.result.time < (time - 3600000 / 2)) {
-          update = true
-        }
-      } else {
-        reviews[id] = {
-          id: id
-        }
-        update = true
-      }
-    }
-  }
+    const updates = await Promise.all([
+      fetchReviews(
+        `turkerview`,
+        `https://api.turkerview.com/api/v1/requesters/?ids=${rids}`
+      ),
+      fetchReviews(
+        `turkopticon`,
+        `https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${rids}`
+      ),
+      fetchReviews(
+        `turkopticon2`,
+        `https://api.turkopticon.info/requesters?rids=${rids}`
+      )
+    ]);
 
-  transaction.oncomplete = async (event) => {
-    if (update) {
-      const updatedReviews = await requesterReviewsUpdate(reviews, requesters)
-      updateRequesterReviews(updatedReviews)
-    }
-  }
+    const updated = rids.reduce((obj, rid) => {
+      const review = updates.reduce((o, update) => {
+        const { site, json } = update;
+        const data =
+          (json ? json[rid] : null) ||
+          (reviews[rid] ? reviews[rid][site] : null);
+        return { ...o, [site]: data };
+      }, {});
+
+      return { ...obj, [rid]: review };
+    }, {});
+
+    const averaged = await averageReviews(updated);
+    window.console.log(`averaged`, averaged);
+
+    resolve(averaged);
+    saveReviews(averaged);
+  });
+}
+
+async function reviewsForFinder(rids) {
+  const reviews = await getReviews(rids);
+  const needsUpdate = await updateCheck(reviews);
+
+  updateRequesterReviews(needsUpdate ? await updateReviews(reviews) : reviews);
 }
 
 function requesterReviewsUpdate (objectReviews, arrayIds) {
@@ -751,25 +896,14 @@ function requesterRatingAverage () {
   const review = reviewsDB[requesterId]
 
   if (review) {
-    const tv = storage.reviews.turkerview ? review.turkerview : null
-    const to = storage.reviews.turkopticon ? review.turkopticon : null
-    const to2 = storage.reviews.turkopticon2 ? review.turkopticon2 : null
-
-    const tvPay = tv ? tv.ratings.pay : null
-    const tvHrly = tv ? (tv.ratings.hourly / 3) : null
-    const toPay = to ? to.attrs.pay : null
-    const to2Hrly = to2 ? to2.recent.reward[1] > 0 ? ((to2.recent.reward[0] / to2.recent.reward[1] * 3600) / 3) : to2.all.reward[1] > 0 ? ((to2.all.reward[0] / to2.all.reward[1] * 3600) / 3) : null : null
-
-    if (tvPay || tvHrly || toPay || to2Hrly) {
-      const average = [tvPay, tvHrly, toPay, to2Hrly].filter(Boolean).map((currentValue, index, array) => Number(currentValue) / array.length).reduce((a, b) => a + b)
-      return average
-    }
+    console.log(review);
+    return review.average;
   }
 
   return 0
 }
 
-function requesterReviewGetClass () {
+async function requesterReviewGetClass () {
   const [requesterId] = arguments
 
   const average = requesterRatingAverage(requesterId)
@@ -979,7 +1113,7 @@ $(`#hit-sharer-modal`).on(`show.bs.modal`, (event) => {
   }
 })
 
-$(`#requester-review-modal`).on(`show.bs.modal`, (event) => {
+$(`#requester-review-modal`).on(`show.bs.modal`, async (event) => {
   const key = event.relatedTarget.dataset.key
   const review = reviewsDB[key]
 
@@ -987,7 +1121,9 @@ $(`#requester-review-modal`).on(`show.bs.modal`, (event) => {
   const to = review.turkopticon
   const to2 = review.turkopticon2
 
-  if (storage.reviews.turkerview) {
+  const options = await StorageGetKey(`options`);
+
+  if (options.requesterReviewsTurkerview) {
     if (tv) {
       document.getElementById(`review-turkerview-link`).href = `https://turkerview.com/requesters/${key}`
       document.getElementById(`review-turkerview-ratings-hourly`).textContent = toMoneyString(tv.ratings.hourly)
@@ -1009,7 +1145,7 @@ $(`#requester-review-modal`).on(`show.bs.modal`, (event) => {
     document.getElementById(`review-turkerview`).style.display = `none`
   }
 
-  if (storage.reviews.turkopticon) {
+  if (options.requesterReviewsTurkopticon) {
     if (to) {
       document.getElementById(`review-turkopticon-link`).href = `https://turkopticon.ucsd.edu/${key}`
       document.getElementById(`review-turkopticon-attrs-pay`).textContent = `${to.attrs.pay} / 5` || `- / 5`
@@ -1030,27 +1166,26 @@ $(`#requester-review-modal`).on(`show.bs.modal`, (event) => {
     document.getElementById(`review-turkopticon`).style.display = `none`
   }
 
-  if (storage.reviews.turkopticon2) {
+  if (options.requesterReviewsTurkopticon2) {
     if (to2) {
-      const recent = to2.recent
-      const all = to2.all
+      const {all, recent} = to2;
 
       document.getElementById(`review-turkopticon2-link`).href = `https://turkopticon.info/requesters/${key}`
-      document.getElementById(`review-turkopticon2-recent-reward`).textContent = recent.reward[1] > 0 ? `$${(recent.reward[0] / recent.reward[1] * 3600).toFixed(2)}` : `---`
-      document.getElementById(`review-turkopticon2-recent-pending`).textContent = recent.pending > 0 ? `${(recent.pending / 86400).toFixed(2)} days` : `---`
-      document.getElementById(`review-turkopticon2-recent-comm`).textContent = recent.comm[1] > 0 ? `${Math.round(recent.comm[0] / recent.comm[1] * 100)}% of ${recent.comm[1]}` : `---`
-      document.getElementById(`review-turkopticon2-recent-recommend`).textContent = recent.recommend[1] > 0 ? `${Math.round(recent.recommend[0] / recent.recommend[1] * 100)}% of ${recent.recommend[1]}` : `---`
-      document.getElementById(`review-turkopticon2-recent-rejected`).textContent = recent.rejected[0]
-      document.getElementById(`review-turkopticon2-recent-tos`).textContent = recent.tos[0]
-      document.getElementById(`review-turkopticon2-recent-broken`).textContent = recent.broken[0]
+      document.getElementById(`review-turkopticon2-recent-reward`).textContent = recent.hourly;
+      document.getElementById(`review-turkopticon2-recent-pending`).textContent = recent.pending;
+      document.getElementById(`review-turkopticon2-recent-comm`).textContent = recent.comm;
+      document.getElementById(`review-turkopticon2-recent-recommend`).textContent = recent.recommend;
+      document.getElementById(`review-turkopticon2-recent-rejected`).textContent = recent.rejected;
+      document.getElementById(`review-turkopticon2-recent-tos`).textContent = recent.tos;
+      document.getElementById(`review-turkopticon2-recent-broken`).textContent = recent.broken;
 
-      document.getElementById(`review-turkopticon2-all-reward`).textContent = all.reward[1] > 0 ? `$${(all.reward[0] / all.reward[1] * 3600).toFixed(2)}` : `---`
-      document.getElementById(`review-turkopticon2-all-pending`).textContent = all.pending > 0 ? `${(all.pending / 86400).toFixed(2)} days` : `---`
-      document.getElementById(`review-turkopticon2-all-comm`).textContent = all.comm[1] > 0 ? `${Math.round(all.comm[0] / all.comm[1] * 100)}% of ${all.comm[1]}` : `---`
-      document.getElementById(`review-turkopticon2-all-recommend`).textContent = all.recommend[1] > 0 ? `${Math.round(all.recommend[0] / all.recommend[1] * 100)}% of ${all.recommend[1]}` : `---`
-      document.getElementById(`review-turkopticon2-all-rejected`).textContent = all.rejected[0]
-      document.getElementById(`review-turkopticon2-all-tos`).textContent = all.tos[0]
-      document.getElementById(`review-turkopticon2-all-broken`).textContent = all.broken[0]
+      document.getElementById(`review-turkopticon2-all-reward`).textContent = all.hourly;
+      document.getElementById(`review-turkopticon2-all-pending`).textContent = all.pending;
+      document.getElementById(`review-turkopticon2-all-comm`).textContent = all.comm;
+      document.getElementById(`review-turkopticon2-all-recommend`).textContent = all.recommend;
+      document.getElementById(`review-turkopticon2-all-rejected`).textContent = all.rejected;
+      document.getElementById(`review-turkopticon2-all-tos`).textContent = all.tos;
+      document.getElementById(`review-turkopticon2-all-broken`).textContent = all.broken;
 
       document.getElementById(`review-turkopticon2-review`).style.display = ``
       document.getElementById(`review-turkopticon2-no-reviews`).style.display = `none`
