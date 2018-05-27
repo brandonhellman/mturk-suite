@@ -1,4 +1,4 @@
-(async function hitTrackerDisplayEarnings() {
+async function hitTrackerDisplayEarnings() {
   const [earnings] = await Promise.all([
     StorageGetKey(`earnings`),
     Enabled(`hitTrackerDisplayEarnings`)
@@ -13,4 +13,6 @@
     `beforeend`,
     `<span> - Earnings: </span><a href="${href}" target="_blank">${money}</a>`
   );
-})();
+}
+
+hitTrackerDisplayEarnings();
