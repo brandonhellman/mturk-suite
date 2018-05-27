@@ -1411,79 +1411,44 @@ document.getElementById(`logged-hits-toggle`).addEventListener(`click`, (event) 
 document.getElementById(`hit-export-short`).addEventListener(`click`, (event) => {
   const key = event.target.dataset.key
   const hit = finderDB[key]
-
-  chrome.runtime.sendMessage({
-    function: `hitExportShort`,
-    data: {
-      hit: hit
-    }
-  })
+  chrome.runtime.sendMessage({ hit, hitExporter: `short` });
 })
 
 document.getElementById(`hit-export-plain`).addEventListener(`click`, (event) => {
   const key = event.target.dataset.key
   const hit = finderDB[key]
-
-  chrome.runtime.sendMessage({
-    function: `hitExportPlain`,
-    data: {
-      hit: hit
-    }
-  })
+  chrome.runtime.sendMessage({ hit, hitExporter: `plain` });
 })
 
 document.getElementById(`hit-export-bbcode`).addEventListener(`click`, (event) => {
   const key = event.target.dataset.key
   const hit = finderDB[key]
+  chrome.runtime.sendMessage({ hit, hitExporter: `bbcode` });
 
-  chrome.runtime.sendMessage({
-    function: `hitExportBBCode`,
-    data: {
-      hit: hit
-    }
-  })
 })
 
 document.getElementById(`hit-export-markdown`).addEventListener(`click`, (event) => {
   const key = event.target.dataset.key
   const hit = finderDB[key]
-
-  chrome.runtime.sendMessage({
-    function: `hitExportMarkdown`,
-    data: {
-      hit: hit
-    }
-  })
+  chrome.runtime.sendMessage({ hit, hitExporter: `markdown` });
 })
 
 document.getElementById(`hit-export-turkerhub`).addEventListener(`click`, (event) => {
-  const result = window.confirm(`Are you sure you want to export this HIT to TurkerHub.com?`)
+  const result = window.prompt(`Are you sure you want to export this HIT to TurkerHub.com?`)
 
   if (result) {
     const key = event.target.dataset.key
     const hit = finderDB[key]
-
-    chrome.runtime.sendMessage({
-      function: `hitExportTurkerHub`,
-      data: {
-        hit: hit
-      }
-    })
+    chrome.runtime.sendMessage({ hit, hitExporter: `turkerhub`, message: result });
   }
 })
 
 document.getElementById(`hit-export-mturkcrowd`).addEventListener(`click`, (event) => {
-  const result = window.confirm(`Are you sure you want to export this HIT to MTurkCrowd.com?`)
+  const result = window.prompt(`Are you sure you want to export this HIT to MTurkCrowd.com?`)
 
   if (result) {
     const key = event.target.dataset.key
     const hit = finderDB[key]
-
-    chrome.runtime.sendMessage({
-      function: `hitExportMTurkCrowd`,
-      data: {
-        hit: hit
-      }
-    })
+    chrome.runtime.sendMessage({ hit, hitExporter: `mturkcrowd`, message: result });
   }
 })
