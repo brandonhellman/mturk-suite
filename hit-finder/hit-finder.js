@@ -149,7 +149,6 @@ function finderProcess () {
       if (included) {
         row.classList.add(`included`)
       }
-      console.log(requesterReviewClass)
       if (hfOptions[`display-colored-rows`]) {
         row.classList.add(`table-${requesterReviewClass}`)
       }
@@ -330,7 +329,6 @@ function minimumRequesterRating () {
   const ratingAverage = requesterRatingAverage(hit.requester_id)
 
   if (ratingAverage > 0 && ratingAverage < Number(storage.hitFinder[`filter-min-requester-rating`])) {
-    console.log(`ratingAverage`, ratingAverage)
     return true
   }
 
@@ -822,7 +820,6 @@ function updateReviews(reviews) {
     }, {});
 
     const averaged = await averageReviews(updated);
-    window.console.log(`averaged`, averaged);
 
     resolve(averaged);
     saveReviews(averaged);
@@ -896,7 +893,6 @@ function requesterRatingAverage () {
   const review = reviewsDB[requesterId]
 
   if (review) {
-    console.log(review);
     return review.average;
   }
 
@@ -914,7 +910,7 @@ async function updateRequesterReviews (reviews) {
   for (const key in reviews) {
     reviewsDB[key] = reviews[key]
 
-    const reviewClass = requesterReviewGetClass(key)
+    const reviewClass = await requesterReviewGetClass(key)
 
     if (reviewClass) {
       for (const element of document.getElementsByClassName(`btn-${key}`)) {
