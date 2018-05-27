@@ -86,9 +86,8 @@ async function getTrackerCounts(request, sendResponse) {
       const { state } = hit;
       const count = counts[state];
       counts[state] = count ? count + 1 : 1;
-
-      if (count < 5001) cursor.continue();
-      else counts = { [state]: `5000+` };
+      if (counts[state] < 5001) cursor.continue();
+      else counts[state] = `5000+`;
     }
   };
 
