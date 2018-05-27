@@ -35,9 +35,9 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
     <div>
       <table style="width: 100%">
         <tr> <td>Hourly</td> <td>$${hourly}</td>    </tr>
-        <tr> <td>Pay</td>    <td>${pay}</td>        </tr>
-        <tr> <td>Fast</td>   <td>${fast}</td>       </tr>
-        <tr> <td>Comm</td>   <td>${comm}</td>       </tr>
+        <tr> <td>Pay</td>    <td>${pay} / 5</td>        </tr>
+        <tr> <td>Fast</td>   <td>${fast} / 5</td>       </tr>
+        <tr> <td>Comm</td>   <td>${comm} / 5</td>       </tr>
         <tr> <td>Rej</td>    <td>${rejections}</td> </tr>
         <tr> <td>ToS</td>    <td>${tos}</td>        </tr>
         <tr> <td>Blocks</td> <td>${blocks}</td>     </tr>
@@ -82,10 +82,10 @@ function requesterReviewsTurkopticonHTML(hit, review, options) {
     </h2>
     <div>
       <table style="width: 100%">
-        <tr> <td>Pay</td>     <td>${pay}</td>       </tr>
-        <tr> <td>Fast</td>    <td>${fast}</td>      </tr>
-        <tr> <td>Comm</td>    <td>${comm}</td>      </tr>
-        <tr> <td>Fair</td>    <td>${fair}</td>      </tr>
+        <tr> <td>Pay</td>     <td>${pay} / 5</td>       </tr>
+        <tr> <td>Fast</td>    <td>${fast} / 5</td>      </tr>
+        <tr> <td>Comm</td>    <td>${comm} / 5</td>      </tr>
+        <tr> <td>Fair</td>    <td>${fair} / 5</td>      </tr>
         <tr> <td>Reviews</td> <td>${reviews}</td>   </tr>
         <tr> <td>ToS</td>     <td>${tos_flags}</td> </tr>
       </table>
