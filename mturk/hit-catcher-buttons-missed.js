@@ -32,7 +32,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
       });
     });
 
-    const rEl = await ReactEl(`reactComponents/alert/Alert`);
+    const rEl = await ReactDOM(`reactComponents/alert/Alert`);
     rEl.getElementsByTagName(`h3`)[0].appendChild(once);
     rEl.getElementsByTagName(`h3`)[0].appendChild(panda);
   }

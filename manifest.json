@@ -134,7 +134,7 @@
         "https://worker.mturk.com/projects/",
         "https://worker.mturk.com/projects?*",
         "https://worker.mturk.com/projects/?*",
-        "https://worker.mturk.com/tasks*"
+        "https://worker.mturk.com/tasks?*"
       ],
       "run_at": "document_end"
     },
@@ -147,7 +147,9 @@
         "https://worker.mturk.com/projects",
         "https://worker.mturk.com/projects/",
         "https://worker.mturk.com/projects?*",
-        "https://worker.mturk.com/projects/?*"
+        "https://worker.mturk.com/projects/?*",
+        "https://worker.mturk.com/tasks*",
+        "https://worker.mturk.com/requesters/*"
       ],
       "run_at": "document_end"
     },

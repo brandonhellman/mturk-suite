@@ -1,53 +1,51 @@
-/* globals chrome mturkReact */
-
-(async function () {
-  const opened = await new Promise((resolve) => chrome.runtime.sendMessage({hitCatcher: `open`}, resolve))
+async function hitCatcherButtons() {
+  const opened = await new Promise(resolve =>
+    chrome.runtime.sendMessage({ hitCatcher: `open` }, resolve)
+  );
 
   if (opened) {
-    const react = await mturkReact(`reactComponents/hitSetTable/HitSetTable`)
-    const reactProps = await react.getProps()
+    const dom = await ReactDOM(`HitSetTable`);
+    const reactProps = await ReactProps(`HitSetTable`);
 
     const hits = reactProps.bodyData.reduce((accumulator, currentValue) => {
-      accumulator[currentValue.hit_set_id] = currentValue
-      return accumulator
-    }, {})
+      accumulator[currentValue.hit_set_id] = currentValue;
+      return accumulator;
+    }, {});
 
-    const reactElememnt = await react.getElement()
+    [...dom.querySelectorAll(`.work-btn.hidden-sm-down`)].forEach(element => {
+      const hitSetId = element.href.match(/projects\/([A-Z0-9]+)\/tasks/)[1];
 
-    for (const element of reactElememnt.querySelectorAll(`.work-btn.hidden-sm-down`)) {
-      const hitSetId = element.href.match(/projects\/([A-Z0-9]+)\/tasks/)[1]
+      const group = document.createElement(`div`);
+      group.className = `btn-group`;
 
-      const group = document.createElement(`div`)
-      group.className = `btn-group`
+      const accept = document.createElement(`a`);
+      accept.href = element.href;
+      accept.className = `btn work-btn`;
+      accept.textContent = `Accept`;
+      group.appendChild(accept);
 
-      const accept = document.createElement(`a`)
-      accept.href = element.href
-      accept.className = `btn work-btn`
-      accept.textContent = `Accept`
-      group.appendChild(accept)
+      const dropdown = document.createElement(`button`);
+      dropdown.className = `btn btn-primary dropdown-toggle`;
+      dropdown.dataset.toggle = `dropdown`;
+      dropdown.addEventListener(`click`, event => {
+        event.target.closest(`.desktop-row`).click();
+      });
+      group.appendChild(dropdown);
 
-      const dropdown = document.createElement(`button`)
-      dropdown.className = `btn btn-primary dropdown-toggle`
-      dropdown.dataset.toggle = `dropdown`
-      dropdown.addEventListener(`click`, (event) => {
-        event.target.closest(`.desktop-row`).click()
-      })
-      group.appendChild(dropdown)
+      const dropdownMenu = document.createElement(`ul`);
+      dropdownMenu.className = `dropdown-menu dropdown-menu-right`;
+      group.appendChild(dropdownMenu);
 
-      const dropdownMenu = document.createElement(`ul`)
-      dropdownMenu.className = `dropdown-menu dropdown-menu-right`
-      group.appendChild(dropdownMenu)
+      const once = document.createElement(`div`);
+      once.className = `col-xs-6`;
+      dropdownMenu.appendChild(once);
 
-      const once = document.createElement(`div`)
-      once.className = `col-xs-6`
-      dropdownMenu.appendChild(once)
-
-      const onceAction = document.createElement(`button`)
-      onceAction.className = `btn btn-primary`
-      onceAction.style.width = `100%`
-      onceAction.textContent = `Once`
-      onceAction.addEventListener(`click`, (event) => {
-        event.target.closest(`.desktop-row`).click()
+      const onceAction = document.createElement(`button`);
+      onceAction.className = `btn btn-primary`;
+      onceAction.style.width = `100%`;
+      onceAction.textContent = `Once`;
+      onceAction.addEventListener(`click`, event => {
+        event.target.closest(`.desktop-row`).click();
 
         chrome.runtime.sendMessage({
           hitCatcher: {
@@ -57,20 +55,20 @@
             sound: true,
             project: hits[hitSetId]
           }
-        })
-      })
-      once.appendChild(onceAction)
+        });
+      });
+      once.appendChild(onceAction);
 
-      const panda = document.createElement(`div`)
-      panda.className = `col-xs-6`
-      dropdownMenu.appendChild(panda)
+      const panda = document.createElement(`div`);
+      panda.className = `col-xs-6`;
+      dropdownMenu.appendChild(panda);
 
-      const pandaAction = document.createElement(`button`)
-      pandaAction.className = `btn btn-primary`
-      pandaAction.style.width = `100%`
-      pandaAction.textContent = `Panda`
-      pandaAction.addEventListener(`click`, (event) => {
-        event.target.closest(`.desktop-row`).click()
+      const pandaAction = document.createElement(`button`);
+      pandaAction.className = `btn btn-primary`;
+      pandaAction.style.width = `100%`;
+      pandaAction.textContent = `Panda`;
+      pandaAction.addEventListener(`click`, event => {
+        event.target.closest(`.desktop-row`).click();
 
         chrome.runtime.sendMessage({
           hitCatcher: {
@@ -80,11 +78,13 @@
             sound: false,
             project: hits[hitSetId]
           }
-        })
-      })
-      panda.appendChild(pandaAction)
+        });
+      });
+      panda.appendChild(pandaAction);
 
-      element.replaceWith(group)
-    }
+      element.replaceWith(group);
+    });
   }
-})()
+}
+
+hitCatcherButtons();
