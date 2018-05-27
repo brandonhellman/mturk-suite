@@ -32,7 +32,8 @@
       "background/hit-exporter.js",
       "background/hit-tracker.js",
       "background/omnibox.js",
-      "background/requester-reviews.js"
+      "background/requester-reviews.js",
+      "background/web-request.js"
     ],
     "persistent": true
   },
@@ -151,7 +152,7 @@
         "https://worker.mturk.com/tasks*",
         "https://worker.mturk.com/requesters/*"
       ],
-      "run_at": "document_end"
+      "run_at": "document_start"
     },
 
     {
