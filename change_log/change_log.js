@@ -6,7 +6,7 @@ changeLog.push({
   General: [
     `Fixed HIT Tracker Live Update, will now properly update when you submit or sync.`,
     `HIT Catcher Once and Panda buttons when you miss a HIT are back from vacation.`,
-    `Remember Filter fixed.`
+    `Remember Filter fixed.`,
     `Pagination Last Page now always links to the correct page.`
   ]
 })
