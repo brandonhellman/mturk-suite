@@ -1,6 +1,17 @@
 const changeLog = [];
 
 changeLog.push({
+  version: `2.3.1`,
+  date: `Sunday, May 27, 2018`,
+  General: [
+    `Fixed HIT Tracker Live Update, will now properly update when you submit or sync.`,
+    `HIT Catcher Once and Panda buttons when you miss a HIT are back from vacation.`,
+    `Remember Filter fixed.`
+    `Pagination Last Page now always links to the correct page.`
+  ]
+})
+
+changeLog.push({
   version: `2.3`,
   date: `Sunday, May 27, 2018`,
   MTS: [
