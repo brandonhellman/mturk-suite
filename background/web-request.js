@@ -40,7 +40,7 @@ chrome.webRequest.onCompleted.addListener(
           chrome.tabs.sendMessage(request.tabId, {
             hitMissed: request.hit_set_id
           });
-        }, 250);
+        }, 1000);
       }
     }
   },
