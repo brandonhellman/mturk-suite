@@ -63,8 +63,7 @@ chrome.contextMenus.create({
 
     chrome.tabs.executeScript(tab.id, {
       code,
-      frameId: info.frameId,
-      allFrames: true
+      frameId: info.frameId
     });
   }
 });
