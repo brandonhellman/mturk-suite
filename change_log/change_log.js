@@ -1,6 +1,12 @@
 const changeLog = [];
 
 changeLog.push({
+  version: `2.3.2`,
+  date: `Monday, May 28, 2018`,
+  "HIT Finder": [`Requester reviews are now updating again.`]
+});
+
+changeLog.push({
   version: `2.3.1`,
   date: `Sunday, May 27, 2018`,
   General: [
@@ -9,7 +15,7 @@ changeLog.push({
     `Remember Filter fixed.`,
     `Pagination Last Page now always links to the correct page.`
   ]
-})
+});
 
 changeLog.push({
   version: `2.3`,
