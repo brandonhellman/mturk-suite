@@ -1,6 +1,15 @@
 const changeLog = [];
 
 changeLog.push({
+  version: `2.3.3`,
+  date: `Monday, May 28, 2018`,
+  General: [
+    `HIT Catcher buttons for missed HITs should be fixed for everyone`
+  ],
+  "HIT Finder": [`Fixed issue when an Include List match was found with notifications enabled causing Finder to stall.`]
+});
+
+changeLog.push({
   version: `2.3.2`,
   date: `Monday, May 28, 2018`,
   "HIT Finder": [`Requester reviews are now updating again.`]
