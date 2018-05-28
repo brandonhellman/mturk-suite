@@ -15,7 +15,7 @@ async function paginationLastPage() {
       dom.querySelector(`.pagination > :last-child`).insertAdjacentHTML(
         `beforebegin`,
         HTML`<li class="page-item">
-          <a href="/?${searchParams}" class="page-link btn btn-secondary btn-small">${lastPage}</a>
+          <a href="${window.location.origin}${window.location.pathname}?${searchParams}" class="page-link btn btn-secondary btn-small">${lastPage}</a>
         </li>`
       );
     }
