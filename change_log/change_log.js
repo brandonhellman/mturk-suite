@@ -1,6 +1,15 @@
 const changeLog = [];
 
 changeLog.push({
+  version: `2.3.4`,
+  date: `Monday, May 28, 2018`,
+  General: [
+    `Input Worker Id working again for Firefox`,
+    `HIT Tracker earnings are updating live corretly again.`
+  ]
+});
+
+changeLog.push({
   version: `2.3.3`,
   date: `Monday, May 28, 2018`,
   General: [
