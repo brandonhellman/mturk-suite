@@ -106,7 +106,8 @@
         "https://worker.mturk.com/projects",
         "https://worker.mturk.com/projects/",
         "https://worker.mturk.com/projects?*",
-        "https://worker.mturk.com/projects/?*"
+        "https://worker.mturk.com/projects/?*",
+        "https://worker.mturk.com/requesters/*/projects*"
       ],
       "run_at": "document_end"
     },
