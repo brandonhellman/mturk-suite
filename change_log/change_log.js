@@ -1,6 +1,14 @@
 const changeLog = [];
 
 changeLog.push({
+  version: `2.3.5`,
+  date: `Tuesday, May 29, 2018`,
+  General: [
+    `Block List On MTurk now works on requester pages.`
+  ]
+});
+
+changeLog.push({
   version: `2.3.4`,
   date: `Monday, May 28, 2018`,
   General: [
