@@ -4,7 +4,7 @@ changeLog.push({
   version: `2.3.6`,
   date: `Thursday, May 31, 2018`,
   General: [
-    `Block List On MTurk now works on requester pages.`
+    `HIT Catcher buttons for missed HITs now have a fallback for slower load times fixing issues where they would not show up for some.`
   ]
 });
 
