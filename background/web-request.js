@@ -24,6 +24,24 @@ chrome.webRequest.onCompleted.addListener(
   async details => {
     const request = requestsDB[details.requestId];
 
+    let misses = 0;
+
+    function missedHIT() {
+      misses += 1;
+
+      chrome.tabs.sendMessage(
+        request.tabId,
+        {
+          hitMissed: request.hit_set_id
+        },
+        res => {
+          if (!res && misses < 5) {
+            setTimeout(missedHIT, 1000);
+          }
+        }
+      );
+    }
+
     if (request) {
       const catcher = chrome.extension
         .getViews()
@@ -36,11 +54,7 @@ chrome.webRequest.onCompleted.addListener(
           `https://worker.mturk.com/projects/${request.hit_set_id}/tasks`
         ) === -1
       ) {
-        setTimeout(() => {
-          chrome.tabs.sendMessage(request.tabId, {
-            hitMissed: request.hit_set_id
-          });
-        }, 1000);
+        setTimeout(missedHIT, 1000);
       }
     }
   },
