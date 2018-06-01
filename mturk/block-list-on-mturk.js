@@ -145,7 +145,7 @@ async function updateBlockList(blockList) {
 
   openBlockList.addEventListener(`click`, () => drawItems());
 
-  blockListToggle.addEventListener(`click`, () => {
+  blockListToggle.parentElement.addEventListener(`click`, () => {
     blocked.forEach(index => {
       const hit = rows[index];
       hit.style.display = hit.style.display === `none` ? `` : `none`;
