@@ -1,6 +1,14 @@
 const changeLog = [];
 
 changeLog.push({
+  version: `2.3.7`,
+  date: `Sunday, July 1, 2018`,
+  "HIT Tracker": [
+    'Week ranges are no longer hardcoded and will no longer require updates to fix.'
+  ]
+});
+
+changeLog.push({
   version: `2.3.6`,
   date: `Thursday, May 31, 2018`,
   General: [
