@@ -169,10 +169,10 @@ function trackerOverviewData () {
   return new Promise((resolve) => {
     const transaction = hitTrackerDB.transaction([`hit`], `readonly`)
     const objectStore = transaction.objectStore(`hit`)
-    const week = getWeekKludge()
+    const week = returnWeek()
     const month = getMonth()
 
-    if (week.day === 0) document.getElementById(`which-week`).textContent = `Last`
+    document.getElementById(`which-week`).textContent = week.which
 
     // pending week
     objectStore.index(`date`).openCursor(window.IDBKeyRange.bound(week.start, week.end)).onsuccess = (event) => {
@@ -588,55 +588,27 @@ function loggedOut () {
   sycningEnded()
 }
 
-function getWeek (dateToUse) {
-  const moment = dateToUse || new Date(); // If a test date isn't passed, get current one
-  const amz = new Date(moment.toLocaleString('en-US', {timeZone: 'America/Los_Angeles'})) // Set everything to Bezos time. (PST/PDT)
-  function pad (p) { // Used to pad month and day with leading 0 if necessary
-    return ('0' + p).slice(-2)
-  }
-  function amzformat (d) { // Return a string in the format YYYYMMDD
-    return (d.getFullYear() + '') + pad(d.getMonth()) + pad(d.getDate())
-  }
-  function offset () { // Calculate offset from current day to week start
-    return amz.getDate() - amz.getDay()
-  }
+function returnWeek() {
+  const date = new Date(Date.now());
+  const toPST = date.toLocaleString(`en-US`, {
+    timeZone: `America/Los_Angeles`
+  });
+  const isPST = new Date(toPST);
+  const day = isPST.getDay();
+  const mod = day > 0 ? 0 : 7;
 
-  let start = new Date(amz.setDate(offset())) // Find Sunday of this week
-  let end = new Date(amz.setDate(offset() + 6)) // Find Saturday of this week
+  const p = s => `0${s}`.slice(-2);
+  const offset = n => isPST.getDate() - isPST.getDay() - (n || 0);
+  const yyyymmdd = d => `${d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate())}`;
 
-  return {start: amzformat(start), end: amzformat(end)} // return object of {start: YYYYMMDD, end: YYYYMMDD}
-}
+  const start = new Date(isPST.setDate(offset(mod)));
+  const end = new Date(isPST.setDate(offset() + 6));
 
-function getWeekKludge () {
-  const today = mturkDate()
-  const weeks = [
-    [`20180325`, `20180326`, `20180327`, `20180328`, `20180329`, `20180330`, `20180331`],
-    // April 2018
-    [`20180401`, `20180402`, `20180403`, `20180404`, `20180405`, `20180406`, `20180407`],
-    [`20180408`, `20180409`, `20180410`, `20180411`, `20180412`, `20180413`, `20180414`],
-    [`20180415`, `20180416`, `20180417`, `20180418`, `20180419`, `20180420`, `20180421`],
-    [`20180422`, `20180423`, `20180424`, `20180425`, `20180426`, `20180427`, `20180428`],
-    // May 2018
-    [`20180429`, `20180430`, `20180501`, `20180502`, `20180503`, `20180504`, `20180505`],
-    [`20180506`, `20180507`, `20180508`, `20180509`, `20180510`, `20180511`, `20180512`],
-    [`20180513`, `20180514`, `20180515`, `20180516`, `20180517`, `20180518`, `20180519`],
-    [`20180520`, `20180521`, `20180522`, `20180523`, `20180524`, `20180525`, `20180526`],
-    [`20180527`, `20180528`, `20180529`, `20180530`, `20180531`, `20180601`, `20180602`],
-    // June 2018
-    [`20180603`, `20180604`, `20180605`, `20180606`, `20180607`, `20180608`, `20180609`],
-    [`20180610`, `20180611`, `20180612`, `20180613`, `20180614`, `20180615`, `20180616`],
-    [`20180617`, `20180618`, `20180619`, `20180620`, `20180621`, `20180622`, `20180623`],
-    [`20180624`, `20180625`, `20180626`, `20180627`, `20180628`, `20180629`, `20180630`],
-  ]
-
-  for (const i in weeks) {
-    const day = weeks[i].indexOf(today)
-
-    if (~day) {
-      const week = day === 0 ? weeks[i - 1] : weeks[i]
-      return { day: day, start: week[0], end: week[6] }
-    }
-  }
+  return {
+    start: yyyymmdd(start),
+    end: yyyymmdd(end),
+    which: day > 0 ? `This` : `Last`
+  };
 }
 
 function getMonth () {
