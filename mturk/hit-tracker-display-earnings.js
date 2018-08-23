@@ -5,8 +5,7 @@ async function hitTrackerDisplayEarnings() {
   ]);
 
   const money = `$${earnings.toFixed(2)}`;
-  const { id } = chrome.runtime;
-  const href = `chrome-extension://${id}/hit_tracker/hit_tracker.html`;
+  const href = chrome.extension.getURL('/hit_tracker/hit_tracker.html');
 
   const element = document.getElementsByClassName(`col-xs-7`)[0];
   element.insertAdjacentHTML(

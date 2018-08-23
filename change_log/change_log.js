@@ -1,6 +1,15 @@
 const changeLog = [];
 
 changeLog.push({
+  version: `2.3.8`,
+  date: `Sunday, July 1, 2018`,
+  "General": [
+    'Firefox: Fix for pending earnings link trying to go to a Chrome URL.'
+  ]
+});
+
+
+changeLog.push({
   version: `2.3.7`,
   date: `Sunday, July 1, 2018`,
   "HIT Tracker": [
