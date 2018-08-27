@@ -503,6 +503,7 @@ let timer = 0;
 async function catcherRun(forcedId) {
     const start = new Date().getTime();
 
+    cacheVoice()
     function delay() {
         const nextCatch = start + storage.hitCatcher.speed;
         const adjustedDelay = nextCatch - new Date().getTime();
@@ -661,11 +662,15 @@ function catcherCaptchaFound() {
     }
 }
 
-speechSynthesis.getVoices();
+function cacheVoice(){
+    if (!('voice' in window) || voice == undefined){
+        voice = speechSynthesis.getVoices().filter((voice) => voice.name == `Google US English`)[0];
+    }
+}
 
-function textToSpeech(phrase) {
+async function textToSpeech(phrase) {
     const message = new SpeechSynthesisUtterance(phrase);
-    message.voice = speechSynthesis.getVoices().filter((voice) => voice.name == `Google US English`)[0];
+    message.voice = window.voice;
     window.speechSynthesis.speak(message);
 }
 
