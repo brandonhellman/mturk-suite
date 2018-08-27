@@ -526,22 +526,24 @@ async function catcherRun(forcedId) {
             const status = response.status;
 
             if (response.ok && response.url.indexOf(`tasks`) !== -1) {
-                const text = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(text, `text/html`);
-                const json = JSON.parse(doc.querySelector(`[data-react-class="require('reactComponents/common/ShowModal')['default']"]`).dataset.reactProps);
+                if (!watcher.project) {
+                    const text = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(text, `text/html`);
+                    const json = JSON.parse(doc.querySelector(`[data-react-class="require('reactComponents/common/ShowModal')['default']"]`).dataset.reactProps);
 
-                watcher.project = watcher.project ? watcher.project : {
-                    requester_name: json.modalOptions.requesterName,
-                    requester_id: json.modalOptions.contactRequesterUrl.match(/requester_id.+?=([0-9A-Z]+)/) ? json.modalOptions.contactRequesterUrl.match(/requester_id.+?=([0-9A-Z]+)/)[1] : null,
-                    title: json.modalOptions.projectTitle,
-                    hit_set_id: response.url.match(/projects\/([A-Z0-9]+)\/tasks/) ? response.url.match(/projects\/([A-Z0-9]+)\/tasks/)[1] : null,
-                    monetary_reward: {
-                        amount_in_dollars: json.modalOptions.monetaryReward.amountInDollars
-                    },
-                    assignment_duration_in_seconds: json.modalOptions.assignmentDurationInSeconds,
-                    project_requirements: [{qualification_type: { name: `Unknown` }, comparator: `Unknown`, qualification_values: [``]}]
+                    watcher.project = watcher.project ? watcher.project : {
+                        requester_name: json.modalOptions.requesterName,
+                        requester_id: json.modalOptions.contactRequesterUrl.match(/requester_id.+?=([0-9A-Z]+)/) ? json.modalOptions.contactRequesterUrl.match(/requester_id.+?=([0-9A-Z]+)/)[1] : null,
+                        title: json.modalOptions.projectTitle,
+                        hit_set_id: response.url.match(/projects\/([A-Z0-9]+)\/tasks/) ? response.url.match(/projects\/([A-Z0-9]+)\/tasks/)[1] : null,
+                        monetary_reward: {
+                            amount_in_dollars: json.modalOptions.monetaryReward.amountInDollars
+                        },
+                        assignment_duration_in_seconds: json.modalOptions.assignmentDurationInSeconds,
+                        project_requirements: [{qualification_type: { name: `Unknown` }, comparator: `Unknown`, qualification_values: [``]}]
 
+                    }
                 }
 
                 if (~response.url.indexOf(`assignment_id=`)) {
