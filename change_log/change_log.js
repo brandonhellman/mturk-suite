@@ -1,8 +1,18 @@
 const changeLog = [];
 
 changeLog.push({
+  version: `2.3.9`,
+  date: `Tuesday, August 28, 2018`,
+  "HIT Catcher": [
+    'Avoid selecting the voice for Text to Speech unnecessarily',
+    'Avoid parsing for infomation about a HIT if we already got it.'
+  ]
+});
+
+
+changeLog.push({
   version: `2.3.8`,
-  date: `Sunday, July 1, 2018`,
+  date: `Wednesday, August 22, 2018`,
   "General": [
     'Firefox: Fix for pending earnings link trying to go to a Chrome URL.'
   ]
