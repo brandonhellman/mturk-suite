@@ -1,10 +1,13 @@
 /* eslint-disable no-unused-vars */
 
 function getVoice(name) {
-  const voices = speechSynthesis.getVoices();
-  const filtered = voices.filter(v => v.name === (name || v.name));
-  const voice = filtered[0] || voices[0];
-  return voice;
+  if (!window.voice) {
+    voices = speechSynthesis.getVoices();
+    const filtered = voices.filter(v => v.name === (name || v.name));
+    const voice = filtered[0] || voices[0];
+    window.voice = voice;
+  }
+  return window.voice;
 }
 
 function getSpeechVoice(name) {
