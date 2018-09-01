@@ -12,6 +12,10 @@ document
     document.getElementById(`requester-reviews`).hidden = !event.target.checked;
   });
 
+document.getElementById(`blockListOnMturk`).addEventListener(`change`, event => {
+  document.getElementById(`blockLocation`).disabled = !event.target.checked;
+});
+
 chrome.storage.local.get(`options`, keys => {
   const { options } = keys;
 
