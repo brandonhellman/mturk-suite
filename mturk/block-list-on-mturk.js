@@ -75,20 +75,20 @@ async function updateBlockList(blockList) {
 
   if (blockLocation) {
     // from all Hits with requirements, get the ones with location requirement not met
-    with_location_requitement_not_meet = data.filter(d => d.project_requirements.length > 0)
+    const with_location_requitement_not_meet = data.filter(d => d.project_requirements.length > 0)
     .filter(
       d => d.project_requirements.some(
         r => r.qualification_type_id == "00000000000000000071" && !r.caller_meets_requirements
       )
     );
 
-    extra_blockList = with_location_requitement_not_meet.reduce((result, h) => {
+    const extra_blockList = with_location_requitement_not_meet.reduce((result, h) => {
       result[h.hit_set_id] = {
         'match': h.hit_set_id, 'name': h.title, 'strict': true
       }; return result
     },{});
 
-    for (attrname in extra_blockList) {
+    for (const attrname in extra_blockList) {
       blockList[attrname] = extra_blockList[attrname];
     }
   }
