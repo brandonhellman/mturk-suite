@@ -63,30 +63,47 @@ async function updateBlockList(blockList) {
 }
 
 (async function blockListOnMturk() {
-  const [blockList, element, props, blockLocation] = await Promise.all([
+  const [blockList, element, props] = await Promise.all([
     StorageGetKey(`blockList`),
     ReactDOM(`HitSetTable`),
     ReactProps(`HitSetTable`),
-    Enabled(`blockLocation`),
     Enabled(`blockListOnMturk`)
   ]);
+
+  const blockLocation = await new Promise(async r => {
+    try {
+      await Enabled(`blockLocation`);
+      r(true);
+    } catch (err) {
+      r(false);
+    }
+  });
 
   const data = props.bodyData;
 
   if (blockLocation) {
     // from all Hits with requirements, get the ones with location requirement not met
-    const with_location_requitement_not_meet = data.filter(d => d.project_requirements.length > 0)
-    .filter(
-      d => d.project_requirements.some(
-        r => r.qualification_type_id == "00000000000000000071" && !r.caller_meets_requirements
-      )
-    );
+    const with_location_requitement_not_meet = data
+      .filter(d => d.project_requirements.length > 0)
+      .filter(d =>
+        d.project_requirements.some(
+          r =>
+            r.qualification_type_id == "00000000000000000071" &&
+            !r.caller_meets_requirements
+        )
+      );
 
-    const extra_blockList = with_location_requitement_not_meet.reduce((result, h) => {
-      result[h.hit_set_id] = {
-        'match': h.hit_set_id, 'name': h.title, 'strict': true
-      }; return result
-    },{});
+    const extra_blockList = with_location_requitement_not_meet.reduce(
+      (result, h) => {
+        result[h.hit_set_id] = {
+          match: h.hit_set_id,
+          name: h.title,
+          strict: true
+        };
+        return result;
+      },
+      {}
+    );
 
     for (const attrname in extra_blockList) {
       blockList[attrname] = extra_blockList[attrname];

@@ -1,6 +1,20 @@
 const changeLog = [];
 
 changeLog.push({
+  version: `2.3.10`,
+  date: `Sunday, September 8, 2018`,
+  "New Feature: Block Location": [
+    'Block HITs that you do not meet the location qualification for.',
+  ],
+  "HIT Catcher": [
+    "Fix: Should announce when logged out again.",
+  ],
+  "General": [
+    "Cache TTS voice."
+  ]
+});
+
+changeLog.push({
   version: `2.3.9`,
   date: `Tuesday, August 28, 2018`,
   "HIT Catcher": [
