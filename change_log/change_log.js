@@ -1,6 +1,17 @@
 const changeLog = [];
 
 changeLog.push({
+  version: `2.3.11`,
+  date: `Sunday, September 8, 2018`,
+  "HIT Catcher": [
+    "Fix: Will no longer pause/announce logged out after catching any HIT when not logged out.",
+  ],
+  "General": [
+    "Fix: Blocklist will now show if Block Location is turned off."
+  ]
+});
+
+changeLog.push({
   version: `2.3.10`,
   date: `Sunday, September 8, 2018`,
   "New Feature: Block Location": [
