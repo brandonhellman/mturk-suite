@@ -9,11 +9,10 @@ async function StorageGetKey(key) {
 
 // eslint-disable-next-line no-unused-vars
 function Enabled(name) {
-  return new Promise(async resolve => {
+  return new Promise(async (resolve, reject) => {
     const options = await StorageGetKey(`options`);
 
     if (options[name]) resolve();
-    else
-      window.console.warn(`"${name}" did not resolve because it is disabled.`);
+    else reject()
   });
 }
