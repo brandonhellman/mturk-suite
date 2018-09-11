@@ -523,8 +523,6 @@ async function catcherRun(forcedId) {
         })
         .catch(e => err = e);
 
-        console.log(err);
-
         if (response.status == 200 || response.status == 429 || response.status == 422) {
             watcher.searched = watcher.searched > 0 ? watcher.searched + 1 : 1;
 
