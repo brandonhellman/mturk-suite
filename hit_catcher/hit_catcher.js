@@ -518,12 +518,14 @@ async function catcherRun(forcedId) {
 
         var err;
         const response = await fetch(`https://worker.mturk.com/projects/${id}/tasks/accept_random?format=json`, {
-            credentials: `include`,
-            redirect: `follow`,
+          credentials: `include`,
         })
         .catch(e => err = e);
-
-        if (response.status == 200 || response.status == 429 || response.status == 422) {
+        
+        console.log(response.url)
+        if (response.url && response.url.includes('https://www.amazon.com/ap/signin')) {
+            return catcherLoggedOut();
+        } else if (response.status == 200 || response.status == 429 || response.status == 422) {
             watcher.searched = watcher.searched > 0 ? watcher.searched + 1 : 1;
 
             const status = response.status;
@@ -564,7 +566,7 @@ async function catcherRun(forcedId) {
             watcherUpdate(watcher);
             catcher.timeout = setTimeout(catcherRun, delay(), status === 429 ? id : undefined);
         } else if (err instanceof TypeError) {
-            return catcherLoggedOut();
+          catcher.timeout = setTimeout(catcherRun, delay(), id);
         }
     }
     else if (catcher.paused.status === false) {

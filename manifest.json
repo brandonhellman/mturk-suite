@@ -59,7 +59,8 @@
     "clipboardWrite",
     "*://*.mturk.com/*",
     "*://*.turkerhub.com/*",
-    "*://*.mturkcrowd.com/*"
+    "*://*.mturkcrowd.com/*",
+    "https://www.amazon.com/ap/signin?*openid.return_to=https://worker.mturk.com/projects/*/tasks/accept_random*"
   ],
 
   "short_name": "MTS",
