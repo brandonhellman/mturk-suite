@@ -1,6 +1,14 @@
 const changeLog = [];
 
 changeLog.push({
+  version: '2.3.12',
+  date: 'Saturday, September 15, 2018',
+  'HIT Catcher': [
+    'Fix: No longer incorrectly pauses and announces you are logged out when experiencing network difficulties.'
+  ]
+})
+
+changeLog.push({
   version: `2.3.11`,
   date: `Sunday, September 8, 2018`,
   "HIT Catcher": [
