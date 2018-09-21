@@ -116,14 +116,6 @@ const storage = new Object();
             }
         }
 
-        for (const key in storage.watchers) {
-            const watcher = storage.watchers[key];
-
-            if (watcher instanceof Object) {
-                watcherDraw(watcher);
-            }
-        }
-
         chrome.storage.local.set({
             watchers: storage.watchers
         });
