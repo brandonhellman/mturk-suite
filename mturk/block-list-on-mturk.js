@@ -73,6 +73,14 @@ async function updateBlockList(blockList) {
   const blockLocation = await new Promise(async r => {
     try {
       await Enabled(`blockLocation`);
+      r(true);
+    } catch (err) {
+      r(false);
+    }
+  });
+
+  const blockMaster = await new Promise(async r => {
+    try {
       await Enabled(`blockMaster`);
       r(true);
     } catch (err) {
@@ -87,7 +95,7 @@ async function updateBlockList(blockList) {
 
   if (blockLocation) {
     // from all Hits with requirements, get the ones with location requirement not met
-    const with_location_requitement_not_meet = data
+    with_location_requitement_not_meet = data
       .filter(d => d.project_requirements.length > 0)
       .filter(d =>
         d.project_requirements.some(
@@ -99,7 +107,7 @@ async function updateBlockList(blockList) {
   }
 
   if (blockMaster) {
-    const require_master = data
+    require_master = data
       .filter(d => d.project_requirements.length > 0)
       .filter(d =>
         d.project_requirements.some(
@@ -113,7 +121,7 @@ async function updateBlockList(blockList) {
   extra_hits_to_hide = [...new Set([...with_location_requitement_not_meet, ...require_master])];
 
   if (extra_hits_to_hide) {
-    const extra_blockList = hits_to_hide.reduce(
+    const extra_blockList = extra_hits_to_hide.reduce(
       (result, h) => {
         result[h.hit_set_id] = {
           match: h.hit_set_id,
