@@ -73,6 +73,7 @@ async function updateBlockList(blockList) {
   const blockLocation = await new Promise(async r => {
     try {
       await Enabled(`blockLocation`);
+      await Enabled(`blockMaster`);
       r(true);
     } catch (err) {
       r(false);
@@ -80,6 +81,9 @@ async function updateBlockList(blockList) {
   });
 
   const data = props.bodyData;
+
+  with_location_requitement_not_meet = [];
+  require_master = [];
 
   if (blockLocation) {
     // from all Hits with requirements, get the ones with location requirement not met
@@ -92,8 +96,24 @@ async function updateBlockList(blockList) {
             !r.caller_meets_requirements
         )
       );
+  }
 
-    const extra_blockList = with_location_requitement_not_meet.reduce(
+  if (blockMaster) {
+    const require_master = data
+      .filter(d => d.project_requirements.length > 0)
+      .filter(d =>
+        d.project_requirements.some(
+          r =>
+            r.qualification_type_id == "2F1QJWKUDD8XADTFD2Q0G6UTO95ALH" &&
+            !r.caller_meets_requirements
+        )
+      );
+  }
+
+  extra_hits_to_hide = [...new Set([...with_location_requitement_not_meet, ...require_master])];
+
+  if (extra_hits_to_hide) {
+    const extra_blockList = hits_to_hide.reduce(
       (result, h) => {
         result[h.hit_set_id] = {
           match: h.hit_set_id,
