@@ -50,9 +50,32 @@
 .table-danger a:visited,
 .table-default a:visited {
     color: #551A8B !important;
+
+.range-wrapper {
+    border: solid 1px #ced4da;
+    padding: 3px 9px;
+    border-radius: .25rem;
+}
 }
 
 .table-default td {
     background-color: buttonface !important;
 }
 
+.range-wrapper {
+    border: 1px solid #ced4da;
+    border-radius: .25em;
+    padding: .2em .5em;
+}
+
+.range-wrapper input[type='range'] {
+    width: 100%;
+}
+
+.range-wrapper .lable {
+    font-size: .6em;
+}
+
+.range-wrapper .align-right {
+    float: right;
+}

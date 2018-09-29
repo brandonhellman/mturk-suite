@@ -1471,3 +1471,7 @@ document.getElementById(`hit-export-mturkcrowd`).addEventListener(`click`, (even
     });
   }
 })
+
+document.getElementById(`volume`).addEventListener(`change`, (event) => {
+    textToSpeech('Voice level test');
+});

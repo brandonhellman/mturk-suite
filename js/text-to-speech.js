@@ -21,5 +21,6 @@ function getSpeechVoice(name) {
 async function textToSpeech(text, name) {
   const utterThis = new SpeechSynthesisUtterance(text);
   utterThis.voice = await getSpeechVoice(name);
+  utterThis.volume = document.getElementById('volume').value;
   window.speechSynthesis.speak(utterThis);
 }
