@@ -90,37 +90,42 @@ async function updateBlockList(blockList) {
 
   const data = props.bodyData;
 
+  // using a dict to document what those ids refer to
+  const master_requirements_ids = Object.keys({ 
+    '2F1QJWKUDD8XADTFD2Q0G6UTO95ALH': `Categorization`,
+    '2NDP2L92HECWY8NS8H3CK0CP5L9GHO': `Photo Masters`, 
+    '21VZU98JHSTLZ5BPP4A9NOBJEK3DPG': `Masters`
+  });
+
   with_location_requitement_not_meet = [];
   require_master = [];
 
   if (blockLocation) {
-    // from all Hits with requirements, get the ones with location requirement not met
     with_location_requitement_not_meet = data
-      .filter(d => d.project_requirements.length > 0)
-      .filter(d =>
-        d.project_requirements.some(
-          r =>
-            r.qualification_type_id == "00000000000000000071" &&
-            !r.caller_meets_requirements
+      .filter(d => d.project_requirements.length > 0) // we want only the Hits with requirements
+      .filter(d => // get the ones with location requirement not met
+        d.project_requirements.some(r =>
+          r.qualification_type_id == "00000000000000000071" && !r.caller_meets_requirements
         )
       );
   }
 
   if (blockMaster) {
     require_master = data
-      .filter(d => d.project_requirements.length > 0)
-      .filter(d =>
-        d.project_requirements.some(
-          r =>
-            r.qualification_type_id == "2F1QJWKUDD8XADTFD2Q0G6UTO95ALH" &&
-            !r.caller_meets_requirements
+      .filter(d => d.project_requirements.length > 0) // we want only the Hits with requirements
+      .filter(d => // get the ones with location requirement not met
+        d.project_requirements.some(r =>
+          master_requirements_ids.some(r_id => r_id == r.qualification_type_id) && // is this requirement id any of the one on master_requirements_ids?
+          !r.caller_meets_requirements
         )
       );
   }
 
+  // put all extra hits to block in one list, no duplicates
   extra_hits_to_hide = [...new Set([...with_location_requitement_not_meet, ...require_master])];
 
   if (extra_hits_to_hide) {
+    // put the extra hits on the same format as the one really blocked
     const extra_blockList = extra_hits_to_hide.reduce(
       (result, h) => {
         result[h.hit_set_id] = {
@@ -133,6 +138,7 @@ async function updateBlockList(blockList) {
       {}
     );
 
+    // put the extra hits on blockList like the others
     for (const attrname in extra_blockList) {
       blockList[attrname] = extra_blockList[attrname];
     }
