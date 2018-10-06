@@ -1,7 +1,7 @@
 const changeLog = [];
 
 changeLog.push({
-  version: '2.3.13',
+  version: '2.4.0',
   date: 'Saturday, October 6, 2018',
   'New Feature: Block Masters': [
     'Block HITs that require Masters if you don\'t have the qualification.'
