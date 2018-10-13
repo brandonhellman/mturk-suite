@@ -5,16 +5,5 @@
     "eslint": "^5.7.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-prettier": "^3.1.0"
-  },
-  "eslintConfig": {
-    "extends": ["airbnb-base", "prettier"],
-    "env": {
-      "browser": true,
-      "webextensions": true
-    },
-    "rules": {
-      "camelcase": 0,
-      "linebreak-style": 0
-    }
   }
 }
