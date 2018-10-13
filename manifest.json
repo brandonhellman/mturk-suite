@@ -86,7 +86,8 @@
         "js/mturk-date.js",
         "js/react-dom-props.js",
         "js/storage.js",
-        "js/tagged-template-literals.js"
+        "js/tagged-template-literals.js",
+        "mturk/globals/index.js"
       ],
       "matches": ["https://worker.mturk.com/*"],
       "run_at": "document_start",
