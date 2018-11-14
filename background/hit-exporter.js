@@ -237,7 +237,7 @@ function plainTemplate(hit) {
       Requester: ${requester_name} • https://worker.mturk.com/requesters${requester_id}/projects
       ${reviews}
       Reward: ${reward}
-      Duration: ${duration}
+      Duration: ${moment.duration(duration, "seconds").format()}
       Available: ${assignable_hits_count}
       Description: ${description}
       Qualifications: ${qualifications}`;
@@ -315,7 +315,7 @@ function bbCodeTemplate(hit) {
     const template = `[table][tr][td][b]Title:[/b] [url="https://worker.mturk.com/projects/${hit_set_id}/tasks"]${title}[/url] | [url="https://worker.mturk.com/projects/${hit_set_id}/tasks/accept_random"]Accept[/url]
       [b]Requester:[/b] [url="https://worker.mturk.com/requesters/${requester_id}/projects"]${requester_name}[/url] [${requester_id}] [url="https://worker.mturk.com/contact_requester/hit_type_messages/new?hit_type_message[hit_type_id]=YOURMTURKHIT&hit_type_message[requester_id]=${requester_id}"]Contact[/url]
       ${reviews}[b]Reward:[/b] ${reward}
-      [b]Duration:[/b] ${duration}
+      [b]Duration:[/b] ${moment.duration(duration, "seconds").format()}
       [b]Available:[/b] ${assignable_hits_count}
       [b]Description:[/b] ${description}
       [b]Qualifications:[/b] ${qualifications}[/td][/tr][/table]`;
@@ -393,7 +393,7 @@ function markdownTemplate(hit) {
       ${await markdownTemplateReviews(hit)}**Reward:** $${
       hit.monetary_reward.amount_in_dollars
     }  
-      **Duration:** ${hit.assignment_duration_in_seconds}  
+      **Duration:** ${moment.duration(hit.assignment_duration_in_seconds, "seconds").format()}  
       **Available:** ${hit.assignable_hits_count}  
       **Description:** ${hit.description}  
       **Qualifications:** ${hit.project_requirements

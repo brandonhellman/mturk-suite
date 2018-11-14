@@ -4,6 +4,7 @@
     "MturkDate": false,
     "StorageGetKey": false,
     "HTML": false,
-    "ENCODE": false
+    "ENCODE": false,
+    "moment": false
   }
 }

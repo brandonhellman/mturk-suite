@@ -23,6 +23,8 @@
 
   "background": {
     "scripts": [
+      "js/moment.js",
+      "js/moment-duration-format.js",
       "js/fetch-with-timeout.js",
       "js/mturk-date.js",
       "js/storage.js",
