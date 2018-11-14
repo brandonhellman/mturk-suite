@@ -44,7 +44,7 @@ function hitExporterPopoverButton(event, type, json) {
       `Are you sure you want to export this HIT to ${method}.com?`
     );
 
-    if (result !== undefined) {
+    if (result !== null) {
       chrome.runtime.sendMessage(
         { hit, hitExporter: method, message: result },
         hitExporterMarkButton

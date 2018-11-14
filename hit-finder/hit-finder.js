@@ -1451,7 +1451,7 @@ document.getElementById(`hit-export-markdown`).addEventListener(`click`, (event)
 document.getElementById(`hit-export-turkerhub`).addEventListener(`click`, (event) => {
   const result = window.prompt(`Are you sure you want to export this HIT to TurkerHub.com?`)
 
-  if (result) {
+  if (result !== null) {
     const key = event.target.dataset.key
     const hit = finderDB[key]
     chrome.runtime.sendMessage({ hit, hitExporter: `turkerhub`, message: result }, (response) => {
@@ -1463,7 +1463,7 @@ document.getElementById(`hit-export-turkerhub`).addEventListener(`click`, (event
 document.getElementById(`hit-export-mturkcrowd`).addEventListener(`click`, (event) => {
   const result = window.prompt(`Are you sure you want to export this HIT to MTurkCrowd.com?`)
 
-  if (result) {
+  if (result !== null) {
     const key = event.target.dataset.key
     const hit = finderDB[key]
     chrome.runtime.sendMessage({ hit, hitExporter: `mturkcrowd`, message: result }, (response) => {
