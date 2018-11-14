@@ -1,6 +1,15 @@
 const changeLog = [];
 
 changeLog.push({
+  version: '2.4.1',
+  date: 'Wednesday, November 14, 2018',
+  'General': [
+    'Fix: No longer required to type something into the promp box for direct exports.',
+    'Fix: Fixed the duration formatting on exports.'
+  ]
+})
+
+changeLog.push({
   version: '2.4.0',
   date: 'Saturday, October 6, 2018',
   'New Feature: Block Masters': [
