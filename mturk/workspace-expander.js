@@ -4,9 +4,7 @@ async function workspaceExpander() {
     Enabled(`workspaceExpander`)
   ]);
 
-  const workspace =
-    document.querySelector(`.task-question-iframe-container`) ||
-    document.getElementById(`hit-wrapper`);
+  const workspace = document.querySelector('#MainContent');
   workspace.style.height = `100vh`;
   workspace.children[0].focus();
   workspace.scrollIntoView();
