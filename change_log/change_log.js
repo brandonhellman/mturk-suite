@@ -1,6 +1,14 @@
 const changeLog = [];
 
 changeLog.push({
+  version: '2.4.3',
+  date: 'Tuesday, November 20, 2018',
+  'General': [
+    'Fix: Workspace Expander should expand everything properly now.',
+  ]
+})
+
+changeLog.push({
   version: '2.4.2',
   date: 'Saturday, November 17, 2018',
   'General': [
