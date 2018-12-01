@@ -1,6 +1,14 @@
 const changeLog = [];
 
 changeLog.push({
+  version: '2.4.4',
+  date: 'Saturday, December 1, 2018',
+  'General': [
+    'Fix: The footer that has been floating into the workspace when Workspace Expander is enabled has been fixed.',
+  ]
+})
+
+changeLog.push({
   version: '2.4.3',
   date: 'Tuesday, November 20, 2018',
   'General': [
