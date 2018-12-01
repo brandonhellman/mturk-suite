@@ -1,6 +1,14 @@
 const changeLog = [];
 
 changeLog.push({
+  version: '2.4.5',
+  date: 'Saturday, December 1, 2018',
+  'General': [
+    'Fix: Some HITs that were being completely hidden by Workspace Expander are now visible.',
+  ]
+})
+
+changeLog.push({
   version: '2.4.4',
   date: 'Saturday, December 1, 2018',
   'General': [
