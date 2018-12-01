@@ -7,6 +7,7 @@ async function workspaceExpander() {
   const workspace = document.querySelector('#MainContent');
   const taskRow = document.querySelector('.task-row');
   const taskPreview = document.querySelector('.task-preview');
+  const iframeContainer = document.querySelector('.task-row > .col-xs-12');
   const iframe = document.querySelector('.task-question-iframe-container');
 
   if (workspace) {
@@ -22,6 +23,11 @@ async function workspaceExpander() {
   if (taskPreview) {
     taskPreview.style.height = '100%';
     taskPreview.scrollIntoView();
+  }
+
+  if (iframeContainer) {
+    iframeContainer.style.height = `100%`;
+    iframeContainer.scrollIntoView();
   }
 
   if (iframe) {
