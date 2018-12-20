@@ -419,7 +419,7 @@ async function hitExporterMarkdown(request, sender, sendResponse) {
 function turkerHubFetchDaily() {
   return new Promise(async (resolve, reject) => {
     const response = await window.fetch(
-      `https://turkerhub.com/forums/daily-mturk-hits-threads.2/?order=post_date&direction=desc`,
+      `https://forum.turkerview.com/forums/daily-mturk-hits-threads.2/?order=post_date&direction=desc`,
       {
         credentials: `include`
       }
@@ -451,7 +451,7 @@ function turkerHubFetchDaily() {
 function turkerHubCheckPosts(hit, thread) {
   return new Promise(async (resolve, reject) => {
     const response = await window.fetch(
-      `https://turkerhub.com/hub.php?action=getPosts&thread_id=${thread}&order_by=post_date`,
+      `https://forum.turkerview.com/hub.php?action=getPosts&thread_id=${thread}&order_by=post_date`,
       {
         credentials: `include`
       }
@@ -476,7 +476,7 @@ function turkerHubCheckPosts(hit, thread) {
 function turkerHubPostExport(thread, token, string) {
   return new Promise(async (resolve, reject) => {
     const response = await window.fetch(
-      `https://turkerhub.com/threads/${thread}/add-reply`,
+      `https://forum.turkerview.com/threads/${thread}/add-reply`,
       {
         credentials: `include`,
         method: `post`,
@@ -503,13 +503,13 @@ async function hitExporterTurkerHub(request, sender, sendResponse) {
     await turkerHubPostExport(data.thread, data.token, modified);
     hitExporterNotification(
       `HIT Exporter Successful!`,
-      `Turker Hub export posted on TurkerHub.com`
+      `TurkerView Forum export posted on Forum.TurkerView.com`
     );
     sendResponse({ success: true, id: request.hit.hit_set_id });
   } catch (error) {
     hitExporterNotification(
       `HIT Exporter Failed!`,
-      `Turker Hub export failed with the error ${error}`
+      `TurkerView Forum export failed with the error ${error}`
     );
     sendResponse({ success: false, id: request.hit.hit_set_id });
   }

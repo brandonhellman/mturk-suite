@@ -60,7 +60,7 @@
     "notifications",
     "clipboardWrite",
     "*://*.mturk.com/*",
-    "*://*.turkerhub.com/*",
+    "*://*.turkerview.com/*",
     "*://*.mturkcrowd.com/*",
     "https://www.amazon.com/ap/signin?*openid.return_to=https://worker.mturk.com/projects/*/tasks/accept_random*"
   ],
@@ -70,8 +70,8 @@
   "externally_connectable": {
     "matches": [
       "https://worker.mturk.com/*",
-      "https://turkerhub.com/*",
-      "http://www.mturkcrowd.com/*"
+      "https://forum.turkerview.com//*",
+      "https://www.mturkcrowd.com/*"
     ]
   },
 

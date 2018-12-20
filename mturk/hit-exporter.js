@@ -8,7 +8,7 @@ function hitExporterPopover(button, hit) {
     <button class="btn btn-primary btn-sm" data-hit-json="${json}" data-type="plain">Plain</button>
     <button class="btn btn-primary btn-sm" data-hit-json="${json}" data-type="markdown">Markdown</button>
     <button class="btn btn-primary btn-sm" data-hit-json="${json}" data-type="bbcode">BBCode</button>
-    <button class="btn btn-primary btn-sm" data-hit-json="${json}" data-type="turkerhub">Turker Hub</button>
+    <button class="btn btn-primary btn-sm" data-hit-json="${json}" data-type="turkerhub">TurkerView Forum</button>
     <button class="btn btn-primary btn-sm" data-hit-json="${json}" data-type="mturkcrowd">MTurk Crowd</button>
     </div>`;
 
@@ -41,19 +41,21 @@ function hitExporterPopoverButton(event, type, json) {
   if (method === `turkerhub` || method === `mturkcrowd`) {
     // eslint-disable-next-line no-alert
     const result = window.prompt(
-      `Are you sure you want to export this HIT to ${method}.com?`
+      `Are you sure you want to export this HIT to ${
+        method === 'turkerhub' ? 'turkerview.forum' : method
+      }.com?`,
     );
 
     if (result !== null) {
       chrome.runtime.sendMessage(
         { hit, hitExporter: method, message: result },
-        hitExporterMarkButton
+        hitExporterMarkButton,
       );
     }
   } else {
     chrome.runtime.sendMessage(
       { hit, hitExporter: method },
-      hitExporterMarkButton
+      hitExporterMarkButton,
     );
   }
 }
@@ -63,7 +65,7 @@ async function hitExporter() {
     ReactDOM(`HitSetTable`, `TaskQueueTable`),
     ReactProps(`HitSetTable`, `TaskQueueTable`),
     StorageGetKey(`options`),
-    Enabled(`hitExporter`)
+    Enabled(`hitExporter`),
   ]);
 
   const { bodyData } = props;
@@ -76,14 +78,14 @@ async function hitExporter() {
       .querySelector(`.project-name-column`)
       .insertAdjacentHTML(
         `afterbegin`,
-        HTML`<span class="btn btn-sm fa fa-share text-primary" tabIndex="0" data-hit="${hit}"></span>`
+        HTML`<span class="btn btn-sm fa fa-share text-primary" tabIndex="0" data-hit="${hit}"></span>`,
       );
   });
 
-  [...dom.querySelectorAll(`[data-hit]`)].forEach(button => {
+  [...dom.querySelectorAll(`[data-hit]`)].forEach((button) => {
     const hit = JSON.parse(button.dataset.hit);
 
-    button.addEventListener(`click`, event => {
+    button.addEventListener(`click`, (event) => {
       event.stopImmediatePropagation();
 
       if (hitExporterType !== `all`)
@@ -93,7 +95,7 @@ async function hitExporter() {
     if (hitExporterType === `all`) hitExporterPopover(button, hit);
   });
 
-  document.addEventListener(`click`, event => {
+  document.addEventListener(`click`, (event) => {
     if (event.target.matches(`[data-hit-json]`)) {
       hitExporterPopoverButton(event);
     }

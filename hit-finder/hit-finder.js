@@ -1449,7 +1449,7 @@ document.getElementById(`hit-export-markdown`).addEventListener(`click`, (event)
 })
 
 document.getElementById(`hit-export-turkerhub`).addEventListener(`click`, (event) => {
-  const result = window.prompt(`Are you sure you want to export this HIT to TurkerHub.com?`)
+  const result = window.prompt(`Are you sure you want to export this HIT to Forum.TurkerView.com?`)
 
   if (result !== null) {
     const key = event.target.dataset.key
