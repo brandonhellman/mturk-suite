@@ -1,6 +1,14 @@
 const changeLog = [];
 
 changeLog.push({
+  version: '2.4.6',
+  date: 'Thursday, December 20, 2018',
+  'General': [
+    'HIT Exporter Fix: TurkerView Forum direct exports should now work (TurkerHub).',
+  ]
+})
+
+changeLog.push({
   version: '2.4.5',
   date: 'Saturday, December 1, 2018',
   'General': [
