@@ -180,57 +180,62 @@ async function requesterReviews() {
 
   const options = await StorageGetKey(`options`);
 
+  dom.querySelectorAll(`.mobile-row > a > .expand-button`).forEach(mobileBtn => {
+    mobileBtn.style.display = `none`;
+  });
   dom.querySelectorAll(`.table-row`).forEach((row, i) => {
     const hit = props.bodyData[i].project || props.bodyData[i];
     const { requester_id, requester_name } = hit;
     const review = response.reviews[requester_id];
 
-    row.querySelectorAll(`.expand-button`).forEach(btn => {
-      if (btn.parentElement.className === `hidden`) console.log('hidden expander btn, stahp this shit');
-      const container = document.createElement(`div`)
-      container.style.display = `inline-block`;
-      container.addEventListener(`click`, event => {
-        event.stopImmediatePropagation();
-      });
-
-      const requesterTurkerViewReviews = document.createElement(`span`)
-      requesterTurkerViewReviews.className = `btn btn-sm btn-default`;
-
-      const turkerviewIcon = document.createElement(`img`)
-      turkerviewIcon.src = `https://turkerview.com/assets/images/tv-${requesterReviewsTVClass(
-        review
-      )}.png`
-      turkerviewIcon.style.maxHeight = `16px`
-      requesterTurkerViewReviews.appendChild(turkerviewIcon)
-      container.appendChild(requesterTurkerViewReviews);
-
-      const button = document.createElement(`i`);
-      button.roll = `button`;
-      button.tabIndex = 0;
-      button.className = `btn btn-sm fa fa-user text-${requesterReviewsClass(
-        review
-      )}`;
-      container.appendChild(button);
-
-      const script = document.createElement(`script`);
-      script.textContent = `$(document.currentScript).parent().popover({
-        html: true,
-        delay: { show: 500, hide: 100 },
-        trigger: \`hover focus\`,
-        title: \`${requester_name} [${requester_id}]\`,
-        content: \`<div class="container">
-            ${requesterReviewsTurkerViewHTML(hit, review, options)}
-            ${requesterReviewsTurkopticonHTML(hit, review, options)}
-            ${requesterReviewsTurkopticon2HTML(hit, review, options)}
-          </div>\`
-      });`;
-      container.appendChild(script);
-
-      const expand = btn;
-      expand.parentElement.insertAdjacentElement(`afterend`, container);
-      expand.style.display = `none`;
+    row.querySelectorAll(`.requester-column`).forEach(col => {
+        col.querySelectorAll(`.expand-button`).forEach(btn => {
+          const container = document.createElement(`div`)
+          container.style.display = `inline-block`;
+          container.addEventListener(`click`, event => {
+            event.stopImmediatePropagation();
+          });
+    
+          const requesterTurkerViewReviews = document.createElement(`span`)
+          requesterTurkerViewReviews.className = `btn btn-sm btn-default`;
+    
+          const turkerviewIcon = document.createElement(`img`)
+          turkerviewIcon.src = `https://turkerview.com/assets/images/tv-${requesterReviewsTVClass(
+            review
+          )}.png`
+          turkerviewIcon.style.maxHeight = `16px`
+          requesterTurkerViewReviews.appendChild(turkerviewIcon)
+          container.appendChild(requesterTurkerViewReviews);
+    
+          const button = document.createElement(`i`);
+          button.roll = `button`;
+          button.tabIndex = 0;
+          button.className = `btn btn-sm fa fa-user text-${requesterReviewsClass(
+            review
+          )}`;
+          container.appendChild(button);
+    
+          const script = document.createElement(`script`);
+          script.textContent = `$(document.currentScript).parent().popover({
+            html: true,
+            delay: { show: 500, hide: 100 },
+            trigger: \`hover focus\`,
+            title: \`${requester_name} [${requester_id}]\`,
+            content: \`<div class="container">
+                ${requesterReviewsTurkerViewHTML(hit, review, options)}
+                ${requesterReviewsTurkopticonHTML(hit, review, options)}
+                ${requesterReviewsTurkopticon2HTML(hit, review, options)}
+              </div>\`
+          });`;
+          container.appendChild(script);
+    
+          const expand = btn;
+          expand.parentElement.insertAdjacentElement(`afterend`, container);
+          expand.style.display = `none`;
+        });
     });
-  });
+    });
+    
 
   document.head.insertAdjacentHTML(
     `beforeend`,
