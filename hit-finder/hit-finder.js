@@ -187,7 +187,7 @@ function finderProcess () {
       requester.appendChild(requesterContainer)
 
       const requesterTurkerViewReviews = document.createElement(`button`)
-      requesterTurkerViewReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterReviewClass} btn-turkerview`
+      requesterTurkerViewReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterTVReviewClass} btn-turkerview`
       requesterTurkerViewReviews.dataset.toggle = `modal`
       requesterTurkerViewReviews.dataset.target = `#requester-review-modal`
       requesterTurkerViewReviews.dataset.key = hit.requester_id
@@ -199,7 +199,7 @@ function finderProcess () {
       requesterContainer.appendChild(requesterTurkerViewReviews)
       
       const requesterReviews = document.createElement(`button`)
-      requesterReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterReviewClass}`
+      requesterReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterReviewClass} btn-turkopticon`
       requesterReviews.dataset.toggle = `modal`
       requesterReviews.dataset.target = `#requester-review-modal`
       requesterReviews.dataset.key = hit.requester_id
@@ -796,13 +796,11 @@ function averageReviews(reviews) {
         const to = requesterReviewsTurkopticon ? review.turkopticon : null;
         const to2 = requesterReviewsTurkopticon2 ? review.turkopticon2 : null;
 
-        const tvPay = tv ? tv.ratings.pay : null;
-        const tvHrly = tv ? tv.ratings.hourly / 3 : null;
         const toPay = to ? to.attrs.pay : null;
         const to2Pay = to2 ? to2.all.hourly / 3 : null;
 
-        if (tvPay || tvHrly || toPay || to2Pay) {
-          const average = [tvPay, tvHrly, toPay, to2Pay]
+        if (toPay || to2Pay) {
+          const average = [toPay, to2Pay]
             .filter(pay => pay !== null)
             .map((pay, i, filtered) => Number(pay) / filtered.length)
             .reduce((a, b) => a + b);
@@ -920,6 +918,18 @@ function requesterReviewsUpdate (objectReviews, arrayIds) {
   })
 }
 
+function requesterRatingTVAverage () {
+  const [requesterId] = arguments
+
+  const review = reviewsDB[requesterId]
+
+  if (review && review.turkerview) {
+    return review.turkerview.ratings.hourly;
+  }
+
+  return 0
+}
+
 function requesterRatingAverage () {
   const [requesterId] = arguments
 
@@ -932,6 +942,12 @@ function requesterRatingAverage () {
   return 0
 }
 
+async function requesterReviewGetTVClass () {
+  const [requesterId] = arguments
+
+  const average = requesterRatingTVAverage(requesterId)
+  return (average > 10.50 ? `success` : average > 7.25 ? `warning` : average > 0 ? `danger` : `default`)
+}
 
 async function requesterReviewGetClass () {
   const [requesterId] = arguments
@@ -941,13 +957,15 @@ async function requesterReviewGetClass () {
 }
 
 async function updateRequesterReviews (reviews) {
+  console.log('recolor our btns');
   for (const key in reviews) {
     reviewsDB[key] = reviews[key]
 
     const reviewClass = await requesterReviewGetClass(key)
+    const reviewTVClass = await requesterReviewGetTVClass(key)
 
     if (reviewClass) {
-      for (const element of document.getElementsByClassName(`btn-${key}`)) {
+      for (const element of document.getElementsByClassName(`btn-${key} btn-turkopticon`)) {
         element.classList.remove(`btn-success`, `btn-warning`, `btn-danger`)
         element.classList.add(`btn-${reviewClass}`)
       }
@@ -956,6 +974,13 @@ async function updateRequesterReviews (reviews) {
         if (storage.hitFinder[`display-colored-rows`]) {
           element.classList.add(`table-${reviewClass}`)
         }
+      }
+    }
+
+    if (reviewTVClass){
+      for (const element of document.getElementsByClassName(`btn-${key} btn-turkerview`)) {
+        element.classList.remove(`btn-succes`, `btn-warning`, `btn-danger`)
+        element.classList.add(`btn-${reviewTVClass}`)
       }
     }
   }
@@ -1156,17 +1181,20 @@ $(`#requester-review-modal`).on(`show.bs.modal`, async (event) => {
   if (options.requesterReviewsTurkerview) {
     if (tv) {
       document.getElementById(`review-turkerview-link`).href = `https://turkerview.com/requesters/${key}`
+      document.getElementById(`review-turkerview-link`).innerHTML = `TurkerView (${tv.reviews.toLocaleString()})`
       document.getElementById(`review-turkerview-ratings-hourly`).textContent = toMoneyString(tv.ratings.hourly)
       document.getElementById(`review-turkerview-ratings-pay`).textContent = tv.ratings.pay || `-`
       document.getElementById(`review-turkerview-ratings-fast`).textContent = tv.ratings.fast || `-`
       document.getElementById(`review-turkerview-ratings-comm`).textContent = tv.ratings.comm || `-`
       document.getElementById(`review-turkerview-rejections`).textContent = tv.rejections
-      document.getElementById(`review-turkerview-tos`).textContent = tv.tos
+      document.getElementById(`review-turkerview-reviews`).textContent = tv.reviews.toLocaleString()
       document.getElementById(`review-turkerview-blocks`).textContent = tv.blocks
 
       document.getElementById(`review-turkerview-review`).style.display = ``
       document.getElementById(`review-turkerview-no-reviews`).style.display = `none`
     } else {
+      document.getElementById(`review-turkerview-link`).href = `https://turkerview.com/requesters/${key}`
+      document.getElementById(`review-turkerview-link`).innerHTML = `TurkerView`
       document.getElementById(`review-turkerview-review`).style.display = `none`
       document.getElementById(`review-turkerview-no-reviews`).style.display = ``
     }
