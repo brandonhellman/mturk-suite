@@ -185,7 +185,8 @@ async function requesterReviews() {
     const { requester_id, requester_name } = hit;
     const review = response.reviews[requester_id];
 
-    row.querySelectorAll(`.expand-button:visible`).forEach(btn => {
+    row.querySelectorAll(`.expand-button`).forEach(btn => {
+      if (btn.parentElement.className === `hidden`) console.log('hidden expander btn, stahp this shit');
       const container = document.createElement(`div`)
       container.style.display = `inline-block`;
       container.addEventListener(`click`, event => {
