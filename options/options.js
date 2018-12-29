@@ -38,6 +38,15 @@ chrome.storage.local.get(`options`, keys => {
     });
   });
 
+  [...document.querySelectorAll(`input[name="turkerviewApiKey"]`)].forEach(el => {
+    el.value = options[el.name] ? options[el.name] : ``;
+
+    el.addEventListener(`input`, event => {
+      options[event.target.name] = event.target.value;
+      chrome.storage.local.set({ options });
+    });
+  });
+
   [...document.querySelectorAll(`select`)].forEach(el => {
     // eslint-disable-next-line no-param-reassign
     el.value = options[el.id];

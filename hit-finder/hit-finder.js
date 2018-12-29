@@ -139,6 +139,7 @@ function finderProcess () {
       }
 
       const included = includeListed(hit)
+      const requesterTVReviewClass = await requesterReviewGetTVClass(hit.requester_id)
       const requesterReviewClass = await requesterReviewGetClass(hit.requester_id)
       const trackerRequester = await hitTrackerMatchObject(`requester_id`, hit.requester_id)
       const trackerTitle = await hitTrackerMatchObject(`title`, hit.title)
@@ -185,6 +186,18 @@ function finderProcess () {
       requesterContainer.className = `btn-group`
       requester.appendChild(requesterContainer)
 
+      const requesterTurkerViewReviews = document.createElement(`button`)
+      requesterTurkerViewReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterReviewClass} btn-turkerview`
+      requesterTurkerViewReviews.dataset.toggle = `modal`
+      requesterTurkerViewReviews.dataset.target = `#requester-review-modal`
+      requesterTurkerViewReviews.dataset.key = hit.requester_id
+
+      const turkerviewIcon = document.createElement(`img`)
+      turkerviewIcon.src = `https://turkerview.com/assets/images/tv-white.png`
+      turkerviewIcon.style.maxHeight = `13px`
+      requesterTurkerViewReviews.appendChild(turkerviewIcon)
+      requesterContainer.appendChild(requesterTurkerViewReviews)
+      
       const requesterReviews = document.createElement(`button`)
       requesterReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterReviewClass}`
       requesterReviews.dataset.toggle = `modal`
@@ -700,6 +713,7 @@ async function saveReviews(reviews) {
 function updateCheck(reviews) {
   return new Promise(async resolve => {
     const time = new Date().getTime() - 1800000;
+    //const time = new Date().getTime() - 10000; //time-testing
     const update = Object.keys(reviews).some(rid => reviews[rid].time < time);
     resolve(update);
   });
@@ -746,6 +760,8 @@ function formatResponse(response) {
       }, {});
 
       resolve(formattedTO2);
+    } else if (response.url.includes(`turkerview`)){
+      resolve(json.requesters);
     } else {
       resolve(json);
     }
@@ -755,7 +771,7 @@ function formatResponse(response) {
 function fetchReviews(site, url) {
   return new Promise(async resolve => {
     try {
-      const response = await Fetch(url, undefined, 5000);
+      const response = (site == `turkerview`) ? await FetchTVWithTimeout(url, { headers: ViewHeaders }, 5000) : await Fetch(url, undefined, 5000)
       const json = response.ok ? await formatResponse(response) : null;
       resolve({ site, json });
     } catch (error) {
@@ -804,13 +820,14 @@ function averageReviews(reviews) {
 }
 
 function updateReviews(reviews) {
+  console.log('update revs');
   return new Promise(async resolve => {
     const rids = Object.keys(reviews);
 
     const updates = await Promise.all([
       fetchReviews(
         `turkerview`,
-        `https://api.turkerview.com/api/v1/requesters/?ids=${rids}`
+        `https://view.turkerview.com/v1/requesters/?requester_ids=${rids}`
       ),
       fetchReviews(
         `turkopticon`,
@@ -848,6 +865,7 @@ async function reviewsForFinder(rids) {
   updateRequesterReviews(needsUpdate ? await updateReviews(reviews) : reviews);
 }
 
+// This seems to never get called, remove?
 function requesterReviewsUpdate (objectReviews, arrayIds) {
   return new Promise(async (resolve) => {
     function getReviews (stringSite, stringURL) {
@@ -870,7 +888,7 @@ function requesterReviewsUpdate (objectReviews, arrayIds) {
     }
 
     const getReviewsAll = await Promise.all([
-      getReviews(`turkerview`, `https://api.turkerview.com/api/v1/requesters/?ids=${arrayIds}&from=mts`),
+      getTVReviews(`https://view.turkerview.com/v1/requesters/?requester_ids=${arrayIds}&from=mts`),
       getReviews(`turkopticon`, `https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${arrayIds}`),
       getReviews(`turkopticon2`, `https://api.turkopticon.info/requesters?rids=${arrayIds}&fields[requesters]=aggregates`)
     ])
@@ -913,6 +931,7 @@ function requesterRatingAverage () {
 
   return 0
 }
+
 
 async function requesterReviewGetClass () {
   const [requesterId] = arguments

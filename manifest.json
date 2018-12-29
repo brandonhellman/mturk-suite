@@ -25,6 +25,7 @@
     "scripts": [
       "js/moment.js",
       "js/moment-duration-format.js",
+      "js/fetch-turkerview.js",
       "js/fetch-with-timeout.js",
       "js/mturk-date.js",
       "js/storage.js",
