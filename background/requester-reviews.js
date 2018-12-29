@@ -107,6 +107,8 @@ function formatResponse(response) {
       }, {});
 
       resolve(formattedTO2);
+    } else if (response.url.includes(`turkerview`)){
+      resolve(json.requesters);
     } else {
       resolve(json);
     }
@@ -116,7 +118,7 @@ function formatResponse(response) {
 function fetchReviews(site, url) {
   return new Promise(async resolve => {
     try {
-      const response = await Fetch(url, undefined, 5000);
+      const response = (site == `turkerview`) ? await FetchTVWithTimeout(url, { headers: ViewHeaders }, 5000) : await Fetch(url, undefined, 5000)
       const json = response.ok ? await formatResponse(response) : null;
       resolve({ site, json });
     } catch (error) {
@@ -141,13 +143,11 @@ function averageReviews(reviews) {
         const to = requesterReviewsTurkopticon ? review.turkopticon : null;
         const to2 = requesterReviewsTurkopticon2 ? review.turkopticon2 : null;
 
-        const tvPay = tv ? tv.ratings.pay : null;
-        const tvHrly = tv ? tv.ratings.hourly / 3 : null;
         const toPay = to ? to.attrs.pay : null;
         const to2Pay = to2 ? to2.all.hourly / 3 : null;
 
-        if (tvPay || tvHrly || toPay || to2Pay) {
-          const average = [tvPay, tvHrly, toPay, to2Pay]
+        if (toPay || to2Pay) {
+          const average = [toPay, to2Pay]
             .filter(pay => pay !== null)
             .map((pay, i, filtered) => Number(pay) / filtered.length)
             .reduce((a, b) => a + b);
@@ -171,7 +171,7 @@ function updateReviews(reviews) {
     const updates = await Promise.all([
       fetchReviews(
         `turkerview`,
-        `https://api.turkerview.com/api/v1/requesters/?ids=${rids}`
+        `https://view.turkerview.com/v1/requesters/?requester_ids=${rids}`
       ),
       fetchReviews(
         `turkopticon`,

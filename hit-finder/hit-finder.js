@@ -953,7 +953,7 @@ async function requesterReviewGetClass () {
   const [requesterId] = arguments
 
   const average = requesterRatingAverage(requesterId)
-  return (average > 3.75 ? `success` : average > 2 ? `warning` : average > 0 ? `danger` : `default`)
+  return (average > 3.75 ? `success` : average > 2.25 ? `warning` : average > 0 ? `danger` : `default`)
 }
 
 async function updateRequesterReviews (reviews) {

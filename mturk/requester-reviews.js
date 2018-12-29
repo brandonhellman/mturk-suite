@@ -2,9 +2,19 @@
 function requesterReviewsClass(review) {
   const { average } = review;
   if (average > 3.75) return `success`;
-  if (average > 2.0) return `warning`;
+  if (average > 2.25) return `warning`;
   if (average > 0.0) return `danger`;
   return `muted`;
+}
+
+function requesterReviewsTVClass(review) {
+  if (!review.turkerview) return `unrated`;
+
+  const hourly = review.turkerview.ratings.hourly;
+  if (hourly > 10.50) return `mts-green`;
+  if (hourly > 7.25) return `mts-orange`;
+  if (hourly > 0.0) return `mts-red`;
+  return `unrated`;
 }
 
 function requesterReviewsTurkerViewHTML(hit, review, options) {
@@ -25,7 +35,7 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
       </div>
     </div>`;
 
-  const { ratings, rejections, tos, blocks } = turkerview;
+  const { ratings, rejections, reviews, blocks } = turkerview;
   const { hourly, pay, fast, comm } = ratings;
 
   return HTML`<div class="col-xs-4" style="width: 150px;">
@@ -38,8 +48,8 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
         <tr> <td>Pay</td>    <td>${pay} / 5</td>        </tr>
         <tr> <td>Fast</td>   <td>${fast} / 5</td>       </tr>
         <tr> <td>Comm</td>   <td>${comm} / 5</td>       </tr>
+        <tr> <td>Reviews</td>    <td>${reviews.toLocaleString()}</td>        </tr>
         <tr> <td>Rej</td>    <td>${rejections}</td> </tr>
-        <tr> <td>ToS</td>    <td>${tos}</td>        </tr>
         <tr> <td>Blocks</td> <td>${blocks}</td>     </tr>
       </table>
     </div>
@@ -175,16 +185,31 @@ async function requesterReviews() {
     const { requester_id, requester_name } = hit;
     const review = response.reviews[requester_id];
 
-    row.querySelectorAll(`.expand-button`).forEach(btn => {
+    row.querySelectorAll(`.expand-button:visible`).forEach(btn => {
+      const container = document.createElement(`div`)
+      container.style.display = `inline-block`;
+      container.addEventListener(`click`, event => {
+        event.stopImmediatePropagation();
+      });
+
+      const requesterTurkerViewReviews = document.createElement(`span`)
+      requesterTurkerViewReviews.className = `btn btn-sm btn-default`;
+
+      const turkerviewIcon = document.createElement(`img`)
+      turkerviewIcon.src = `https://turkerview.com/assets/images/tv-${requesterReviewsTVClass(
+        review
+      )}.png`
+      turkerviewIcon.style.maxHeight = `16px`
+      requesterTurkerViewReviews.appendChild(turkerviewIcon)
+      container.appendChild(requesterTurkerViewReviews);
+
       const button = document.createElement(`i`);
       button.roll = `button`;
       button.tabIndex = 0;
-      button.className = `btn btn-sm fa fa-users text-${requesterReviewsClass(
+      button.className = `btn btn-sm fa fa-user text-${requesterReviewsClass(
         review
       )}`;
-      button.addEventListener(`click`, event => {
-        event.stopImmediatePropagation();
-      });
+      container.appendChild(button);
 
       const script = document.createElement(`script`);
       script.textContent = `$(document.currentScript).parent().popover({
@@ -198,10 +223,10 @@ async function requesterReviews() {
             ${requesterReviewsTurkopticon2HTML(hit, review, options)}
           </div>\`
       });`;
-      button.appendChild(script);
+      container.appendChild(script);
 
       const expand = btn;
-      expand.parentElement.insertAdjacentElement(`afterend`, button);
+      expand.parentElement.insertAdjacentElement(`afterend`, container);
       expand.style.display = `none`;
     });
   });
