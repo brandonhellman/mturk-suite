@@ -180,9 +180,8 @@ async function requesterReviews() {
 
   const options = await StorageGetKey(`options`);
 
-  dom.querySelectorAll(`.mobile-row > a > .expand-button`).forEach(mobileBtn => {
-    mobileBtn.style.display = `none`;
-  });
+  dom.querySelectorAll(`.mobile-row > a > .expand-button`).forEach(mobileBtn => mobileBtn.style.display = `none`);
+
   dom.querySelectorAll(`.table-row`).forEach((row, i) => {
     const hit = props.bodyData[i].project || props.bodyData[i];
     const { requester_id, requester_name } = hit;
@@ -234,7 +233,7 @@ async function requesterReviews() {
           expand.style.display = `none`;
         });
     });
-    });
+  });
     
 
   document.head.insertAdjacentHTML(
