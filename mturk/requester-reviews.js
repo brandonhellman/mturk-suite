@@ -182,6 +182,34 @@ async function requesterReviews() {
 
   dom.querySelectorAll(`.mobile-row > a > .expand-button`).forEach(mobileBtn => mobileBtn.style.display = `none`);
 
+  
+  document.querySelector(`.me-bar`)
+  document.querySelector(`.me-bar > .row > .col-xs-7`).insertAdjacentHTML(`beforeend`, `<span class="pull-right text-success" data-toggle="modal" data-target="#turkerview-finder-announcement-modal" style="cursor: pointer;"><i class="fa fa-info-circle"></i> Click Here - TurkerView's API Is Upgrading</span>`);
+
+  document.body.insertAdjacentHTML(
+    `beforeend`,
+    /* html */`<div class="modal" id="turkerview-finder-announcement-modal" style="margin-top: 60px;">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title">TurkerView's API Is Upgrading</h2>
+            <button type="button" class="close text-danger" data-dismiss="modal" style="margin-right: 0;">&times;</button>
+          </div>
+          <div class="modal-body text-dark">
+          <p>Sorry for the intrusion, but we're expanding our services & infrastructure and making huge improvements to the way we deliver information & data to Turkers in 2019!</p>
+                  <p>Part of those changes mean that without an API Key MTS wont be able to retrieve information from our servers soon. You can find more information about the changes <a href="https://forum.turkerview.com/threads/preview-turkerviews-new-view-api-infrastructure.1959/" target="_blank">on our announcement here</a>.</p>
+                  <p>For now, though, we've upgraded our API & left access open so we don't disrupt your day to day workflow. Thanks for all of the support!</p>
+                  <p>Make sure to register & get your new access keys to our upgraded API by <a href="https://turkerview.com/account/api/" target="_blank">visiting your account dashboard</a>.</p>
+                  <p>You can save your TurkerView API Key in MTurk Suite's Options panel.</p>
+          </div>
+          <div class="modal-footer" style="display: block; padding: 15px;">
+          </div>
+        </div>
+      </div>
+    </div>`
+  );
+
+
   dom.querySelectorAll(`.table-row`).forEach((row, i) => {
     const hit = props.bodyData[i].project || props.bodyData[i];
     const { requester_id, requester_name } = hit;
@@ -197,6 +225,8 @@ async function requesterReviews() {
     
           const requesterTurkerViewReviews = document.createElement(`span`)
           requesterTurkerViewReviews.className = `btn btn-sm btn-default`;
+          requesterTurkerViewReviews.roll = `button`;
+          requesterTurkerViewReviews.tabIndex = 0;
     
           const turkerviewIcon = document.createElement(`img`)
           turkerviewIcon.src = `https://turkerview.com/assets/images/tv-${requesterReviewsTVClass(

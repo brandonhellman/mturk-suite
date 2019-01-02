@@ -34,8 +34,11 @@
             <button type="button" class="btn btn-sm btn-primary ml-1" data-toggle="modal" data-target="#block-list-modal">Block List</button>
             <button type="button" class="btn btn-sm btn-primary ml-1" data-toggle="modal" data-target="#include-list-modal">Include List</button>
             <button type="button" class="btn btn-sm btn-primary ml-1" data-toggle="modal" data-target="#settings-modal">Settings</button>
+            <button type="button" class="btn btn-sm btn-success ml-1" data-toggle="modal" data-target="#turkerview-finder-announcement-modal"><i class="fa fa-info-circle"></i> TurkerView MTS Announcement!</button>
         </div>
     </div>
+
+    
 
     <div id="include-list-hits-card" class="card mb-1" style="display: none;">
         <div class="card-header p-1">
@@ -212,6 +215,27 @@
                 <div class="modal-footer">
                     <button type="button" id="block-list-edit-delete" class="btn btn-danger" data-dismiss="modal">Delete</button>
                     <button type="button" id="block-list-edit-save" class="btn btn-primary" data-dismiss="modal">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TurkerView Announcement Modal -->
+    <div id="turkerview-finder-announcement-modal" class="modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6>TurkerView's API Is Upgrading</h6>
+                </div>
+                <div class="modal-body">
+                    <p>Sorry for the intrusion, but we're expanding our services & infrastructure and making huge improvements to the way we deliver information & data to Turkers in 2019!</p>
+                    <p>Part of those changes mean that without an API Key MTS wont be able to retrieve information from our servers soon. You can find more information about the changes <a href="https://forum.turkerview.com/threads/preview-turkerviews-new-view-api-infrastructure.1959/" target="_blank">on our announcement here</a>.</p>
+                    <p>For now, though, we've upgraded our API & left access open so we don't disrupt your day to day workflow. Thanks for all of the support!</p>
+                    <p>Make sure to register & get your new access keys to our upgraded API by <a href="https://turkerview.com/account/api/" target="_blank">visiting your account dashboard</a>.</p>
+                    <p>You can save your TurkerView API Key in <a href="/options/options.html" target="_blank">MTurk Suite's Options</a> panel.</p>
+                </div>
+                <div class="modal-footer">
+
                 </div>
             </div>
         </div>

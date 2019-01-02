@@ -132,7 +132,7 @@
         "js/moment-duration-format.js",
         "js/moment-timezone.js",
         "mturk/turkerview/hourly-tracker.js",     
-        "mturk/turkerview/turkerview-return-reviews.js"
+        "mturk/turkerview/return-reviews.js"
       ],
       "matches": [
         "https://worker.mturk.com/projects/*/tasks/*"

@@ -41,7 +41,7 @@ function workDuration(){
 
     const taskReward = taskprops.modalOptions.monetaryReward.amountInDollars;
 
-    const trackerHTML = HTML`
+    const trackerHTML = /*html*/`
     <div class="col-xs-4">
         <span id="mtsHourlyContainer" class="detail-bar-label" style="cursor: pointer;" title="This will pause the timer for your hourly wage, use this when taking a break or otherwise not working on the HIT." data-toggle="tooltip" data-placement="bottom">
             <span id="mtsHourlyWage"></span>
@@ -56,7 +56,8 @@ function workDuration(){
 
     document.getElementById(`swapTimeDisplay`).addEventListener(`click`, function() { 
         showElapsed = showElapsed ? false : true;
-        document.getElementById(`mtsDurationTracker`).innerHTML = showElapsed ? `${timerString(workDuration(), "*mm:ss")} [E]` : `${timerString(durationRemaining, "*mm:ss")} [R]`;
+        document.getElementById(`mtsHourlyWage`).style.display = showElapsed ? `inherit` : `none`;
+        document.getElementById(`mtsDurationTracker`).innerHTML = showElapsed ? `${timerString(workDuration(), "*mm:ss")} [E]` : `${timerString(durationRemaining, "H:*mm:ss")} [R] / ${timerString(durationTotal, "H:*mm:ss")} [T]`;
     });
 
     document.getElementById(`mtsHourlyContainer`).addEventListener(`click`, function(){
@@ -72,13 +73,15 @@ function workDuration(){
                 document.getElementById(`mtsHourlyWage`).innerHTML = `<span class="${hourlyWageClass(currentWage)}">$${displayWage}/hr`;
             }
 
-            document.getElementById(`mtsDurationTracker`).innerHTML = showElapsed ? `${timerString(workDurationInSeconds, "*mm:ss")} [E]`: `${timerString(durationRemaining, "*mm:ss")} [R]`;
+            document.getElementById(`mtsHourlyWage`).style.display = showElapsed ? `inherit` : `none`;
+            document.getElementById(`mtsDurationTracker`).innerHTML = showElapsed ? `${timerString(workDurationInSeconds, "*mm:ss")} [E]` : `${timerString(durationRemaining, "H:*mm:ss")} [R] / ${timerString(durationTotal, "H:*mm:ss")} [T]`;
 
         } else{
             workDurationPause = false;
             workPauseDurationInMs += moment(moment.tz(`America/Los_Angeles`)).diff(workPauseMoment);
 
-            document.getElementById(`mtsDurationTracker`).innerHTML = showElapsed ? `${timerString(workDuration(), "*mm:ss")} [E]` : `${timerString(durationRemaining, "H:*mm:ss")} [R]`;
+            document.getElementById(`mtsHourlyWage`).style.display = showElapsed ? `inherit` : `none`;
+            document.getElementById(`mtsDurationTracker`).innerHTML = showElapsed ? `${timerString(workDuration(), "*mm:ss")} [E]` : `${timerString(durationRemaining, "H:*mm:ss")} [R] / ${timerString(durationTotal, "H:*mm:ss")} [T]`;
         }
     });
 
@@ -88,7 +91,8 @@ function workDuration(){
         durationRemaining--;
         let workDurationInSeconds = workDuration();
 
-        document.getElementById(`mtsDurationTracker`).innerHTML = showElapsed ? `${timerString(workDurationInSeconds, "*mm:ss")} [E]` : `${timerString(durationRemaining, "*mm:ss")} [R]`;
+        document.getElementById(`mtsHourlyWage`).style.display = showElapsed ? `inherit` : `none`;
+        document.getElementById(`mtsDurationTracker`).innerHTML = showElapsed ? `${timerString(workDurationInSeconds, "*mm:ss")} [E]` : `${timerString(durationRemaining, "H:*mm:ss")} [R] / ${timerString(durationTotal, "H:*mm:ss")} [T]`;
 
         if (workDurationPause) return;
 
@@ -98,7 +102,16 @@ function workDuration(){
             document.getElementById(`mtsHourlyWage`).innerHTML = `<span class="${hourlyWageClass(currentWage)}">$${displayWage}/hr`;
 
             if (currentWage < 7.25 && !document.getElementById(`mtsReturnReviewFromHourlyTrackerAlert`)){
-                document.getElementById(`swapTimeDisplay`).insertAdjacentHTML(`afterend`, `<br><a id="mtsReturnReviewFromHourlyTrackerAlert" class="text-warning detail-bar-label mts-tv-return-warn" style="margin-right: 5px; cursor: pointer;">[ Review & Return ]</a>`)
+                document.getElementById(`swapTimeDisplay`).insertAdjacentHTML(`afterend`, `<span id="hourlyTvReturnReview"><br><a id="mtsReturnReviewFromHourlyTrackerAlert" class="text-warning detail-bar-label mts-tv-return-warn" style="margin-right: 5px; cursor: pointer;">[ Review & Return ]</a></span>`)
+                console.log('el' + document.getElementById(`mtsReturnReviewFromHourlyTrackerAlert`));
+                document.getElementById(`mtsReturnReviewFromHourlyTrackerAlert`).addEventListener(`click`, function(){
+                    document.querySelector(`body`).classList.add(`global-modal-open`);
+                    document.querySelector(`body`).classList.add(`modal-open`);
+                    document.getElementById(`mts-tvReturnModal`).style.display = `block`;
+                    document.getElementById(`mts-tv-return-modal-backdrop`).style.display = `block`;
+        
+                    document.querySelector(`input[name=elapsed_work_time]`).value = workDuration();
+                });
             }
         }
         
