@@ -17,6 +17,15 @@ function requesterReviewsTVClass(review) {
   return `unrated`;
 }
 
+function requesterHourlyTVClass(hourly) {
+  if (hourly == null) return `text-muted`;
+
+  if (hourly > 10.50) return `text-success`;
+  if (hourly > 7.25) return `text-warning`;
+  if (hourly > 0.0) return `text-danger`;
+  return `text-muted`;
+}
+
 function requesterReviewsTurkerViewHTML(hit, review, options) {
   const { requester_id } = hit;
   const { turkerview } = review;
@@ -25,8 +34,8 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
   if (!requesterReviewsTurkerview) return ``;
 
   if (!turkerview)
-    return HTML`<div class="col-xs-4" style="width: 150px;">
-      <h2>
+    return HTML`<div class="col-xs-12">
+      <h2 style="text-align: center;">
         <a class="text-primary" href="https://turkerview.com/requesters/${requester_id}" target="_blank">TurkerView</a>
       </h2>
       <div>No Reviews</div>
@@ -38,25 +47,48 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
   const { ratings, rejections, reviews, blocks } = turkerview;
   const { hourly, pay, fast, comm } = ratings;
 
-  return HTML`<div class="col-xs-4" style="width: 150px;">
-    <h2>
-      <a class="text-primary" href="https://turkerview.com/requesters/${requester_id}" target="_blank">TurkerView</a>
+  return /*html*/`
+    <h2 style="text-align: center;">
+      <a class="text-primary" href="https://turkerview.com/requesters/${requester_id}" target="_blank">TurkerView</a> <span class="text-muted"><small>(${reviews.toLocaleString()} Reviews)</small></span>
     </h2>
-    <div>
-      <table style="width: 100%">
-        <tr> <td>Hourly</td> <td>$${hourly}</td>    </tr>
-        <tr> <td>Pay</td>    <td>${pay} / 5</td>        </tr>
-        <tr> <td>Fast</td>   <td>${fast} / 5</td>       </tr>
-        <tr> <td>Comm</td>   <td>${comm} / 5</td>       </tr>
-        <tr> <td>Reviews</td>    <td>${reviews.toLocaleString()}</td>        </tr>
-        <tr> <td>Rej</td>    <td>${rejections}</td> </tr>
-        <tr> <td>Blocks</td> <td>${blocks}</td>     </tr>
-      </table>
+    <div class="row" style="font-size: 0.857rem;">
+      <div class="col-xs-1"></div>
+
+      <div class="col-xs-10">
+        <div class="row">
+          <div class="col-xs-6"><p style="margin-bottom: 0.15rem;" class="text-muted"><strong>Hourly Avg:</strong></p></div>
+          <div class="col-xs-6"><p style="margin-bottom: 0.15rem;" class="text-muted pull-right"><strong class="${requesterHourlyTVClass(hourly)}">$${hourly}/hr</strong></p></div>
+        </div>
+        <hr style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+        <div class="row">
+          <div class="col-xs-6"><p style="margin-bottom: 0.15rem;" class="text-muted">Pay Sentiment:</p></div>
+          <div class="col-xs-6"><p style="margin-bottom: 0.15rem;" class="text-muted pull-right"><span class="text-${pay.class}">${pay.text} <i class="fa ${pay.faicon}"></i></span></p></div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6"><p style="margin-bottom: 0.15rem;" class="text-muted">Approval Time:</p></div>
+          <div class="col-xs-6"><p style="margin-bottom: 0.15rem;" class="text-muted pull-right"><span class="text-${fast.class}">${fast.text} <i class="fa ${fast.faicon}"></i></span></p></div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6"><p style="margin-bottom: 0.25rem;" class="text-muted">Communication:</p></div>
+          <div class="col-xs-6"><p style="margin-bottom: 0.25rem;" class="text-muted pull-right"><span class="text-${comm.class}">${comm.text} <i class="fa ${comm.faicon}"></i></span></p></div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted">${rejections === 0 ? '<i class="fa fa-check" style="color: rgba(0, 128, 0, 1);"></i> No Rejections' : '<i class="fa fa-times" style="color: rgba(255, 0, 0, 1);"></i> Rejected Work'}</p></div>
+          <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted">${blocks === 0 ? '<i class="fa fa-check" style="color: rgba(0, 128, 0, 1);"></i> No Blocks' : '<i class="fa fa-times" style="color: rgba(255, 0, 0, 1);"></i> Blocks Reported'}</p></div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted"><a href="https://turkerview.com/requesters/${requester_id}}" target="_blank">Overview</a></p></div>
+          <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted"><a href="https://turkerview.com/requesters/${requester_id}}/reviews" target="_blank">Reviews</a></p></div>
+        </div>
+      </div>
+
+      <div class="col-xs-1"></div>
     </div>
-    <div>
-      <a href="https://turkerview.com/review.php" target="_blank">Review on TV</a>
+    <div style="text-align: center;">
+      <a href="https://turkerview.com/review.php" target="_blank">How Do I Review on TV?</a>
     </div>
-  </div>`;
+    <hr>
+  `;
 }
 
 function requesterReviewsTurkopticonHTML(hit, review, options) {
@@ -247,11 +279,14 @@ async function requesterReviews() {
           const script = document.createElement(`script`);
           script.textContent = `$(document.currentScript).parent().popover({
             html: true,
-            delay: { show: 500, hide: 100 },
+            delay: { show: 500, hide: 200 },
             trigger: \`hover focus\`,
             title: \`${requester_name} [${requester_id}]\`,
-            content: \`<div class="container">
+            content: \`
+              <div class="container">
                 ${requesterReviewsTurkerViewHTML(hit, review, options)}
+              </div>
+              <div class="container">
                 ${requesterReviewsTurkopticonHTML(hit, review, options)}
                 ${requesterReviewsTurkopticon2HTML(hit, review, options)}
               </div>\`
