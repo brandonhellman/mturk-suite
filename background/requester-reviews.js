@@ -118,7 +118,7 @@ function formatResponse(response) {
 function fetchReviews(site, url) {
   return new Promise(async resolve => {
     try {
-      const response = (site == `turkerview`) ? await FetchTVWithTimeout(url, { headers: ViewHeaders }, 5000) : await Fetch(url, undefined, 5000)
+      const response = (site == `turkerview`) ? await FetchTVWithTimeout(url, { headers: ViewHeaders }, 5000) : await Fetch(url, undefined, 350)
       const json = response.ok ? await formatResponse(response) : null;
       resolve({ site, json });
     } catch (error) {
