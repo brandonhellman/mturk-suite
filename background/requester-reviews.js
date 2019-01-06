@@ -107,6 +107,8 @@ function formatResponse(response) {
       }, {});
 
       resolve(formattedTO2);
+    } else if (response.url.includes(`turkerview`)){
+      resolve(json.requesters);
     } else {
       resolve(json);
     }

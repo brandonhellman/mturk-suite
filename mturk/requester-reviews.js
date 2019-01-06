@@ -45,9 +45,7 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
     </div>`;
 
   const { ratings, wages, rejections, reviews, blocks } = turkerview;
-  console.log(wages.average.wage);
-  //return;
-  const { hourly, pay, fast, comm } = ratings;
+  const { pay, fast, comm } = ratings;
 
   return /*html*/`
     <h2 style="text-align: center;">

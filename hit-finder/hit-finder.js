@@ -1188,9 +1188,9 @@ $(`#requester-review-modal`).on(`show.bs.modal`, async (event) => {
       document.getElementById(`review-turkerview-ratings-pay`).innerHTML = `<span class="text-${tv.ratings.pay.class}">${tv.ratings.pay.text} <i class="fa ${tv.ratings.pay.faicon}"></i></span>` || `-`
       document.getElementById(`review-turkerview-ratings-fast`).innerHTML = `<span class="text-${tv.ratings.fast.class}">${tv.ratings.fast.text}</span>` || `-`
       document.getElementById(`review-turkerview-ratings-comm`).innerHTML = `<span class="text-${tv.ratings.comm.class}">${tv.ratings.comm.text}</span>` || `-`
-      document.getElementById(`review-turkerview-rejections`).innerHTML = tv.rejections === 0 ? '<i class="fa fa-check" style="color: rgba(0, 128, 0, 1);"></i> No Rejections' : '<i class="fa fa-times" style="color: rgba(255, 0, 0, 1);"></i> Rejected Work'
+      document.getElementById(`review-turkerview-rejections`).innerHTML = tv.rejections === 0 ? '<i class="fa fa-check text-success"></i> No Rejections' : '<i class="fa fa-times text-danger"></i> Rejected Work'
       document.getElementById(`review-turkerview-reviews`).textContent = tv.reviews.toLocaleString()
-      document.getElementById(`review-turkerview-blocks`).innerHTML = tv.blocks === 0 ? '<i class="fa fa-check" style="color: rgba(0, 128, 0, 1);"></i> No Blocks' : '<i class="fa fa-times" style="color: rgba(255, 0, 0, 1);"></i> Blocks Reported'
+      document.getElementById(`review-turkerview-blocks`).innerHTML = tv.blocks === 0 ? '<i class="fa fa-check text-success"></i> No Blocks' : '<i class="fa fa-times text-danger"></i> Blocks Reported'
 
       document.getElementById(`review-turkerview-profile-link`).innerHTML = `<a href="https://turkerview.com/requesters/${key}}" target="_blank">Profile <i class="fa fa-external-link"></i></a>`
       document.getElementById(`review-turkerview-reviews-link`).innerHTML = `<a href="https://turkerview.com/requesters/${key}}/reviews" target="_blank">Reviews <i class="fa fa-external-link"></i></a>`
