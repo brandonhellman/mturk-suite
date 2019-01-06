@@ -151,7 +151,8 @@ function finderProcess () {
         row.classList.add(`included`)
       }
       if (hfOptions[`display-colored-rows`]) {
-        row.classList.add(`table-${requesterReviewClass}`)
+        console.log(requesterTVReviewClass, requesterReviewClass);
+        row.classList.add(`table-${(requesterTVReviewClass != `default` ? requesterTVReviewClass : requesterReviewClass)}`)
       }
 
       const actions = document.createElement(`td`)
