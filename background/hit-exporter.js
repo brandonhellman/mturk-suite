@@ -81,10 +81,10 @@ function hitExporterToClipboard(string, hit, sendResponse) {
 function templateTurkerView(review) {
   if (review instanceof Object === false) return `No Reviews`;
 
-  const { ratings, rejections, tos, blocks } = review;
-  const { hourly, pay, fast, comm } = ratings;
+  const { ratings, wages, rejections, tos, blocks } = review;
+  const { pay, fast, comm } = ratings;
 
-  return `[Hrly=$${hourly}] [Pay=${pay}] [Fast=${fast}] [Comm=${comm}] [Rej=${rejections}] [ToS=${tos}] [Blk=${blocks}]`;
+  return `[Hrly=$${wages.average.wage}] [Pay=${pay.text}] [Approval=${fast.text}] [Comm=${comm.text}] [Rej=${rejections}] [Blk=${blocks}]`;
 }
 
 function templateTurkopticon(review) {
