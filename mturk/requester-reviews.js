@@ -10,7 +10,7 @@ function requesterReviewsClass(review) {
 function requesterReviewsTVClass(review) {
   if (!review.turkerview) return `unrated`;
 
-  const hourly = review.turkerview.ratings.hourly;
+  const hourly = review.turkerview.wages.average.wage;
   if (hourly > 10.50) return `mts-green`;
   if (hourly > 7.25) return `mts-orange`;
   if (hourly > 0.0) return `mts-red`;
@@ -44,7 +44,9 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
       </div>
     </div>`;
 
-  const { ratings, rejections, reviews, blocks } = turkerview;
+  const { ratings, wages, rejections, reviews, blocks } = turkerview;
+  console.log(wages.average.wage);
+  //return;
   const { hourly, pay, fast, comm } = ratings;
 
   return /*html*/`
@@ -57,7 +59,7 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
       <div class="col-xs-10">
         <div class="row">
           <div class="col-xs-6"><p style="margin-bottom: 0.15rem;" class="text-muted"><strong>Hourly Avg:</strong></p></div>
-          <div class="col-xs-6"><p style="margin-bottom: 0.15rem;" class="text-muted pull-right"><strong class="${requesterHourlyTVClass(hourly)}">$${hourly}/hr</strong></p></div>
+          <div class="col-xs-6"><p style="margin-bottom: 0.15rem;" class="text-muted pull-right"><strong class="${requesterHourlyTVClass(wages.average.wage)}">$${wages.average.wage}/hr</strong></p></div>
         </div>
         <hr style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
         <div class="row">
@@ -77,7 +79,7 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
           <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted">${blocks === 0 ? '<i class="fa fa-check" style="color: rgba(0, 128, 0, 1);"></i> No Blocks' : '<i class="fa fa-times" style="color: rgba(255, 0, 0, 1);"></i> Blocks Reported'}</p></div>
         </div>
         <div class="row">
-          <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted"><a href="https://turkerview.com/requesters/${requester_id}}" target="_blank">Overview</a></p></div>
+          <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted"><a href="https://turkerview.com/requesters/${requester_id}}" target="_blank">Profile</a></p></div>
           <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted"><a href="https://turkerview.com/requesters/${requester_id}}/reviews" target="_blank">Reviews</a></p></div>
         </div>
       </div>
