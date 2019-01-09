@@ -141,6 +141,25 @@
     },
 
     {
+      "js": [
+        "js/moment.js",
+        "js/moment-duration-format.js",
+        "js/moment-timezone.js",
+        "bootstrap/js/jquery-3.2.1.min.js",
+        "bootstrap/js/popper.min.js",
+        "bootstrap/js/bootstrap.min.js",
+        "mturk/turkerview/dashboard.js"
+      ],
+      "matches": [
+        "https://worker.mturk.com/*"
+      ],
+      "exclude_matches" : [
+        "https://worker.mturk.com/projects/*/tasks/*"
+      ],
+      "run_at": "document_end"
+    },
+
+    {
       "js": ["mturk/context-menu-worker-id.js"],
       "matches": ["https://worker.mturk.com/*"],
       "run_at": "document_end"

@@ -28,12 +28,64 @@ function workDuration(){
     return adjustedWorkDuration;
 }
 
+async function submitMessage(e){
+
+    console.log(e);
+    let msg = JSON.stringify(e.data);
+    if (msg.indexOf("assignmentId") == -1) return;
+
+
+    const [dom, props] = await Promise.all([
+        ReactDOM(`ShowModal`),
+        ReactProps(`ShowModal`)
+    ]);
+
+    const today = moment.tz('America/Los_Angeles').format('YYYY-MM-DD');
+
+    let requester_name = props.modalOptions.requesterName;
+    let requester_id = props.modalOptions.contactRequesterUrl.match(/requester_id%5D=(.*?)&/)[1];
+    let title = props.modalOptions.projectTitle;
+    let reward = props.modalOptions.monetaryReward.amountInDollars;
+    let hit_set_id = document.querySelectorAll('form[action*="projects/')[0].action.match(/projects\/([A-Z0-9]+)\/tasks/)[1];
+    let hitKey = 'tv_'+today+"_"+hit_set_id;
+
+    let now = moment.tz('America/Los_Angeles');
+
+    let submittedObject = {
+        date: today,
+        requester: requester_name,
+        rid: requester_id,
+        title: title,
+        hit_set_id: hit_set_id,
+        task_count: 1,
+        reward: reward,
+        completionTime: workDuration()*1000,
+        submitTime: now,
+        lastCheck: now,
+        approved: null,
+        multi: false,
+        reviewed: false,
+        reviewId: null
+    };
+    if (!localStorage.getItem(hitKey)){
+        localStorage.setItem(hitKey, JSON.stringify(submittedObject));
+    } else{
+        let newMulti = JSON.parse(localStorage.getItem(hitKey));
+        newMulti['multi'] = true;
+        localStorage.setItem(hitKey, JSON.stringify(newMulti));
+    }
+}
+
 (async function(){
     const [dom, props, taskprops] = await Promise.all([
         ReactDOM(`CompletionTimer`),
         ReactProps(`CompletionTimer`),
         ReactProps(`ShowModal`)
     ]);
+
+    //window.onmessage = submitMessage(msg);
+
+    window.addEventListener(`message`, function(event) { submitMessage(event) });
 
     const oldDurationElement = dom.parentElement.parentElement;
     const durationTotal = props.originalTimeToCompleteInSeconds;
@@ -116,5 +168,4 @@ function workDuration(){
         }
         
     }
-
 })();
