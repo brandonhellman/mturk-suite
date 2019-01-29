@@ -31,30 +31,52 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
   const { turkerview } = review;
   const { requesterReviewsTurkerview } = options;
 
-  if (!requesterReviewsTurkerview) return ``;
+  if (!requesterReviewsTurkerview) return /*html*/`
+  <div class="row">
+    <div class="col-xs-12">
+      <span class="text-muted">TurkerView is disabled. Turn it on in MTurk Suite's Options</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted"><a href="https://turkerview.com/requesters/${requester_id}}" target="_blank">Profile</a></p></div>
+    <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted"><a href="https://turkerview.com/requesters/${requester_id}}/reviews" target="_blank">Reviews</a></p></div>
+  </div>`;
 
   if (!turkerview)
-    return HTML`<div class="col-xs-12">
+    return HTML`<div class="col-xs-12" style="font-size: 1rem;">
       <h2 style="text-align: center;">
         <a class="text-primary" href="https://turkerview.com/requesters/${requester_id}" target="_blank">TurkerView</a>
       </h2>
-      <div>No Reviews</div>
+      <div class="alert alert-warning" style="font-size: 1rem; display: ${userApiKey.length == 40 ? `none` : `block`}">
+        <h3>You need a valid TurkerView Auth Key</h3>
+        <p>Please <a href="https://turkerview.com/account/api" target="_blank"><u>register & claim your <strong>free</strong> API Key</u></a> to enable this function.</p>
+      </div>
+      <div class="row">
+        <div class="col-xs-12" style="text-align: center;"><p><strong>Oh no!</strong><br>We haven't met this Requester yet.</p></div>
+          <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted"><a href="https://turkerview.com/requesters/${requester_id}}" target="_blank">Profile</a></p></div>
+          <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted"><a href="https://turkerview.com/requesters/${requester_id}}/reviews" target="_blank">Reviews</a></p></div>
+      </div>
       <div>
-        <a href="https://turkerview.com/review.php" target="_blank">Review on TV</a>
+        <div style="text-align: center; font-size: 0.714rem;">
+          <a href="https://turkerview.com/review.php" target="_blank">How Do I Review on TV?</a>
+        </div>
       </div>
     </div>`;
 
-  const { ratings, wages, rejections, reviews, blocks } = turkerview;
+  const { ratings, wages, rejections, reviews, blocks, user_reviews } = turkerview;
   const { pay, fast, comm } = ratings;
 
   return /*html*/`
+    <div class="alert alert-warning" style="font-size: 0.857rem; display: ${userApiKey.length == 40 ? `none` : `block`}">
+        <h3>You need a valid TurkerView Auth Key</h3>
+        <p>Please <a href="https://turkerview.com/account/api" target="_blank"><u>register & claim your <strong>free</strong> API Key</u></a> to enable this function.</p>
+    </div>
     <h2 style="text-align: center;">
       <a class="text-primary" href="https://turkerview.com/requesters/${requester_id}" target="_blank">TurkerView</a> <span class="text-muted"><small>(${reviews.toLocaleString()} Reviews)</small></span>
     </h2>
     <div class="row" style="font-size: 0.857rem;">
-      <div class="col-xs-1"></div>
 
-      <div class="col-xs-10">
+      <div class="col-xs-12">
         <div class="row">
           <div class="col-xs-6"><p style="margin-bottom: 0.15rem;" class="text-muted"><strong>Hourly Avg:</strong></p></div>
           <div class="col-xs-6"><p style="margin-bottom: 0.15rem;" class="text-muted pull-right"><strong class="${requesterHourlyTVClass(wages.average.wage)}">$${wages.average.wage}/hr</strong></p></div>
@@ -73,7 +95,7 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
           <div class="col-xs-6"><p style="margin-bottom: 0.25rem;" class="text-muted pull-right"><span class="text-${comm.class}">${comm.text} <i class="fa ${comm.faicon}"></i></span></p></div>
         </div>
         <div class="row">
-          <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted">${rejections === 0 ? '<i class="fa fa-check" style="color: rgba(0, 128, 0, 1);"></i> No Rejections' : '<i class="fa fa-times" style="color: rgba(255, 0, 0, 1);"></i> Rejected Work'}</p></div>
+          <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted">${rejections === 0 ? '<i class="fa fa-check" style="color: rgba(0, 128, 0, 1);"></i> No Rejections' : `<i class="fa fa-times text-danger"></i> <a href="https://turkerview.com/requesters/${requester_id}/reviews/rejected/" target="_blank">Rejected Work</a>`}</p></div>
           <div class="col-xs-6"><p style="margin-bottom: 0.25rem; text-align: center;" class="text-muted">${blocks === 0 ? '<i class="fa fa-check" style="color: rgba(0, 128, 0, 1);"></i> No Blocks' : '<i class="fa fa-times" style="color: rgba(255, 0, 0, 1);"></i> Blocks Reported'}</p></div>
         </div>
         <div class="row">
@@ -82,12 +104,26 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
         </div>
       </div>
 
-      <div class="col-xs-1"></div>
-    </div>
-    <div style="text-align: center;">
-      <a href="https://turkerview.com/review.php" target="_blank">How Do I Review on TV?</a>
     </div>
     <hr>
+    <h2 style="text-align: center;">
+      <span class="text-primary" onclick="return void;">Your Reviews</a> <span class="text-muted"><small>(${user_reviews.toLocaleString()} Reviews)</small></span>
+    </h2>
+    <div class="row" style="font-size: 0.857rem;">
+      <div class="col-xs-12">
+        <div class="row" style="display: ${user_reviews == 0 ? `none` : `block`};">
+          <div class="col-xs-6"><p style="margin-bottom: 0.15rem;" class="text-muted"><strong>Hourly Avg:</strong></p></div>
+          <div class="col-xs-6"><p style="margin-bottom: 0.15rem;" class="text-muted pull-right"><strong class="${requesterHourlyTVClass(wages.user_average.wage)}">$${wages.user_average.wage}/hr</strong></p></div>
+        </div>
+        <span class="text-muted" style="display: ${user_reviews > 0 ? `none` : `block`}; text-align: center;">You don't have any data for this Requester!
+          <div style="text-align: center; font-size: 0.714rem;">
+            <a href="https://turkerview.com/review.php" target="_blank">How Do I Review on TV?</a>
+          </div>
+        </span>
+      </div>
+    </div>
+
+    
   `;
 }
 
@@ -212,34 +248,9 @@ async function requesterReviews() {
 
   const options = await StorageGetKey(`options`);
 
+  //userApiKey = options.
+
   dom.querySelectorAll(`.mobile-row > a > .expand-button`).forEach(mobileBtn => mobileBtn.style.display = `none`);
-
-  
-  document.querySelector(`.me-bar`)
-  document.querySelector(`.me-bar > .row > .col-xs-7`).insertAdjacentHTML(`beforeend`, `<span class="pull-right text-success" data-toggle="modal" data-target="#turkerview-finder-announcement-modal" style="cursor: pointer;"><i class="fa fa-info-circle"></i> Click Here - TurkerView's API Is Upgrading</span>`);
-
-  document.body.insertAdjacentHTML(
-    `beforeend`,
-    /* html */`<div class="modal" id="turkerview-finder-announcement-modal" style="margin-top: 60px;">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2 class="modal-title">TurkerView's API Is Upgrading</h2>
-            <button type="button" class="close text-danger" data-dismiss="modal" style="margin-right: 0;">&times;</button>
-          </div>
-          <div class="modal-body text-dark">
-          <p>Sorry for the intrusion, but we're expanding our services & infrastructure and making huge improvements to the way we deliver information & data to Turkers in 2019!</p>
-                  <p>Part of those changes mean that without an API Key MTS wont be able to retrieve information from our servers soon. You can find more information about the changes <a href="https://forum.turkerview.com/threads/preview-turkerviews-new-view-api-infrastructure.1959/" target="_blank">on our announcement here</a>.</p>
-                  <p>For now, though, we've upgraded our API & left access open so we don't disrupt your day to day workflow. Thanks for all of the support!</p>
-                  <p>Make sure to register & get your new access keys to our upgraded API by <a href="https://turkerview.com/account/api/" target="_blank">visiting your account dashboard</a>.</p>
-                  <p>You can save your TurkerView API Key in MTurk Suite's Options panel.</p>
-          </div>
-          <div class="modal-footer" style="display: block; padding: 15px;">
-          </div>
-        </div>
-      </div>
-    </div>`
-  );
 
 
   dom.querySelectorAll(`.table-row`).forEach((row, i) => {
@@ -255,6 +266,7 @@ async function requesterReviews() {
             event.stopImmediatePropagation();
           });
     
+          /* TurkerView */
           const requesterTurkerViewReviews = document.createElement(`span`)
           requesterTurkerViewReviews.className = `btn btn-sm btn-default`;
           requesterTurkerViewReviews.roll = `button`;
@@ -267,7 +279,22 @@ async function requesterReviews() {
           turkerviewIcon.style.maxHeight = `16px`
           requesterTurkerViewReviews.appendChild(turkerviewIcon)
           container.appendChild(requesterTurkerViewReviews);
+
+          const tv_script = document.createElement(`script`);
+          tv_script.textContent = `$(document.currentScript).parent().popover({
+            html: true,
+            delay: { show: 100, hide: 400 },
+            trigger: \`hover focus\`,
+            title: \`${requester_name} [${requester_id}]\`,
+            content: \`
+              <div class="container" style="min-width: 280px; max-width: 320px;">
+                ${requesterReviewsTurkerViewHTML(hit, review, options)}
+              </div>\`
+          });`;
+          requesterTurkerViewReviews.appendChild(tv_script);
     
+
+          /* TurkOpticon */
           const button = document.createElement(`i`);
           button.roll = `button`;
           button.tabIndex = 0;
@@ -284,14 +311,11 @@ async function requesterReviews() {
             title: \`${requester_name} [${requester_id}]\`,
             content: \`
               <div class="container">
-                ${requesterReviewsTurkerViewHTML(hit, review, options)}
-              </div>
-              <div class="container">
                 ${requesterReviewsTurkopticonHTML(hit, review, options)}
                 ${requesterReviewsTurkopticon2HTML(hit, review, options)}
               </div>\`
           });`;
-          container.appendChild(script);
+          button.appendChild(script);
     
           const expand = btn;
           expand.parentElement.insertAdjacentElement(`afterend`, container);

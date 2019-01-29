@@ -7,8 +7,6 @@ chrome.storage.local.get([`options`], keys => {
     buildHeaders(keys.options.turkerviewApiKey);
 });
 
-
-
 function buildHeaders(userApiKey){
     ViewHeaders = new Headers([
         [`X-VIEW-KEY`, userApiKey],
@@ -18,7 +16,6 @@ function buildHeaders(userApiKey){
 }
 
 function FetchTVWithTimeout(input, init, timeout){
-    console.log('tvtimmeout');
     return Promise.race([
         fetch(input, init),
         new Promise((resolve, reject) =>

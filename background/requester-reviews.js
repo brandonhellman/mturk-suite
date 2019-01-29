@@ -58,6 +58,25 @@ async function saveReviews(reviews) {
   });
 }
 
+async function clearTurkerViewCache(statusText){
+  const db = await reviewsDB();
+  const transaction = db.transaction([`requester`], `readwrite`);
+  const objectStore = transaction.objectStore(`requester`);
+
+  var request = objectStore.getAll();
+
+  transaction.oncomplete = () => {
+    const clear_transaction = db.transaction([`requester`], `readwrite`);
+    const clear_objectStore = clear_transaction.objectStore(`requester`);
+    request.result.forEach(rid => {
+      if (rid.turkerview == null) return;
+      rid.turkerview = null;
+      clear_objectStore.put(rid);
+    });
+  }
+
+}
+
 function updateCheck(reviews) {
   return new Promise(async resolve => {
     const time = new Date().getTime() - 1800000;
@@ -117,10 +136,29 @@ function formatResponse(response) {
 
 function fetchReviews(site, url) {
   return new Promise(async resolve => {
+    const {
+      requesterReviewsTurkerview,
+      requesterReviewsTurkopticon,
+      requesterReviewsTurkopticon2
+    } = await StorageGetKey(`options`);
+
     try {
-      const response = (site == `turkerview`) ? await FetchTVWithTimeout(url, { headers: ViewHeaders }, 5000) : await Fetch(url, undefined, 350)
+      if (site == `turkerview` && !requesterReviewsTurkerview) {
+        clearTurkerViewCache();
+        resolve({site, json: null});
+        return;
+      }
+      const response = (site == `turkerview`) ? await FetchTVWithTimeout(url, { headers: ViewHeaders }, 500) : await Fetch(url, undefined, 350)
       const json = response.ok ? await formatResponse(response) : null;
+
+      if (site == `turkerview` && !response.ok){
+        //We can handle TurkerView API Errors here.
+        if (response.statusText == `invalidUserAuthKey`) clearTurkerViewCache();
+        else if (response.statusText == `dailyLimitExceeded`) clearTurkerViewCache();
+      } 
+      
       resolve({ site, json });
+
     } catch (error) {
       resolve({ site, json: null });
     }
@@ -182,6 +220,7 @@ function updateReviews(reviews) {
         `https://api.turkopticon.info/requesters?rids=${rids}`
       )
     ]);
+
 
     const updated = rids.reduce((obj, rid) => {
       const review = updates.reduce((o, update) => {

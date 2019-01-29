@@ -44,7 +44,11 @@ chrome.storage.local.get(`options`, keys => {
     el.addEventListener(`input`, event => {
       options[event.target.name] = event.target.value;
       chrome.storage.local.set({ options });
+      
+      if (el.value.length == 40) document.getElementById(`turkerviewConnected`).style.display = ``;
+      else document.getElementById(`turkerviewConnected`).style.display = `none`;
     });
+    if (el.value.length == 40) document.getElementById(`turkerviewConnected`).style.display = ``;
   });
 
   [...document.querySelectorAll(`select`)].forEach(el => {

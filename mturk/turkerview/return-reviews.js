@@ -1,278 +1,4 @@
-console.log(`we're on the task page`);
-
-function returnReviewsModal(hit_set_id, requester_id, reward, userApiKey){
-    return /* html */`
-<div class="modal fade in" id="mts-tvReturnModal" style="display: none; z-index: 11000">
-    <div id="mts-tv-return-dialog" class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button id="mts-tv-return-modal-close" type="button" class="close" data-dismiss="modal"><svg class="close-icon" data-reactid=".8.0.0.0.0.0"><g fill="none" stroke="#555" class="close-icon-graphic" stroke-width="2.117" stroke-linecap="round" data-reactid=".8.0.0.0.0.0.0"><path d="M1.2 1.3l7.4 7.5M1.2 8.8l7.4-7.5" data-reactid=".8.0.0.0.0.0.0.0"></path></g></svg></button>
-                <h2 class="modal-title">Submit a TurkerView Return Report (MTS)</h2>
-            </div>
-            <div class="modal-body">
-                <div id="mts-return-review-alert" class="alert alert-dismissable alert-success hide">
-                        <button type="button" class="close" data-dismiss="alert">×</button>
-                        <h4>Thank you!</h4>
-                        <p>Your review for has been added!</p>
-                </div>
-                <form id="mts-tv-return-review" action="https://turkerview.com/api/v2/returns/submit/" method="POST">
-                    <div class="row" style="margin-bottom: .7rem;">
-                        <div class="col-xs-12 text-muted">
-                        <h3 id="return-wage-est" style="text-align: center;"></h3>
-                        </div>
-                    </div>
-                    <div class="row">
-                    <h2>Reason for returning?</h2>
-                        <div class="col-xs-12 text-muted form-group">
-                            <label><input type="checkbox" name="underpaid"> Underpaid</label><small> - use this if the HIT isn't worth the time involved to finish it.</small>
-                            <p id="mts-progressest" style="display: none; padding-left: 30px;">Progress Estimate: 
-                            <select name="progressSelect" id="mts-progressSelect">
-                                <option>Unsure</option>
-                                <option value=".075">5-10% Complete</option>
-                                <option value=".175">10-25% Complete</option>
-                                <option value=".375">25-50% Complete</option>
-                                <option value=".625">50-75% Complete</option>
-                                <option value=".875">75-100% Complete</option>
-                            </select>
-                            <span id="mts-estVal"></span>
-                            </p>
-                        </div>
-                        
-                        <div class="col-xs-12 text-muted form-group">
-                            <label><input type="checkbox" name="broken"> Broken</label><small> - the HIT cannot be completed - do NOT use this for no survey code.</small>
-                        </div>
-                        
-                        <div class="col-xs-12 text-muted form-group">
-                            <label><input type="checkbox" name="unpaid_screener"> Unpaid Screener</label><small> - use this if you were screened out without compensation.</small>
-                        </div>
-                        
-                        <div class="col-xs-12 text-muted form-group">
-                            <label><input type="checkbox" name="tos"> ToS Violation</label>
-                            <div id="mts-tos_toggle" style="padding-left: 30px; display: none;">
-                                <label style="display: block;"><input type="radio" value="1" name="tos_type"> Personally Identifiable Information (PII) Minor <small>(Email, Zip, Company Name)</small></label>
-                                <label style="display: block;"><input type="radio" value="2" name="tos_type"> Personally Identifiable Information (PII) Major <small>(Full Name, Phone #, SSN)</small></label>
-                                <label style="display: block;"><input type="radio" value="3" name="tos_type"> SEO/Referral/Review Fraud</label>
-                                <label style="display: block;"><input type="radio" value="4" name="tos_type"> Phishing/Malicious Activity</label>
-                                <label style="display: block;"><input type="radio" value="9" name="tos_type"> Misc/Other</label>
-                            </div>
-                            
-                        </div>
-                        
-                        <div class="col-xs-12 text-muted form-group">
-                            <label><input type="checkbox" name="writing"> Writing</label><small> - use if this HIT requires annoying "write about a time when" prompts.</small>
-                            <div id="mts-writing_toggle" style="padding-left: 30px; display: none;">
-                                <label style="display: block;"><input type="radio" value="1" name="writing_type"> Experiential Writing <small>"Write about a time when..."</small></label>
-                                <label style="display: block;"><input type="radio" value="9" name="writing_type"> Misc/Other</label>
-                                <p style="font-size: 85%; margin-left: 20px;">While Misc/Other requires writing usually copying the writing prompt is enough to get the point across to other users (please try not to disclose survey content, though!)</p>
-                            </div>
-                        </div>
-                        
-                        <div class="col-xs-12 text-muted form-group">
-                            <label><input type="checkbox" name="downloads"> Downloads / Installs</label>
-                            <div id="mts-downloads_toggle" style="padding-left: 30px; display: none;">
-                                <label style="display: block;"><input type="radio" value="1" name="downloads_type"> Inquisit <small> - use if this HIT utilizes the unpopular Inquisit plugin.</small></label>
-                                <label style="display: block;"><input type="radio" value="2" name="downloads_type"> Browser Extension</label>
-                                <label style="display: block;"><input type="radio" value="3" name="downloads_type"> Phone/Tablet Apps</label>
-                                <label style="display: block;"><input type="radio" value="9" name="downloads_type"> Misc/Other</label>
-                            </div>
-                        </div>
-                        
-                        <div class="col-xs-12 text-muted form-group">
-                            <label><input type="checkbox" name="em"> Extraordinary Measures</label>
-                            <div id="mts-em_toggle" style="padding-left: 30px; display: none;">
-                                <label style="display: block;"><input type="radio" value="1" name="em_type"> Phone Calls</label>
-                                <label style="display: block;"><input type="radio" value="2" name="em_type"> Webcam/Face requirements</label>
-                                <label style="display: block;"><input type="radio" value="9" name="em_type"> Misc/Other</label>
-                            </div>
-                        </div>
-                        
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-12 text-muted">
-                        <h2>Comment</h2>
-                        <textarea name="comment" rows="4" style="width: 100%;" placeholder="Leave a comment..."></textarea>
-                        <span id="mts-comment-required" style="display: none;" class="text-danger">* Required<small class="text-muted"> - Please leave at least a short note with your review to help other workers avoid the same problem.</small></span>
-                        <p id="mts-comment-length" style="display: none;" class="text-muted"></p>
-                        </div>
-                    </div>
-                    <input type="hidden" name="group_id" value="${hit_set_id}">
-                    <input type="hidden" name="requester_id" value="${requester_id}">
-                    <input type="hidden" name="reward" value="${reward}">
-                    <input type="hidden" name="elapsed_work_time">
-                    <input type="hidden" name="userApiKey" value="${userApiKey}">
-                    <input type="hidden" name="appname" value="MTurk Suite">
-                    <input type="hidden" name="version" value="${chrome.runtime.getManifest().version}">
-                    <div class="row" style="margin-bottom: 0">
-                        <div class="col-xs-12 text-muted">
-                        <button type="submit" class="btn btn-primary pull-right">Submit Data & Return HIT</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<div id="mts-tv-return-modal-backdrop" class="modal-backdrop fade in" style="display: none; z-index: 10999"></div>`;
-}
-
-function returnReviewModalListeners(){
-    const inputForm = document.getElementById(`mts-tv-return-review`);
-    let minCommentLength = 20;
-
-    inputForm.querySelector(`input[name=underpaid]`).addEventListener(`change`, function(event){
-        if (event.target.checked) document.getElementById(`mts-progressest`).style.display = `block`;
-        else {
-            document.getElementById(`mts-progressest`).style.display = `none`;
-            document.getElementById(`mts-progressSelect`).selectedIndex = 0;
-            document.getElementById(`mts-estVal`).innerText = ``;
-        }
-    });
-
-    document.getElementById(`mts-progressSelect`).addEventListener(`change`, function(event){
-        let estimated_progress = event.target[event.target.selectedIndex].value;
-        if (estimated_progress == "Unsure"){
-            document.getElementById(`mts-estVal`).innerText = ``;
-            return;
-        }
-        let reward = inputForm.querySelector(`input[name=reward]`).value;
-        let elapsed_work_time = inputForm.querySelector(`input[name=elapsed_work_time]`).value*1000;
-        let estimated_completion_time = elapsed_work_time/estimated_progress;
-        let ect = estimated_completion_time/1000;
-        let min = Math.floor(ect/60);
-        let sec = Math.floor(ect%60);
-        let estimated_hourly = (3600/(estimated_completion_time/1000)) * reward;
-        document.getElementById(`mts-estVal`).innerText = min + ":"+sec + "s / $" + (estimated_hourly).toFixed(2) + "/hr";
-    });
-
-    inputForm.querySelector(`input[name=tos]`).addEventListener(`change`, function(event){
-        if (event.target.checked) document.getElementById(`mts-tos_toggle`).style.display = `block`;
-        else {
-            document.getElementById(`mts-tos_toggle`).style.display = `none`;
-            inputForm.querySelectorAll(`input[name=tos_type]`).forEach(input => { input.checked = false; })
-        }
-    });
-
-    inputForm.querySelector(`input[name=writing]`).addEventListener(`change`, function(event){
-        if (event.target.checked) document.getElementById(`mts-writing_toggle`).style.display = `block`;
-        else {
-            document.getElementById(`mts-writing_toggle`).style.display = `none`;
-            inputForm.querySelectorAll(`input[name=writing_type]`).forEach(input => { input.checked = false; })
-        }
-    });
-
-    inputForm.querySelector(`input[name=downloads]`).addEventListener(`change`, function(event){
-        if (event.target.checked) document.getElementById(`mts-downloads_toggle`).style.display = `block`;
-        else {
-            document.getElementById(`mts-downloads_toggle`).style.display = `none`;
-            inputForm.querySelectorAll(`input[name=downloads_type]`).forEach(input => { input.checked = false; })
-        }
-    });
-
-    inputForm.querySelector(`input[name=em]`).addEventListener(`change`, function(event){
-        if (event.target.checked) document.getElementById(`mts-em_toggle`).style.display = `block`;
-        else {
-            document.getElementById(`mts-em_toggle`).style.display = `none`;
-            inputForm.querySelectorAll(`input[name=em_type]`).forEach(input => { input.checked = false; })
-        }
-    });
-
-    inputForm.querySelector(`textarea[name=comment]`).addEventListener(`input`, function(event){
-        let currentLength = event.target.value.length;
-        document.getElementById(`mts-comment-length`).innerText = `Please be descriptive so other workers can better understand your review, currently at ${currentLength} / ${minCommentLength} minimum characters`; 
-    });
-    
-    inputForm.querySelectorAll(`input`).forEach(input => {
-        input.addEventListener(`change`, function(event){
-            let name = event.target.name;
-            let val = event.target.value;
-            if (
-                (name == 'tos_type' && val == 9 && event.target.checked) ||
-                (name == 'writing_type' && val == 9 && event.target.checked) ||
-                (name == 'downloads_type' && val == 9 && event.target.checked) ||
-                (name == 'em_type' && val == 9 && event.target.checked) ||
-                (name == 'underpaid' && event.target.checked) ||
-                (name == 'broken' && event.target.checked)
-                ){
-                    inputForm.querySelector(`textarea[name=comment]`).setAttribute(`minlength`, minCommentLength);
-                    inputForm.querySelector(`textarea[name=comment]`).required = true;
-                    document.getElementById(`mts-comment-required`).style.display = `block`;
-                    document.getElementById(`mts-comment-length`).style.display = `block`;
-                }
-            else{
-                inputForm.querySelector(`textarea[name=comment]`).removeAttribute(`minlength`);
-                inputForm.querySelector(`textarea[name=comment]`).required = false;
-                document.getElementById(`mts-comment-required`).style.display = `none`;
-                document.getElementById(`mts-comment-length`).style.display = `none`;
-                }
-        })
-    });
-
-    
-    
-    inputForm.addEventListener(`submit`, function(event){
-        event.preventDefault();
-
-        inputForm.querySelector(`button[type=submit]`).disabled = true;
-        var formData = new FormData(inputForm);
-        
-        fetch(inputForm.action, {
-            method: `POST`,
-            body: formData,
-            headers: ViewHeaders
-        }).then(response => {
-            if (!response.ok) throw response
-            
-            return response.json();
-        }).then(response => {
-            const noticeAlert = document.getElementById(`mts-return-review-alert`);
-            noticeAlert.classList.remove(`alert-success`);
-            noticeAlert.classList.remove(`alert-warning`);
-            noticeAlert.classList.remove(`alert-danger`);
-            noticeAlert.classList.add(`alert-${response.class}`);
-            noticeAlert.classList.remove(`hide`);
-            noticeAlert.innerHTML = response.html;
-
-            if (response.status == 'success'){
-                setTimeout(function(){ 
-                    document.querySelectorAll(`form[action*="rtrn"]`)[0].submit();
-                }, 1000)
-            } else inputForm.querySelector(`button[type=submit]`).disabled = false;
-            
-        }).catch(exception => {
-            const MainContainer = document.getElementById(`mts-return-review-alert`);
-            if (exception.statusText == 'invalidUserAuthKey') MainContainer.innerHTML = `
-        <div id="tvjs-view-error" class="alert alert-danger">
-            <h4>We need an API Key!</h4>
-            <p>Sorry! One place we have to enforce API Keys immediately is submitting data otherwise TurkerView doesn't know who you are in order to assign credit for the review.</p>
-            <p>You can claim your free API key (or support the site with a subscription!) from your <a href="https://turkerview.com/account/api/" target="_blank" style="text-decoration: underline;">TurkerView account API dashboard.</a></p>
-        </div>`;
-            else if (exception.statusText == 'dailyLimitExceeded') MainContainer.innerHTML = `
-        <div id="tvjs-view-error" class="alert alert-danger">
-            <h4>Your TurkerView API Key has hit its daily quota limit.</h4>
-            <p>Please upgrade to a subscription plan from your <a href="https://turkerview.com/account/api/" target="_blank">TurkerView account API dashboard.</a> or leave a review to increase quota.</p>
-        </div>`;
-            MainContainer.classList.remove('alert-success');
-            MainContainer.classList.remove('alert-warning');
-            MainContainer.classList.remove('alert-danger');
-            MainContainer.classList.remove('hide');
-        });
-        
-
-        
-    })
-    
-}
-
-function returnReviewForm(){
-
-}
-
-function closeReturnReviewModal(){
-    document.getElementById(`mts-tv-return-modal-backdrop`).style.display = `none`;
-    document.getElementById(`mts-tvReturnModal`).style.display = `none`;
-    document.querySelector(`body`).classList.remove(`global-modal-open`)
-    document.querySelector(`body`).classList.remove(`modal-open`)
-}
+moment.tz.add("America/Los_Angeles|PST PDT PWT PPT|80 70 70 70|010102301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-261q0 1nX0 11B0 1nX0 SgN0 8x10 iy0 5Wp1 1VaX 3dA0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1a00 1fA0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0|15e6");
 
 function closeReturnReviewDataModal(){
     document.getElementById(`mts-tv-return-warning-data-modal-backdrop`).style.display = `none`;
@@ -283,6 +9,15 @@ function closeReturnReviewDataModal(){
 
 function retrieveReturnReviews(hit_set_id, assignable_hits_count){
     let found_in_storage = false;
+    let deadline_bool = false;
+
+    /* After Feb 1st we need to make sure the user has an API key or the response will be invalid, faster to do it here. */
+    let today = moment.tz('America_Los_Angeles');
+    let deadline = moment('2019-02-01').tz('America/Los_Angeles', true);
+    let diff = moment(deadline).diff(today, 'days');
+    if (diff < 0) deadline_bool = true;
+    
+
     Object.keys(localStorage)
         .forEach(function(key){
             if (/^tv-return-data/.test(key)) {
@@ -290,7 +25,7 @@ function retrieveReturnReviews(hit_set_id, assignable_hits_count){
                 let now = moment.tz('America/Los_Angeles');
                 let difference_ms = moment(now).diff(moment(json['date']));
                 if (difference_ms > 450000){
-                    localStorage.removeItem(key); // delete after 1 day
+                    localStorage.removeItem(key); // delete after 7 minutes
                     return;
                 }
                 if (json['group_id'] != hit_set_id) return;
@@ -303,7 +38,7 @@ function retrieveReturnReviews(hit_set_id, assignable_hits_count){
 
     if (found_in_storage) return;
 
-    fetch(`https://view.turkerview.com/v1/returns/retrieve/?hit_set_id=${hit_set_id}`, {
+    fetch(`https://view.turkerview.com/v2/returns/retrieve/?hit_set_id=${hit_set_id}`, {
         method: 'GET',
         cache: 'no-cache',
         headers: ViewHeaders
@@ -324,52 +59,54 @@ function retrieveReturnReviews(hit_set_id, assignable_hits_count){
         let downloads_total = 0;
         let em_total = 0;
         let comments = [];
-        for (i = 0; i < data.length; i++){
+        
+        for (i = 0; i < data.reviews.length; i++){
             //let localUserIgnore = JSON.parse(localStorage.getItem('tv-return-ignore-list')) || [];
             //if (localUserIgnore.includes(data[i].user_id)) continue;
 
-            reward = data[i].reward;
-            total_time_in_ms += data[i].elapsed_work_time;
-            underpaid_total += data[i].underpaid;
-            broken_total += data[i].broken;
-            unpaid_screener_total += data[i].unpaid_screener;
-            tos_total += data[i].tos;
-            writing_total += data[i].writing;
-            downloads_total += data[i].downloads;
-            em_total += data[i].extraordinary_measures;
+            reward = data.reviews[i].reward;
+            total_time_in_ms += data.reviews[i].elapsed_work_time;
+            underpaid_total += data.reviews[i].underpaid;
+            broken_total += data.reviews[i].broken;
+            unpaid_screener_total += data.reviews[i].unpaid_screener;
+            tos_total += data.reviews[i].tos;
+            writing_total += data.reviews[i].writing;
+            downloads_total += data.reviews[i].downloads;
+            em_total += data.reviews[i].extraordinary_measures;
 
             let comment_prefix = '';
-            if (data[i].underpaid == 1){
-                let hourly = (3600/(data[i].elapsed_work_time/1000))*(parseFloat(reward)).toFixed(2);
+            if (data.reviews[i].underpaid == 1){
+                let hourly = (3600/(data.reviews[i].elapsed_work_time/1000))*(parseFloat(reward)).toFixed(2);
                 comment_prefix = `[Marked Underpaid @ $${hourly.toFixed(2)}/hr]<br>`;
             }
 
-            if (data[i].unpaid_screener == 1){
-                screened_time_total += data[i].elapsed_work_time;
+            if (data.reviews[i].unpaid_screener == 1){
+                screened_time_total += data.reviews[i].elapsed_work_time;
 
-                let time_in_seconds = data[i].elapsed_work_time/1000;
+                let time_in_seconds = data.reviews[i].elapsed_work_time/1000;
                 let min = Math.floor(time_in_seconds/60);
                 let sec = (time_in_seconds%60).toFixed(0);
                 comment_prefix += `[Screened out @${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}]<br>`;
             }
 
-            if (data[i].tos == 1) comment_prefix += `${tosMap.get(data[i].tos_type)}<br>`;
-
-            if (data[i].writing == 1) comment_prefix += `${writingMap.get(data[i].writing_type)}<br>`;
-            if (data[i].downloads == 1) comment_prefix += `${downloadsMap.get(data[i].downloads_type)}<br>`;
-            if (data[i].extraordinary_measures == 1) comment_prefix += `${emMap.get(data[i].em_type)}<br>`;
+            if (data.reviews[i].tos == 1) comment_prefix += `${tosMap.get(data.reviews[i].tos_type)}<br>`;
+            if (data.reviews[i].writing == 1) comment_prefix += `${writingMap.get(data.reviews[i].writing_type)}<br>`;
+            if (data.reviews[i].downloads == 1) comment_prefix += `${downloadsMap.get(data.reviews[i].downloads_type)}<br>`;
+            if (data.reviews[i].extraordinary_measures == 1) comment_prefix += `${emMap.get(data.reviews[i].em_type)}<br>`;
 
             let comment_object = {
-                user_id: data[i].user_id,
-                username: data[i].username,
-                date: data[i].date,
-                tos_type: data[i].tos_type,
-                comment: comment_prefix + data[i].comment }
+                user_id: data.reviews[i].user_id,
+                username: data.reviews[i].username,
+                date: data.reviews[i].date,
+                tos_type: data.reviews[i].tos_type,
+                comment: comment_prefix + data.reviews[i].comment }
             comments.push(comment_object);
+            
         }
 
         let objectToStore = {
             group_id: hit_set_id,
+            notice: data.notice,
             date: moment.tz('America/Los_Angeles'),
             reward: reward,
             total_time_in_ms: total_time_in_ms,
@@ -401,17 +138,15 @@ function buildReturnWarnings(json){
 
     let highest_warning_class = 'text-danger';
 
-    document.querySelectorAll(`.mts-tv-return-warn`).forEach(el => {
-        el.insertAdjacentHTML(`beforebegin`, `<a ${highest_warning_class == 'hidden' ? 'style="display: none;"' : ''} class="btn btn-danger mts-tv-return-warning-data-launcher" href="#" style="margin-right: 5px;"><i class="fa fa-fw fa-warning"></i></a>`);
+    document.querySelectorAll(`.work-pipeline-action`).forEach(el => {
+        el.insertAdjacentHTML(`afterbegin`, `<a ${highest_warning_class == 'hidden' ? 'style="display: none;"' : ''} class="btn btn-danger mts-tv-return-warning-data-launcher" href="#" style="margin-right: 5px;"><i class="fa fa-fw fa-warning"></i></a>`);
     })
 
     document.querySelectorAll(`.task-project-title`).forEach(el => {
-        el.insertAdjacentHTML(`beforebegin`, `<div ${highest_warning_class == 'hidden' ? 'style="display: none;"' : ''}><i class="fa fa-warning ${highest_warning_class} mts-tv-return-warning-data-launcher" style="cursor: pointer; padding-right: 3px;"></i></div>`);
+        el.insertAdjacentHTML(`afterbegin`, `<div ${highest_warning_class == 'hidden' ? 'style="display: none;"' : 'style="display: inline-block;"'}><i class="fa fa-warning ${highest_warning_class} mts-tv-return-warning-data-launcher" style="cursor: pointer; padding-right: 3px;"></i></div>`);
     })
 
     let btnHtml = `<i class="fa fa-warning fa-fw ${highest_warning_class} mts-tv-return-warning-data-launcher" style="line-height: 1rem; cursor: pointer; ${highest_warning_class == 'hidden' ? 'display: none;' : ''}" data-toggle="tooltip" data-title="Oh shit!"></i>`;
-
-    document.getElementById(`mtsHourlyContainer`).insertAdjacentHTML(`beforebegin`, btnHtml);
 
     let brokenClass = classMap(json['broken_total']);
     let underpaidClass = classMap(json['underpaid_total']);
@@ -455,6 +190,16 @@ function buildReturnWarnings(json){
                 <h2 class="modal-title">TurkerView Return Warning Report</h2>
             </div>
             <div class="modal-body">
+            ${(json['notice'] != null) ? json['notice'] : ``}
+            <div class="alert alert-warning" style="font-size: 0.857rem; display: ${userApiKey.length == 40 ? `none` : `block`}">
+                <h3>You need a valid TurkerView Auth Key</h3>
+                <p>HIT Warnings are a free feature provided by TurkerView. However, they require a valid API Key to retrieve.</p>
+                <p>Please <a href="https://turkerview.com/account/api" target="_blank">register & claim your <strong>free</strong> API Key</a> by Feb 1st.</p>
+            </div>
+                <div class="alert alert-warning" style="${(document.querySelector(`iframe`).src.includes('/evaluation/endor')) ? '' :'display: none;'}">
+                    <h4>We're on Endor</h4>
+                    <p>This HIT is from a Google Requester (Endor) - they often limit the # of HITs workers can complete which is confusing & gets reported as broken. Generally, they are "safe" to work for so consider checking their full TV profile!</p>
+                </div>
                 <div id="return-review-warning" class="alert alert-dismissable alert-warning" role="alert" style="display: none;">
                         <button type="button" id="close-return-review-warning" class="close" data-dismiss="alert">×</button>
                         <h4>Heads Up!</h4>
@@ -521,9 +266,6 @@ function buildReturnWarnings(json){
         </div>
     </div>
 </div>
-<script>
-
-</script>
 <div id="mts-tv-return-warning-data-modal-backdrop" class="modal-backdrop fade in" style="display: none; z-index: 10999;"></div>`;
 
     document.querySelector(`footer`).insertAdjacentHTML(`beforebegin`, tvReturnWarningDataModal);
@@ -569,64 +311,31 @@ function returnsApiExceptionHandler(exception){
     if (exception.statusText == 'invalidUserAuthKey') MainContainer.insertAdjacentHTML(`afterbegin`, `
 <div id="tvjs-view-error" class="alert alert-danger">
     <h4>Your TurkerView API Key is invalid.</h4>
-    <p>You can claim your free API key (or support the site with a subscription!) from your <a href="https://turkerview.com/account/api/" target="_blank">TurkerView account API dashboard.</a></p>
+    <p>The HIT Warning feature is free! You just need to claim your free API key (or support the site with a subscription!) from your <a href="https://turkerview.com/account/api/" target="_blank">TurkerView account API dashboard.</a></p>
 </div>`);
-    else if (exception.statusText == 'dailyLimitExceeded') MainContainer.insertAdjacentHTML(`afterbegin`, `
-<div id="tvjs-view-error" class="alert alert-danger">
-    <h4>Your TurkerView API Key has hit its daily quota limit.</h4>
-    <p>Please upgrade to a subscription plan from your <a href="https://turkerview.com/account/api/" target="_blank">TurkerView account API dashboard.</a> or leave a review to increase quota.</p>
-</div>`);
+    
 }
 
 async function initReturnReviews(){
-    localStorage.setItem(`mts-return-reviews`, moment.tz(`America/Los_Angeles`));
+
+    const tv_storage_check = localStorage.getItem(`tv-settings`) || null;
+
+    if (tv_storage_check){
+        const tv_last_active = moment(JSON.parse(tv_storage_check).last_sync).tz('America/Los_Angeles');
+        const diff = moment().tz('America/Los_Angeles').diff(tv_last_active, 'hours')
+        // TVJS is still installed on this user's machine (most likely) - don't add a 2nd return review dialog, we'll have TVJS defer to MTS later
+        if (diff < 36) return;
+    }
+
     const [dom, props] = await Promise.all([
         ReactDOM(`ShowModal`),
         ReactProps(`ShowModal`)
     ]);
 
-    let requester_name = props.modalOptions.requesterName;
-    let requester_id = props.modalOptions.contactRequesterUrl.match(/requester_id%5D=(.*?)&/)[1];
-    let title = props.modalOptions.projectTitle;
-    let reward = props.modalOptions.monetaryReward.amountInDollars;
     let hit_set_id = document.querySelectorAll('form[action*="projects/')[0].action.match(/projects\/([A-Z0-9]+)\/tasks/)[1];
     let assignable_hits_count = props.modalOptions.assignableHitsCount;
-    //let hitKey = 'tv_'+today+"_"+gid;
-
-    
-
-    document.querySelectorAll(`form[action*=rtrn_top]`)[0].insertAdjacentHTML(`beforebegin`, `<a class="btn btn-warning mts-tv-return-warn" style="margin-right: 5px;">Review & Return</a>`);
-    document.querySelector(`footer`).insertAdjacentHTML(`beforebegin`, returnReviewsModal(hit_set_id, requester_id, reward, userApiKey));
-
-    document.getElementById(`mts-tv-return-modal-backdrop`).addEventListener(`click`, function(){
-        closeReturnReviewModal();
-    });
-    document.getElementById(`mts-tv-return-modal-close`).addEventListener(`click`, function(){
-        closeReturnReviewModal();
-    });
-    document.getElementById(`mts-tvReturnModal`).addEventListener(`click`, function(){
-        closeReturnReviewModal();
-    });
-
-    document.getElementById(`mts-tv-return-dialog`).addEventListener(`click`, function(e){
-        e.stopPropagation();
-    });
-
-    let els = document.getElementsByClassName(`mts-tv-return-warn`);
-    Array.prototype.forEach.call(els, function(el){
-        el.addEventListener(`click`, function(){
-            document.querySelector(`body`).classList.add(`global-modal-open`);
-            document.querySelector(`body`).classList.add(`modal-open`);
-            document.getElementById(`mts-tvReturnModal`).style.display = `block`;
-            document.getElementById(`mts-tv-return-modal-backdrop`).style.display = `block`;
-
-            document.querySelector(`input[name=elapsed_work_time]`).value = workDuration();
-        })
-    });
 
     retrieveReturnReviews(hit_set_id, assignable_hits_count);
-   returnReviewModalListeners();
-
 }
 
 let userApiKey;
@@ -645,3 +354,32 @@ chrome.storage.local.get([`options`], keys => {
     buildHeaders(userApiKey);
     initReturnReviews();
 })
+
+
+const tosMap = new Map([
+    [0, `N/A`],
+    [1, `<span class="text-muted">Minor Personal Information Violation (Email, Zip, Company Name)</span>`],
+    [2, `<span class="text-danger">Major Personal Information Violation (Name, Phone #, SSN)</span>`],
+    [3, `<span class="text-warning">SEO/Referral/Review Fraud</span>`],
+    [4, `<span class="text-danger">Phishing/Malicious Activity</span>`],
+    [9, `<span class="text-muted">Misc/Other</span>`]
+]);
+const writingMap = new Map([
+    [0, ``],
+    [1, `Experiential/Write about a time when...`],
+    [9, ``]
+]);
+const downloadsMap = new Map([
+    [0, ``],
+    [1, `Inquisit Software`],
+    [2, `Browser Extension`],
+    [3, `Phone/Tablet Apps`],
+    [9, ``]
+]);
+const emMap = new Map([
+    [0, ``],
+    [1, `Phone Calls`],
+    [2, `Webcam / Face requirements`],
+    [9, ``]
+]);
+

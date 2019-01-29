@@ -34,7 +34,7 @@
             <button type="button" class="btn btn-sm btn-primary ml-1" data-toggle="modal" data-target="#block-list-modal">Block List</button>
             <button type="button" class="btn btn-sm btn-primary ml-1" data-toggle="modal" data-target="#include-list-modal">Include List</button>
             <button type="button" class="btn btn-sm btn-primary ml-1" data-toggle="modal" data-target="#settings-modal">Settings</button>
-            <button type="button" class="btn btn-sm btn-success ml-1" data-toggle="modal" data-target="#turkerview-finder-announcement-modal"><i class="fa fa-info-circle"></i> TurkerView MTS Announcement!</button>
+            <button type="button" class="btn btn-sm btn-success ml-1" data-toggle="modal" data-target="#turkerview-finder-announcement-modal" id="tv-finder-announce"><i class="fa fa-info-circle"></i> TurkerView MTS Announcement!</button>
         </div>
     </div>
 
@@ -228,11 +228,13 @@
                     <h6>TurkerView's API Is Upgrading</h6>
                 </div>
                 <div class="modal-body">
-                    <p>Sorry for the intrusion, but we're expanding our services & infrastructure and making huge improvements to the way we deliver information & data to Turkers in 2019!</p>
-                    <p>Part of those changes mean that without an API Key MTS wont be able to retrieve information from our servers soon. You can find more information about the changes <a href="https://forum.turkerview.com/threads/preview-turkerviews-new-view-api-infrastructure.1959/" target="_blank">on our announcement here</a>.</p>
-                    <p>For now, though, we've upgraded our API & left access open so we don't disrupt your day to day workflow. Thanks for all of the support!</p>
-                    <p>Make sure to register & get your new access keys to our upgraded API by <a href="https://turkerview.com/account/api/" target="_blank">visiting your account dashboard</a>.</p>
-                    <p>You can save your TurkerView API Key in <a href="/options/options.html" target="_blank">MTurk Suite's Options</a> panel.</p>
+                    <p>Sorry for the intrusion, but we're expanding our services & infrastructure and making huge improvements to the way we deliver information & data to Turkers in 2019 - including improvements to approval (AA) time tracking!</p>
+                    <p>Part of those changes mean that without an API Key MTS wont be able to retrieve information from our servers soon. You can find more information about the full API changes <a href="https://forum.turkerview.com/threads/view-api-details.2012/" target="_blank" style="text-decoration: underline;">on our announcement here</a>.</p>
+                    <p>For now, though, we've upgraded our API & left access open so we don't disrupt your day to day workflow. We've also <a href="https://forum.turkerview.com/threads/mturk-suite-turkerview-additions.2039/" target="_blank">written about the changes/additions to MTS</a> - please consider giving it a look to get the most out of MTS' new features!</p>
+                    <p>Make sure to register & get your new access keys to our upgraded API by <a href="https://turkerview.com/account/api/" target="_blank" style="text-decoration: underline;">visiting your account dashboard</a>. We'll stop displaying this as soon as you do, but the script wont function after <strong><u>February 1st</u></strong> without an API Key.</p>
+                    <p>You can save your TurkerView API Key in <a href="/options/options.html" target="_blank">MTurk Suite's Options</a> panel or below:</p>
+                    <input id="view-api-key" type="text" class="form-control" style="max-width: 50%; margin-top: 5px; margin-bottom: 5px;">
+                    <button id="view-api-save" type="submit" class="btn btn-primary">Save API Key</button>
                 </div>
                 <div class="modal-footer">
 
@@ -850,33 +852,35 @@
                     <div class="container-fluid">
                         <div class="row small text-nowrap">
                             <div id="review-turkerview" class="col-4">
-                                <h5>
+                                <h5 style="text-align: center;">
                                     <a id="review-turkerview-link" class="text-primary font-weight-bold" target="_blank">Turkerview</a>
                                 </h5>
+                                <hr style="margin-top: 0.5rem;; margin-bottom: 0.5rem;">
                                 <div id="review-turkerview-review">
                                     <div class="row">
                                         <div class="col"><strong>Hourly Avg:</strong></div>
                                         <div id="review-turkerview-ratings-hourly" class="col"></div>
                                     </div>
+                                    <hr style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
                                     <div class="row">
-                                        <div class="col">Pay</div>
+                                        <div class="col">Pay Sentiment</div>
                                         <div id="review-turkerview-ratings-pay" class="col"></div>
                                     </div>
                                     <div class="row">
-                                        <div class="col">Fast</div>
+                                        <div class="col">Approval Time</div>
                                         <div id="review-turkerview-ratings-fast" class="col"></div>
                                     </div>
                                     <div class="row">
-                                        <div class="col">Comm</div>
+                                        <div class="col">Communication</div>
                                         <div id="review-turkerview-ratings-comm" class="col"></div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row" style="display: none;">
                                         <div class="col">Reviews</div>
                                         <div id="review-turkerview-reviews" class="col"></div>
                                     </div>
-                                    <div class="row">
-                                        <div id="review-turkerview-rejections" class="col"></div>
-                                        <div id="review-turkerview-blocks" class="col"></div>
+                                    <div class="row" style="margin-top: 5px;">
+                                        <div id="review-turkerview-rejections" style="text-align: center;" class="col"></div>
+                                        <div id="review-turkerview-blocks" style="text-align: center;" class="col"></div>
                                     </div>
                                     <div class="row" style="text-align: center; margin-top: 3px;">
                                         <div id="review-turkerview-profile-link" class="col" style="text-align: center;"></div>
@@ -884,12 +888,20 @@
                                     </div>
                                 </div>
                                 <div id="review-turkerview-no-reviews">
-                                    No Reviews
+                                    <div style="text-align: center; font-size: 0.714rem;">
+                                        <strong>Oh no!</strong><br>We haven't met this Requester yet.<br>
+                                        <a class="text-success" href="https://turkerview.com/review.php" target="_blank">How Do I Review on TV?</a>
+                                    </div>
                                 </div>
-                                <div style="text-align: center; margin-top: 3px;">
-                                    <a href="https://turkerview.com/review.php" target="_blank">How Do I Review on TV?</a>
+                                <hr>
+                                <h5 style="text-align: center;">
+                                    <span id="review-turkerview-user-title" class="text-primary font-weight-bold" target="_blank">Your Reviews</span>
+                                </h5>
+                                <div id="tv-user-div">
+                                    
                                 </div>
                             </div>
+
                             <div id="review-turkopticon" class="col-3">
                                 <h5>
                                     <a id="review-turkopticon-link" class="text-primary font-weight-bold" target="_blank">Turkopticon</a>

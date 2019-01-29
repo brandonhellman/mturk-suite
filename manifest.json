@@ -130,31 +130,12 @@
       "js": [
         "js/moment.js",
         "js/moment-duration-format.js",
-        "js/moment-timezone.js",
-        "mturk/turkerview/hourly-tracker.js",     
-        "mturk/turkerview/return-reviews.js"
+        "js/moment-timezone.js",  
+        "mturk/turkerview/return-reviews.js",
+        "mturk/turkerview/hit-reviews.js"
       ],
       "matches": [
-        "https://worker.mturk.com/projects/*/tasks/*"
-      ],
-      "run_at": "document_end"
-    },
-
-    {
-      "js": [
-        "js/moment.js",
-        "js/moment-duration-format.js",
-        "js/moment-timezone.js",
-        "bootstrap/js/jquery-3.2.1.min.js",
-        "bootstrap/js/popper.min.js",
-        "bootstrap/js/bootstrap.min.js",
-        "mturk/turkerview/dashboard.js"
-      ],
-      "matches": [
-        "https://worker.mturk.com/*"
-      ],
-      "exclude_matches" : [
-        "https://worker.mturk.com/projects/*/tasks/*"
+        "https://worker.mturk.com/projects/*/tasks*"
       ],
       "run_at": "document_end"
     },
@@ -202,6 +183,25 @@
 
     {
       "js": ["mturk/hit-exporter.js"],
+      "matches": [
+        "https://worker.mturk.com/",
+        "https://worker.mturk.com/?*",
+        "https://worker.mturk.com/projects",
+        "https://worker.mturk.com/projects/",
+        "https://worker.mturk.com/projects?*",
+        "https://worker.mturk.com/projects/?*",
+        "https://worker.mturk.com/tasks*",
+        "https://worker.mturk.com/requesters/*"
+      ],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": [
+        "js/moment.js",
+        "js/moment-duration-format.js",
+        "mturk/turkerview/hit-ratings.js"
+      ],
       "matches": [
         "https://worker.mturk.com/",
         "https://worker.mturk.com/?*",
