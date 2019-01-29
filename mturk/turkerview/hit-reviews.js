@@ -239,5 +239,6 @@ function buildHeaders(userApiKey){
 chrome.storage.local.get([`options`], keys => {
     taskuserApiKey = keys.options.turkerviewApiKey;
     buildHeaders(taskuserApiKey);
+    if (!requesterReviewsTurkerview) return;
     initHitReview();
 })
