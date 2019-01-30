@@ -25,7 +25,7 @@ function returnHitDetailDataModal(json){
          <div class="modal-body project-details no-footer">
          <div class="alert alert-warning" style="font-size: 0.857rem; display: ${userApiKey.length == 40 ? `none` : `block`}">
             <h3>You need a valid TurkerView Auth Key</h3>
-            <p>Please <a href="https://turkerview.com/account/api" target="_blank">register & claim your <strong>free</strong> API Key</a> by Feb 1st.</p>
+            <p>Please <a href="https://turkerview.com/account/api" target="_blank">register & claim your <strong>free</strong> API Key</a> by Feb 7th.</p>
         </div>
             <div class="row" style="text-align: center;">
                <div class="col-xs-12">
@@ -237,8 +237,8 @@ function buildHeaders(userApiKey){
 }
 
 chrome.storage.local.get([`options`], keys => {
-    taskuserApiKey = keys.options.turkerviewApiKey;
+    taskuserApiKey = keys.options.turkerviewApiKey || ``;
     buildHeaders(taskuserApiKey);
-    if (!keys.options.requesterReviewsTurkerview) return;
+    if (!keys.options.requesterReviewsTurkerview || !keys.options.requesterReviews) return;
     initHitReview();
 })

@@ -32,7 +32,7 @@ function hitDataPopover(button, hit, reward, status = `ok`) {
         content = HTML`
         <div class="alert alert-warning" style="font-size: 0.857rem; display: ${userApiKey.length == 40 ? `none` : `block`}">
             <h3>You need a valid TurkerView Auth Key</h3>
-            <p>Please <a href="https://turkerview.com/account/api" target="_blank">register & claim your <strong>free</strong> API Key</a> by Feb 1st.</p>
+            <p>Please <a href="https://turkerview.com/account/api" target="_blank">register & claim your <strong>free</strong> API Key</a> by Feb 7th.</p>
         </div>
     <div style="font-size: 1rem; text-align: center;">
         <span class="text-muted">No one has reviewed this HIT yet!</span><br>
@@ -52,7 +52,7 @@ function hitDataPopover(button, hit, reward, status = `ok`) {
         <div class="row">
             <div class="alert alert-warning" style="font-size: 0.857rem; display: ${userApiKey.length == 40 ? `none` : `block`}">
                 <h3>You need a valid TurkerView Auth Key</h3>
-                <p>Please <a href="https://turkerview.com/account/api" target="_blank"><u>register & claim your <strong>free</strong> API Key</u></a> by Feb 1st.</p>
+                <p>Please <a href="https://turkerview.com/account/api" target="_blank"><u>register & claim your <strong>free</strong> API Key</u></a> by Feb 7th.</p>
             </div>
             <div class="col-xs-12" style="text-align: center">
                 <h3>Average Hourly</h3>
@@ -204,9 +204,9 @@ let ViewHeaders;
 let HitData;
 
 chrome.storage.local.get([`options`], keys => {
-    if (!keys.options.requesterReviewsTurkerview) return;
-    userApiKey = keys.options.turkerviewApiKey;
-    buildHeaders(keys.options.turkerviewApiKey);
+    if (!keys.options.requesterReviewsTurkerview || !keys.options.requesterReviews) return;
+    userApiKey = keys.options.turkerviewApiKey || ``;
+    buildHeaders(userApiKey);
     hitRatings();
 });
 

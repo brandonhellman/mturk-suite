@@ -606,7 +606,8 @@ function requesterHourlyTVClass(hourly) {
 chrome.storage.local.get(`options`, keys => {
   const { options } = keys;
 
-  if (options[`turkerviewApiKey`].length == 40) document.getElementById(`tv-finder-announce`).style.display = `none`;
+  if (options[`turkerviewApiKey`].length == 40 || options[`disable-tv-announcement`] || !options[`requesterReviews`] || !options[`requesterReviewsTurkerview`]) 
+    document.getElementById(`tv-finder-announce`).style.display = `none`;
 
   document.getElementById(`view-api-save`).addEventListener(`click`, function(){
     let temp_api_key = document.getElementById(`view-api-key`).value;
@@ -620,7 +621,16 @@ chrome.storage.local.get(`options`, keys => {
       alert(`We cannot save the provided key as it isn't valid.`);
     }
     
+  });
+
+  document.getElementById(`disable-finder-tv-announcement`).addEventListener(`click`, function(){
+    if (!confirm(`Are you sure you want to hide this reminder? HIT Finder will be unable to retrieve TV data without an API Key after February 7th`)) return;
+    options[`disable-tv-announcement`] = true;
+    chrome.storage.local.set({options});
+    $('#turkerview-finder-announcement-modal').modal('toggle');
+    document.getElementById(`tv-finder-announce`).style.display = `none`
   })
+
 })
 
 

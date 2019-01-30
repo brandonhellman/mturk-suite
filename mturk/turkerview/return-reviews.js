@@ -11,9 +11,9 @@ function retrieveReturnReviews(hit_set_id, assignable_hits_count){
     let found_in_storage = false;
     let deadline_bool = false;
 
-    /* After Feb 1st we need to make sure the user has an API key or the response will be invalid, faster to do it here. */
+    /* After Feb 7th we need to make sure the user has an API key or the response will be invalid, faster to do it here. */
     let today = moment.tz('America_Los_Angeles');
-    let deadline = moment('2019-02-01').tz('America/Los_Angeles', true);
+    let deadline = moment('2019-02-30').tz('America/Los_Angeles', true);
     let diff = moment(deadline).diff(today, 'days');
     if (diff < 0) deadline_bool = true;
     
@@ -194,7 +194,7 @@ function buildReturnWarnings(json){
             <div class="alert alert-warning" style="font-size: 0.857rem; display: ${userApiKey.length == 40 ? `none` : `block`}">
                 <h3>You need a valid TurkerView Auth Key</h3>
                 <p>HIT Warnings are a free feature provided by TurkerView. However, they require a valid API Key to retrieve.</p>
-                <p>Please <a href="https://turkerview.com/account/api" target="_blank">register & claim your <strong>free</strong> API Key</a> by Feb 1st.</p>
+                <p>Please <a href="https://turkerview.com/account/api" target="_blank">register & claim your <strong>free</strong> API Key</a> by Feb 7th.</p>
             </div>
                 <div class="alert alert-warning" style="${(document.querySelector(`iframe`).src.includes('/evaluation/endor')) ? '' :'display: none;'}">
                     <h4>We're on Endor</h4>
@@ -350,9 +350,9 @@ function buildHeaders(userApiKey){
 }
 
 chrome.storage.local.get([`options`], keys => {
-    userApiKey = keys.options.turkerviewApiKey;
+    userApiKey = keys.options.turkerviewApiKey || ``;
     buildHeaders(userApiKey);
-    if (!keys.options.requesterReviewsTurkerview) return;
+    if (!keys.options.requesterReviewsTurkerview || !keys.options.requesterReviews) return;
     initReturnReviews();
 })
 
