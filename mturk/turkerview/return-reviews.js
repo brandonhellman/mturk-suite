@@ -47,7 +47,10 @@ function retrieveReturnReviews(hit_set_id, assignable_hits_count){
 
         return response.json();
     }).then(data => {
-        if (data.length === 0) return;
+        console.log(data);
+        console.log(data.length);
+        console.log(data.reviews.length);
+        if (data.reviews.length === 0) return;
         let reward = 0;
         let total_time_in_ms = 0;
         let underpaid_total = 0;

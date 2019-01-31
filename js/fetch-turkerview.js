@@ -4,6 +4,7 @@ let ViewHeaders;
 
 chrome.storage.local.get([`options`], keys => {
   console.log(keys);
+  console.log(keys.options.turkerviewApiKey);
     userApiKey = (keys.options.turkerviewApiKey) ? keys.options.turkerviewApiKey : ``;
     buildHeaders(userApiKey);
 });
