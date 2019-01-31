@@ -50,6 +50,7 @@ chrome.storage.local.get(`options`, keys => {
         rememberFilter: true,
         requesterReviews: true,
         requesterReviewsTurkerview: true,
+        turkerviewApiKey: ``,
         requesterReviewsTurkopticon: true,
         requesterReviewsTurkopticon2: true,
         version: 1,

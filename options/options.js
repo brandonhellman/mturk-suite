@@ -38,6 +38,19 @@ chrome.storage.local.get(`options`, keys => {
     });
   });
 
+  [...document.querySelectorAll(`input[name="turkerviewApiKey"]`)].forEach(el => {
+    el.value = options[el.name] ? options[el.name] : ``;
+
+    el.addEventListener(`input`, event => {
+      options[event.target.name] = event.target.value;
+      chrome.storage.local.set({ options });
+      
+      if (el.value.length == 40) document.getElementById(`turkerviewConnected`).style.display = ``;
+      else document.getElementById(`turkerviewConnected`).style.display = `none`;
+    });
+    if (el.value.length == 40) document.getElementById(`turkerviewConnected`).style.display = ``;
+  });
+
   [...document.querySelectorAll(`select`)].forEach(el => {
     // eslint-disable-next-line no-param-reassign
     el.value = options[el.id];

@@ -58,6 +58,26 @@ async function saveReviews(reviews) {
   });
 }
 
+async function clearTurkerViewCache(statusText){
+  const db = await reviewsDB();
+  const transaction = db.transaction([`requester`], `readwrite`);
+  const objectStore = transaction.objectStore(`requester`);
+
+  var request = objectStore.getAll();
+
+  transaction.oncomplete = () => {
+    const clear_transaction = db.transaction([`requester`], `readwrite`);
+    const clear_objectStore = clear_transaction.objectStore(`requester`);
+    request.result.forEach(rid => {
+      if (rid.turkerview == null) return;
+      rid.turkerview = null;
+      clear_objectStore.put(rid);
+    });
+  }
+
+}
+
+
 function updateCheck(reviews) {
   return new Promise(async resolve => {
     const time = new Date().getTime() - 1800000;
@@ -107,6 +127,8 @@ function formatResponse(response) {
       }, {});
 
       resolve(formattedTO2);
+    } else if (response.url.includes(`turkerview`)){
+      resolve(json.requesters);
     } else {
       resolve(json);
     }
@@ -115,10 +137,29 @@ function formatResponse(response) {
 
 function fetchReviews(site, url) {
   return new Promise(async resolve => {
+    const {
+      requesterReviewsTurkerview,
+      requesterReviewsTurkopticon,
+      requesterReviewsTurkopticon2
+    } = await StorageGetKey(`options`);
+
     try {
-      const response = await Fetch(url, undefined, 5000);
+      if (site == `turkerview` && !requesterReviewsTurkerview) {
+        clearTurkerViewCache();
+        resolve({site, json: null});
+        return;
+      }
+      const response = (site == `turkerview`) ? await FetchTVWithTimeout(url, { headers: ViewHeaders }, 500) : await Fetch(url, undefined, 350)
       const json = response.ok ? await formatResponse(response) : null;
+
+      if (site == `turkerview` && !response.ok){
+        //We can handle TurkerView API Errors here.
+        if (response.statusText == `invalidUserAuthKey`) clearTurkerViewCache();
+        else if (response.statusText == `dailyLimitExceeded`) clearTurkerViewCache();
+      } 
+      
       resolve({ site, json });
+
     } catch (error) {
       resolve({ site, json: null });
     }
@@ -141,13 +182,11 @@ function averageReviews(reviews) {
         const to = requesterReviewsTurkopticon ? review.turkopticon : null;
         const to2 = requesterReviewsTurkopticon2 ? review.turkopticon2 : null;
 
-        const tvPay = tv ? tv.ratings.pay : null;
-        const tvHrly = tv ? tv.ratings.hourly / 3 : null;
         const toPay = to ? to.attrs.pay : null;
         const to2Pay = to2 ? to2.all.hourly / 3 : null;
 
-        if (tvPay || tvHrly || toPay || to2Pay) {
-          const average = [tvPay, tvHrly, toPay, to2Pay]
+        if (toPay || to2Pay) {
+          const average = [toPay, to2Pay]
             .filter(pay => pay !== null)
             .map((pay, i, filtered) => Number(pay) / filtered.length)
             .reduce((a, b) => a + b);
@@ -171,7 +210,7 @@ function updateReviews(reviews) {
     const updates = await Promise.all([
       fetchReviews(
         `turkerview`,
-        `https://api.turkerview.com/api/v1/requesters/?ids=${rids}`
+        `https://view.turkerview.com/v1/requesters/?requester_ids=${rids}`
       ),
       fetchReviews(
         `turkopticon`,
@@ -182,6 +221,7 @@ function updateReviews(reviews) {
         `https://api.turkopticon.info/requesters?rids=${rids}`
       )
     ]);
+
 
     const updated = rids.reduce((obj, rid) => {
       const review = updates.reduce((o, update) => {

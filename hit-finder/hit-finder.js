@@ -139,6 +139,7 @@ function finderProcess () {
       }
 
       const included = includeListed(hit)
+      const requesterTVReviewClass = await requesterReviewGetTVClass(hit.requester_id)
       const requesterReviewClass = await requesterReviewGetClass(hit.requester_id)
       const trackerRequester = await hitTrackerMatchObject(`requester_id`, hit.requester_id)
       const trackerTitle = await hitTrackerMatchObject(`title`, hit.title)
@@ -150,7 +151,7 @@ function finderProcess () {
         row.classList.add(`included`)
       }
       if (hfOptions[`display-colored-rows`]) {
-        row.classList.add(`table-${requesterReviewClass}`)
+        row.classList.add(`table-${(requesterTVReviewClass != `default` ? requesterTVReviewClass : requesterReviewClass)}`)
       }
 
       const actions = document.createElement(`td`)
@@ -185,8 +186,20 @@ function finderProcess () {
       requesterContainer.className = `btn-group`
       requester.appendChild(requesterContainer)
 
+      const requesterTurkerViewReviews = document.createElement(`button`)
+      requesterTurkerViewReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterTVReviewClass} btn-turkerview`
+      requesterTurkerViewReviews.dataset.toggle = `modal`
+      requesterTurkerViewReviews.dataset.target = `#requester-review-modal`
+      requesterTurkerViewReviews.dataset.key = hit.requester_id
+
+      const turkerviewIcon = document.createElement(`img`)
+      turkerviewIcon.src = `https://turkerview.com/assets/images/tv-white.png`
+      turkerviewIcon.style.maxHeight = `13px`
+      requesterTurkerViewReviews.appendChild(turkerviewIcon)
+      requesterContainer.appendChild(requesterTurkerViewReviews)
+      
       const requesterReviews = document.createElement(`button`)
-      requesterReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterReviewClass}`
+      requesterReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterReviewClass} btn-turkopticon`
       requesterReviews.dataset.toggle = `modal`
       requesterReviews.dataset.target = `#requester-review-modal`
       requesterReviews.dataset.key = hit.requester_id
@@ -581,6 +594,46 @@ function includeListUpdate () {
   })
 }
 
+function requesterHourlyTVClass(hourly) {
+  if (hourly == null) return `text-muted`;
+
+  if (hourly > 10.50) return `text-success`;
+  if (hourly > 7.25) return `text-warning`;
+  if (hourly > 0.0) return `text-danger`;
+  return `text-muted`;
+}
+
+chrome.storage.local.get(`options`, keys => {
+  const { options } = keys;
+
+  if (options[`turkerviewApiKey`].length == 40 || options[`disable-tv-announcement`] || !options[`requesterReviews`] || !options[`requesterReviewsTurkerview`]) 
+    document.getElementById(`tv-finder-announce`).style.display = `none`;
+
+  document.getElementById(`view-api-save`).addEventListener(`click`, function(){
+    let temp_api_key = document.getElementById(`view-api-key`).value;
+    
+    if (temp_api_key.length == 40){
+      options[`turkerviewApiKey`] = temp_api_key;
+      chrome.storage.local.set({ options });
+      alert(`Awesome, we saved your API key for future use!`);
+      window.location.reload();
+    } else{
+      alert(`We cannot save the provided key as it isn't valid.`);
+    }
+    
+  });
+
+  document.getElementById(`disable-finder-tv-announcement`).addEventListener(`click`, function(){
+    if (!confirm(`Are you sure you want to hide this reminder? HIT Finder will be unable to retrieve TV data without an API Key after February 7th`)) return;
+    options[`disable-tv-announcement`] = true;
+    chrome.storage.local.set({options});
+    $('#turkerview-finder-announcement-modal').modal('toggle');
+    document.getElementById(`tv-finder-announce`).style.display = `none`
+  })
+
+})
+
+
 function timeNow () {
   const date = new Date()
   let hours = date.getHours()
@@ -697,9 +750,29 @@ async function saveReviews(reviews) {
   });
 }
 
+async function clearTurkerViewCache(){
+  const db = await getReviewsDB();
+  const transaction = db.transaction([`requester`], `readwrite`);
+  const objectStore = transaction.objectStore(`requester`);
+
+  var request = objectStore.getAll();
+
+  transaction.oncomplete = () => {
+    const clear_transaction = db.transaction([`requester`], `readwrite`);
+    const clear_objectStore = clear_transaction.objectStore(`requester`);
+    request.result.forEach(rid => {
+      if (rid.turkerview == null) return;
+      rid.turkerview = null;
+      clear_objectStore.put(rid);
+    });
+  }
+
+}
+
 function updateCheck(reviews) {
   return new Promise(async resolve => {
     const time = new Date().getTime() - 1800000;
+    //const time = new Date().getTime() - 10000; //time-testing
     const update = Object.keys(reviews).some(rid => reviews[rid].time < time);
     resolve(update);
   });
@@ -746,6 +819,8 @@ function formatResponse(response) {
       }, {});
 
       resolve(formattedTO2);
+    } else if (response.url.includes(`turkerview`)){
+      resolve(json.requesters);
     } else {
       resolve(json);
     }
@@ -754,9 +829,26 @@ function formatResponse(response) {
 
 function fetchReviews(site, url) {
   return new Promise(async resolve => {
+    const {
+      requesterReviewsTurkerview,
+      requesterReviewsTurkopticon,
+      requesterReviewsTurkopticon2
+    } = await StorageGetKey(`options`);
     try {
-      const response = await Fetch(url, undefined, 5000);
+      if (site == `turkerview` && !requesterReviewsTurkerview) {
+        clearTurkerViewCache();
+        resolve({site, json: null});
+        return;
+      }
+      const response = (site == `turkerview`) ? await FetchTVWithTimeout(url, { headers: ViewHeaders }, 500) : await Fetch(url, undefined, 500)
       const json = response.ok ? await formatResponse(response) : null;
+
+      if (site == `turkerview` && !response.ok){
+        //We can handle TurkerView API Errors here.
+        if (response.statusText == `invalidUserAuthKey`) clearTurkerViewCache();
+        else if (response.statusText == `dailyLimitExceeded`) clearTurkerViewCache();
+      } 
+
       resolve({ site, json });
     } catch (error) {
       resolve({ site, json: null });
@@ -780,13 +872,11 @@ function averageReviews(reviews) {
         const to = requesterReviewsTurkopticon ? review.turkopticon : null;
         const to2 = requesterReviewsTurkopticon2 ? review.turkopticon2 : null;
 
-        const tvPay = tv ? tv.ratings.pay : null;
-        const tvHrly = tv ? tv.ratings.hourly / 3 : null;
         const toPay = to ? to.attrs.pay : null;
         const to2Pay = to2 ? to2.all.hourly / 3 : null;
 
-        if (tvPay || tvHrly || toPay || to2Pay) {
-          const average = [tvPay, tvHrly, toPay, to2Pay]
+        if (toPay || to2Pay) {
+          const average = [toPay, to2Pay]
             .filter(pay => pay !== null)
             .map((pay, i, filtered) => Number(pay) / filtered.length)
             .reduce((a, b) => a + b);
@@ -810,7 +900,7 @@ function updateReviews(reviews) {
     const updates = await Promise.all([
       fetchReviews(
         `turkerview`,
-        `https://api.turkerview.com/api/v1/requesters/?ids=${rids}`
+        `https://view.turkerview.com/v1/requesters/?requester_ids=${rids}`
       ),
       fetchReviews(
         `turkopticon`,
@@ -848,6 +938,7 @@ async function reviewsForFinder(rids) {
   updateRequesterReviews(needsUpdate ? await updateReviews(reviews) : reviews);
 }
 
+// This seems to never get called, remove?
 function requesterReviewsUpdate (objectReviews, arrayIds) {
   return new Promise(async (resolve) => {
     function getReviews (stringSite, stringURL) {
@@ -870,7 +961,7 @@ function requesterReviewsUpdate (objectReviews, arrayIds) {
     }
 
     const getReviewsAll = await Promise.all([
-      getReviews(`turkerview`, `https://api.turkerview.com/api/v1/requesters/?ids=${arrayIds}&from=mts`),
+      getTVReviews(`https://view.turkerview.com/v1/requesters/?requester_ids=${arrayIds}&from=mts`),
       getReviews(`turkopticon`, `https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${arrayIds}`),
       getReviews(`turkopticon2`, `https://api.turkopticon.info/requesters?rids=${arrayIds}&fields[requesters]=aggregates`)
     ])
@@ -902,6 +993,18 @@ function requesterReviewsUpdate (objectReviews, arrayIds) {
   })
 }
 
+function requesterRatingTVAverage () {
+  const [requesterId] = arguments
+
+  const review = reviewsDB[requesterId]
+
+  if (review && review.turkerview) {
+    return review.turkerview.wages.average.wage;
+  }
+
+  return 0
+}
+
 function requesterRatingAverage () {
   const [requesterId] = arguments
 
@@ -914,11 +1017,18 @@ function requesterRatingAverage () {
   return 0
 }
 
+async function requesterReviewGetTVClass () {
+  const [requesterId] = arguments
+
+  const average = requesterRatingTVAverage(requesterId)
+  return (average > 10.50 ? `success` : average > 7.25 ? `warning` : average > 0 ? `danger` : `default`)
+}
+
 async function requesterReviewGetClass () {
   const [requesterId] = arguments
 
   const average = requesterRatingAverage(requesterId)
-  return (average > 3.75 ? `success` : average > 2 ? `warning` : average > 0 ? `danger` : `default`)
+  return (average > 3.75 ? `success` : average > 2.25 ? `warning` : average > 0 ? `danger` : `default`)
 }
 
 async function updateRequesterReviews (reviews) {
@@ -926,9 +1036,10 @@ async function updateRequesterReviews (reviews) {
     reviewsDB[key] = reviews[key]
 
     const reviewClass = await requesterReviewGetClass(key)
+    const reviewTVClass = await requesterReviewGetTVClass(key)
 
     if (reviewClass) {
-      for (const element of document.getElementsByClassName(`btn-${key}`)) {
+      for (const element of document.getElementsByClassName(`btn-${key} btn-turkopticon`)) {
         element.classList.remove(`btn-success`, `btn-warning`, `btn-danger`)
         element.classList.add(`btn-${reviewClass}`)
       }
@@ -937,6 +1048,13 @@ async function updateRequesterReviews (reviews) {
         if (storage.hitFinder[`display-colored-rows`]) {
           element.classList.add(`table-${reviewClass}`)
         }
+      }
+    }
+
+    if (reviewTVClass){
+      for (const element of document.getElementsByClassName(`btn-${key} btn-turkerview`)) {
+        element.classList.remove(`btn-succes`, `btn-warning`, `btn-danger`)
+        element.classList.add(`btn-${reviewTVClass}`)
       }
     }
   }
@@ -1136,20 +1254,43 @@ $(`#requester-review-modal`).on(`show.bs.modal`, async (event) => {
 
   if (options.requesterReviewsTurkerview) {
     if (tv) {
+      document.getElementById(`review-who`).textContent = tv.requester_name
       document.getElementById(`review-turkerview-link`).href = `https://turkerview.com/requesters/${key}`
-      document.getElementById(`review-turkerview-ratings-hourly`).textContent = toMoneyString(tv.ratings.hourly)
-      document.getElementById(`review-turkerview-ratings-pay`).textContent = tv.ratings.pay || `-`
-      document.getElementById(`review-turkerview-ratings-fast`).textContent = tv.ratings.fast || `-`
-      document.getElementById(`review-turkerview-ratings-comm`).textContent = tv.ratings.comm || `-`
-      document.getElementById(`review-turkerview-rejections`).textContent = tv.rejections
-      document.getElementById(`review-turkerview-tos`).textContent = tv.tos
-      document.getElementById(`review-turkerview-blocks`).textContent = tv.blocks
+      document.getElementById(`review-turkerview-link`).innerHTML = `TurkerView (${tv.reviews.toLocaleString()} Reviews)`
+      document.getElementById(`review-turkerview-ratings-hourly`).innerHTML = `<strong class="pull-right text-${tv.wages.average.class}">${toMoneyString(tv.wages.average.wage)}/hr</strong>`
+      document.getElementById(`review-turkerview-ratings-pay`).innerHTML = `<span class="pull-right text-${tv.ratings.pay.class}">${tv.ratings.pay.text} <i class="fa ${tv.ratings.pay.faicon}"></i></span>` || `-`
+      document.getElementById(`review-turkerview-ratings-fast`).innerHTML = `<span class="pull-right text-${tv.ratings.fast.class}">${tv.ratings.fast.text}</span>` || `-`
+      document.getElementById(`review-turkerview-ratings-comm`).innerHTML = `<span class="pull-right text-${tv.ratings.comm.class}">${tv.ratings.comm.text}</span>` || `-`
+      document.getElementById(`review-turkerview-rejections`).innerHTML = tv.rejections === 0 ? '<i class="fa fa-check text-success"></i> No Rejections' : `<i class="fa fa-times text-danger"></i> <a href="https://turkerview.com/requesters/${key}/reviews/rejected/" target="_blank">Rejected Work</a>`
+      document.getElementById(`review-turkerview-reviews`).textContent = tv.reviews.toLocaleString()
+      document.getElementById(`review-turkerview-blocks`).innerHTML = tv.blocks === 0 ? '<i class="fa fa-check text-success"></i> No Blocks' : '<i class="fa fa-times text-danger"></i> Blocks Reported'
+
+      document.getElementById(`review-turkerview-profile-link`).innerHTML = `<a href="https://turkerview.com/requesters/${key}" target="_blank">Profile <i class="fa fa-external-link"></i></a>`
+      document.getElementById(`review-turkerview-reviews-link`).innerHTML = `<a href="https://turkerview.com/requesters/${key}/reviews" target="_blank">Reviews <i class="fa fa-external-link"></i></a>`
 
       document.getElementById(`review-turkerview-review`).style.display = ``
       document.getElementById(`review-turkerview-no-reviews`).style.display = `none`
+
+      document.getElementById(`review-turkerview-user-title`).innerHTML = `Your Reviews (${tv.user_reviews.toLocaleString()} Reviews)`
+
+      document.getElementById(`tv-user-div`).innerHTML = `
+      <div class="row" style="display: ${tv.user_reviews == 0 ? `none` : ``};">
+          <div class="col"><p style="margin-bottom: 0.15rem;" class="text-muted"><strong>Hourly Avg:</strong></p></div>
+          <div class="col"><p style="margin-bottom: 0.15rem;" class="text-muted pull-right"><strong class="${requesterHourlyTVClass(tv.wages.user_average.wage)}">$${tv.wages.user_average.wage}/hr</strong></p></div>
+        </div>
+      <span class="text-muted" style="display: ${tv.user_reviews > 0 ? `none` : `block`}; text-align: center; margin-top: 3px;">You don't have any data for this Requester!
+        <div style="text-align: center; font-size: 0.714rem;">
+          <a class="text-success" href="https://turkerview.com/review.php" target="_blank">How Do I Review on TV?</a>
+        </div>
+      </span>`
+
     } else {
+      document.getElementById(`review-turkerview-link`).href = `https://turkerview.com/requesters/${key}`
+      document.getElementById(`review-turkerview-link`).innerHTML = `TurkerView`
       document.getElementById(`review-turkerview-review`).style.display = `none`
       document.getElementById(`review-turkerview-no-reviews`).style.display = ``
+      document.getElementById(`review-turkerview-user-title`).innerHTML = `Your Reviews`
+      document.getElementById(`tv-user-div`).innerHTML = ``
     }
     document.getElementById(`review-turkerview`).style.display = ``
   } else {
