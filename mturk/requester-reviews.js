@@ -267,6 +267,7 @@ async function requesterReviews() {
           });
     
           /* TurkerView */
+          if (options.requesterReviewsTurkerview) {
           const requesterTurkerViewReviews = document.createElement(`span`)
           requesterTurkerViewReviews.className = `btn btn-sm btn-default`;
           requesterTurkerViewReviews.roll = `button`;
@@ -292,12 +293,13 @@ async function requesterReviews() {
               </div>\`
           });`;
           requesterTurkerViewReviews.appendChild(tv_script);
-    
+          }
 
           /* TurkOpticon */
           const button = document.createElement(`i`);
           button.roll = `button`;
           button.tabIndex = 0;
+          button.style.display = options.requesterReviewsTurkopticon || options.requesterReviewsTurkopticon2 ? '' : 'none';
           button.className = `btn btn-sm fa fa-user text-${requesterReviewsClass(
             review
           )}`;
