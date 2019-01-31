@@ -1,6 +1,14 @@
 const changeLog = [];
 
 changeLog.push({
+  version: '2.5.1',
+  date: 'Thursday, January 31, 2019',
+  'General': [
+    'Fix for issue that was causing HIT Finder to freeze.',
+  ]
+})
+
+changeLog.push({
   version: '2.5.0',
   date: 'Wednesday, January 30, 2019',
   'General': [
