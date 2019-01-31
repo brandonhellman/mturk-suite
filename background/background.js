@@ -10,6 +10,19 @@ chrome.runtime.onUpdateAvailable.addListener(details => {
   n.onclick = () => chrome.runtime.reload();
 });
 
+chrome.runtime.onInstalled.addListener(install => {
+  console.log('install/update');
+  const open = indexedDB.open(`requesterReviewsDB`, 1);
+
+  open.onsuccess = event => {
+    var db = open.result;
+    var transaction = db.transaction([`requester`], `readwrite`);
+    var objectStore = transaction.objectStore(`requester`);
+    var objectStoreRequest = objectStore.clear();
+  };
+
+});
+
 chrome.storage.local.get(`blockList`, keys => {
   if (!keys.blockList) {
     chrome.storage.local.set({ blockList: {} });
