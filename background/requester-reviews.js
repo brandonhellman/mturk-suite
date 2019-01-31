@@ -77,6 +77,7 @@ async function clearTurkerViewCache(statusText){
 
 }
 
+
 function updateCheck(reviews) {
   return new Promise(async resolve => {
     const time = new Date().getTime() - 1800000;

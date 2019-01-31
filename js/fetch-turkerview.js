@@ -3,7 +3,8 @@ let userApiKey;
 let ViewHeaders;
 
 chrome.storage.local.get([`options`], keys => {
-    userApiKey = keys.options.turkerviewApiKey || ``;
+  console.log(keys);
+    userApiKey = (keys.options.turkerviewApiKey) ? keys.options.turkerviewApiKey : ``;
     buildHeaders(userApiKey);
 });
 
@@ -14,6 +15,14 @@ function buildHeaders(userApiKey){
         [`X-APP-VER`, chrome.runtime.getManifest().version] //SemVer
     ]);
 }
+
+
+chrome.storage.onChanged.addListener(function(changes, namespace){
+  chrome.storage.local.get([`options`], keys => {
+      userApiKey = (keys.options.turkerviewApiKey) ? keys.options.turkerviewApiKey : ``;
+      buildHeaders(userApiKey);
+  });
+})
 
 function FetchTVWithTimeout(input, init, timeout){
     return Promise.race([

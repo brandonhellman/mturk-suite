@@ -25,7 +25,6 @@
     "scripts": [
       "js/moment.js",
       "js/moment-duration-format.js",
-      "js/fetch-turkerview.js",
       "js/fetch-with-timeout.js",
       "js/mturk-date.js",
       "js/storage.js",
@@ -36,7 +35,8 @@
       "background/hit-tracker.js",
       "background/omnibox.js",
       "background/requester-reviews.js",
-      "background/web-request.js"
+      "background/web-request.js",
+      "js/fetch-turkerview.js"
     ],
     "persistent": true
   },
