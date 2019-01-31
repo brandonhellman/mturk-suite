@@ -1,6 +1,14 @@
 const changeLog = [];
 
 changeLog.push({
+  version: '2.5.0',
+  date: 'Wednesday, January 30, 2019',
+  'General': [
+    'Updated for Turkerview\'s incoming API changes.',
+  ]
+})
+
+changeLog.push({
   version: '2.4.6',
   date: 'Thursday, December 20, 2018',
   'General': [
