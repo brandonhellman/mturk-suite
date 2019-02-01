@@ -128,6 +128,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.type) {
     case `GET_TURKERVIEW`:
       GET_TURKERVIEW(request, sendResponse);
+      return true;
     case `GET_TURKOPTICON`:
       GET_TURKOPTICON(request, sendResponse);
       return true;
