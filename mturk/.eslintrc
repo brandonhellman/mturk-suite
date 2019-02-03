@@ -1,5 +1,11 @@
 {
   "globals": {
+    "MTS_enabled": true,
+    "MTS_element": true,
+    "MTS_props": true,
+    "MTS_elementAndProps": true,
+    "MTS_sendMessage": true,
+
     "Enabled": false,
     "MturkDate": false,
     "ReactDOM": false,
