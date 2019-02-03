@@ -1,27 +1,64 @@
 const REVIEWS = {
-  turkerview: { cache: new Set(), ids: new Set(), updated: 0 },
-  turkopticon: { cache: new Set(), ids: new Set(), updated: 0 },
-  turkopticon2: { cache: new Set(), ids: new Set(), updated: 0 },
+  turkerview: { db: null, cache: new Set(), ids: new Set(), updated: 0 },
+  turkopticon: { db: null, cache: new Set(), ids: new Set(), updated: 0 },
+  turkopticon2: { db: null, cache: new Set(), ids: new Set(), updated: 0 },
 };
 
-const database = (name) =>
+// Initialize the IndexedDBs for TV, TO and TO2.
+[`turkerview`, `turkopticon`, `turkopticon2`].forEach((name) => {
+  const open = indexedDB.open(name, 1);
+
+  open.onsuccess = (event) => {
+    REVIEWS[name].db = event.target.result;
+  };
+
+  open.onupgradeneeded = (event) => {
+    REVIEWS[name].db = event.target.result;
+    REVIEWS[name].db.createObjectStore(`requester`, { keyPath: `id` });
+  };
+});
+
+const fetchNeverFail = (url, options) =>
   new Promise((resolve) => {
-    const open = indexedDB.open(name, 1);
+    const fetchURL = () =>
+      fetch(url, options)
+        .then((response) => resolve(response))
+        .catch(() => {
+          setTimeout(fetchURL, 250);
+        });
 
-    open.onsuccess = (event) => {
-      resolve(event.target.result);
-    };
-
-    open.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      db.createObjectStore(`requester`, { keyPath: `id` });
-      resolve(db);
-    };
+    fetchURL();
   });
+
+const fetchTurkopticon = (rids) => fetchNeverFail(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${rids}`);
+
+const fetchTurkopticon2 = (rids) => fetchNeverFail(`https://api.turkopticon.info/requesters?rids=${rids}`);
+
+const turkopticon2Transform = (data) =>
+  data.reduce((readable, requester) => {
+    const { aggregates } = requester.attributes;
+    const reviews = Object.keys(aggregates).reduce((review, time) => {
+      const { broken, comm, pending, recommend, rejected, reward, tos } = aggregates[time];
+
+      const reformatted = {
+        tos: tos[0],
+        broken: broken[0],
+        rejected: rejected[0],
+        pending: pending > 0 ? (pending / 86400).toFixed(2) : null,
+        hourly: reward[1] > 0 ? ((reward[0] / reward[1]) * 3600).toFixed(2) : null,
+        comm: comm[1] > 0 ? (comm[0] / comm[1]).toFixed(2) : null,
+        recommend: recommend[1] > 0 ? Math.round((recommend[0] / recommend[1]) * 100) : null,
+      };
+
+      return { ...review, [time]: reformatted };
+    }, {});
+
+    return { ...readable, [requester.id]: reviews };
+  }, {});
 
 const getReviews1 = (rids, name) =>
   new Promise(async (resolve) => {
-    const db = await database(name);
+    const { db } = REVIEWS[name];
     const transaction = db.transaction([`requester`], `readonly`);
     const objectStore = transaction.objectStore(`requester`);
 
@@ -37,8 +74,8 @@ const getReviews1 = (rids, name) =>
   });
 
 const checkCache = (rids, name) =>
-  new Promise(async (resolve) => {
-    const db = await database(name);
+  new Promise((resolve) => {
+    const { db } = REVIEWS[name];
     const transaction = db.transaction([`requester`], `readonly`);
     const objectStore = transaction.objectStore(`requester`);
 
@@ -59,7 +96,24 @@ const checkCache = (rids, name) =>
       };
     });
 
-    transaction.oncomplete = () => resolve();
+    transaction.oncomplete = resolve;
+  });
+
+const handleUpdate = (data, name) =>
+  new Promise(async (resolve) => {
+    const { db } = REVIEWS[name];
+    const transaction = db.transaction([`requester`], `readwrite`);
+    const objectStore = transaction.objectStore(`requester`);
+    const updated = Date.now();
+
+    [...REVIEWS[name].ids].forEach((id) => {
+      objectStore.put({ id, updated, ...data[id] });
+      REVIEWS[name].ids.delete(id);
+    });
+
+    REVIEWS[name].updated = updated;
+
+    transaction.oncomplete = resolve;
   });
 
 const handleTurkerview = () =>
@@ -71,17 +125,18 @@ const handleTurkerview = () =>
   });
 
 const handleTurkopticon = () =>
-  new Promise((resolve) => {
-    // await never fail fetch
-    // await transaction updating database
+  new Promise(async (resolve) => {
+    const response = await fetchTurkopticon([...REVIEWS.turkopticon.ids]);
+    const json = await response.json();
+    await handleUpdate(json, `turkopticon`);
     resolve();
   });
 
 const handleTurkopticon2 = () =>
-  new Promise((resolve) => {
-    // await never fail fetch
-    // transform data
-    // await transaction updating database
+  new Promise(async (resolve) => {
+    const response = await fetchTurkopticon2([...REVIEWS.turkopticon2.ids]);
+    const json = await response.json();
+    await handleUpdate(turkopticon2Transform(json.data), `turkopticon2`);
     resolve();
   });
 
@@ -109,7 +164,6 @@ const updateCache = (name) =>
   });
 
 async function GET_TURKERVIEW({ payload }, sendResponse) {
-  console.log(`GET_TURKERVIEW`, payload);
   await checkCache(payload, `turkerview`);
   await updateCache(`turkerview`);
   const reviews = await getReviews1(payload, `turkerview`);
@@ -117,11 +171,15 @@ async function GET_TURKERVIEW({ payload }, sendResponse) {
 }
 
 async function GET_TURKOPTICON({ payload }, sendResponse) {
-  console.log(`GET_TURKOPTICON`, payload);
-  await checkCache(payload, `turkopticon`);
-  await updateCache(`turkopticon`);
-  const reviews = await getReviews1(payload, `turkopticon`);
-  sendResponse(reviews);
+  await Promise.all([checkCache(payload, `turkopticon`), checkCache(payload, `turkopticon2`)]);
+  await Promise.all([updateCache(`turkopticon`), updateCache(`turkopticon2`)]);
+
+  const [turkopticon, turkopticon2] = await Promise.all([
+    getReviews1(payload, `turkopticon`),
+    getReviews1(payload, `turkopticon2`),
+  ]);
+
+  sendResponse({ turkopticon, turkopticon2 });
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
