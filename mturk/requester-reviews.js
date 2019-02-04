@@ -47,7 +47,7 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
       <h2 style="text-align: center;">
         <a class="text-primary" href="https://turkerview.com/requesters/${requester_id}" target="_blank">TurkerView</a>
       </h2>
-      <div class="alert alert-warning" style="font-size: 1rem; display: ${userApiKey.length == 40 ? `none` : `block`}">
+      <div class="alert alert-warning" style="font-size: 1rem; display: ${typeof userApiKey !== 'undefined' && userApiKey.length == 40 ? `none` : `block`}">
         <h3>You need a valid TurkerView Auth Key</h3>
         <p>Please <a href="https://turkerview.com/account/api" target="_blank"><u>register & claim your <strong>free</strong> API Key</u></a> to enable this function.</p>
       </div>
@@ -67,7 +67,7 @@ function requesterReviewsTurkerViewHTML(hit, review, options) {
   const { pay, fast, comm } = ratings;
 
   return /*html*/`
-    <div class="alert alert-warning" style="font-size: 0.857rem; display: ${userApiKey.length == 40 ? `none` : `block`}">
+    <div class="alert alert-warning" style="font-size: 0.857rem; display: ${typeof userApiKey !== 'undefined' && userApiKey.length == 40 ? `none` : `block`}">
         <h3>You need a valid TurkerView Auth Key</h3>
         <p>Please <a href="https://turkerview.com/account/api" target="_blank"><u>register & claim your <strong>free</strong> API Key</u></a> to enable this function.</p>
     </div>
@@ -258,7 +258,7 @@ async function requesterReviews() {
     const { requester_id, requester_name } = hit;
     const review = response.reviews[requester_id];
 
-    row.querySelectorAll(`.requester-column`).forEach(col => {
+    row.querySelectorAll(`.requester-column, .requester-name-column`).forEach(col => {
         col.querySelectorAll(`.expand-button`).forEach(btn => {
           const container = document.createElement(`div`)
           container.style.display = `inline-block`;
