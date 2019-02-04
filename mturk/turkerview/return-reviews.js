@@ -309,15 +309,6 @@ function returnsApiExceptionHandler(exception){
 
      Exception text can be accessed with ex.statusText
      */
-
-    const MainContainer = document.getElementById(`MainContent`);
-    if (document.getElementById(`tvjs-view-error`)) return;
-    if (exception.statusText == 'invalidUserAuthKey') MainContainer.insertAdjacentHTML(`afterbegin`, `
-<div id="tvjs-view-error" class="alert alert-danger">
-    <h4>Your TurkerView API Key is invalid.</h4>
-    <p>The HIT Warning feature is free! You just need to claim your free API key (or support the site with a subscription!) from your <a href="https://turkerview.com/account/api/" target="_blank">TurkerView account API dashboard.</a></p>
-</div>`);
-    
 }
 
 async function initReturnReviews(){
