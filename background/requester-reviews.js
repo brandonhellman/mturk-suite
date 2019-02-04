@@ -149,7 +149,7 @@ function fetchReviews(site, url) {
         resolve({site, json: null});
         return;
       }
-      const response = (site == `turkerview`) ? await FetchTVWithTimeout(url, { headers: ViewHeaders }, 500) : await Fetch(url, undefined, 350)
+      const response = (site == `turkerview`) ? await FetchTVWithTimeout(url, { headers: ViewHeaders }, 400) : await Fetch(url, undefined, 400)
       const json = response.ok ? await formatResponse(response) : null;
 
       if (site == `turkerview` && !response.ok){

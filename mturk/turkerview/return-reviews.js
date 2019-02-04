@@ -137,7 +137,7 @@ const classMap = total_reports => total_reports == 0 ? 'text-muted' :
     total_reports < 3 ? 'text-warning' : 'text-danger';
 
 function buildReturnWarnings(json){
-    if (json['broken_total'] + json['underpaid_total'] + json['unpaid_screener_total'] + json['tos_total'] + json['writing_total'] + json['inquisit_total'] == 0) return;
+    if (json['broken_total'] + json['underpaid_total'] + json['unpaid_screener_total'] + json['tos_total'] + json['writing_total'] + json['downloads_total'] == 0) return;
 
     let highest_warning_class = 'text-danger';
 
@@ -325,7 +325,8 @@ async function initReturnReviews(){
 
     if (tv_storage_check){
         const tv_last_active = moment(JSON.parse(tv_storage_check).last_sync).tz('America/Los_Angeles');
-        const diff = moment().tz('America/Los_Angeles').diff(tv_last_active, 'hours')
+        const diff = tv_last_active.diff(moment().tz('America/Los_Angeles'), 'seconds')
+        console.log(diff);
         // TVJS is still installed on this user's machine (most likely) - don't add a 2nd return review dialog, we'll have TVJS defer to MTS later
         if (diff < 36) return;
     }
