@@ -10,19 +10,6 @@ chrome.runtime.onUpdateAvailable.addListener(details => {
   n.onclick = () => chrome.runtime.reload();
 });
 
-chrome.runtime.onInstalled.addListener(install => {
-  console.log('install/update');
-  const open = indexedDB.open(`requesterReviewsDB`, 1);
-
-  open.onsuccess = event => {
-    var db = open.result;
-    var transaction = db.transaction([`requester`], `readwrite`);
-    var objectStore = transaction.objectStore(`requester`);
-    var objectStoreRequest = objectStore.clear();
-  };
-
-});
-
 chrome.storage.local.get(`blockList`, keys => {
   if (!keys.blockList) {
     chrome.storage.local.set({ blockList: {} });
@@ -42,7 +29,7 @@ chrome.storage.local.get(`includeList`, keys => {
 });
 
 chrome.storage.local.get(`options`, keys => {
-  if (!keys.options || keys.options.version !== 1) {
+  if (!keys.options || keys.options.version !== 1.2) {
     chrome.storage.local.set({
       options: {
         autoAcceptUnchecker: false,
@@ -61,12 +48,10 @@ chrome.storage.local.get(`options`, keys => {
         queueInfoEnhancer: true,
         rateLimitReloader: true,
         rememberFilter: true,
-        requesterReviews: true,
-        requesterReviewsTurkerview: true,
+        turkerview: true,
+        turkopticon: true,
         turkerviewApiKey: ``,
-        requesterReviewsTurkopticon: true,
-        requesterReviewsTurkopticon2: true,
-        version: 1,
+        version: 1.2,
         themeMts: `default`,
         themeMturk: `default`,
         workspaceExpander: true
