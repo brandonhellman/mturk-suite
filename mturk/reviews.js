@@ -22,7 +22,7 @@ const turkopticonClass = ({ average }) => {
 
 const turkerviewHTML = (hit, review) => {
   const { requester_id } = hit;
-  const userApiKey = false;
+  //const userApiKey = false;
 
   if (!review.ratings)
     return HTML`<div class="col-xs-12" style="font-size: 1rem;">

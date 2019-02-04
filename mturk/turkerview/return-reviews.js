@@ -140,13 +140,14 @@ function buildReturnWarnings(json){
     if (json['broken_total'] + json['underpaid_total'] + json['unpaid_screener_total'] + json['tos_total'] + json['writing_total'] + json['inquisit_total'] == 0) return;
 
     let highest_warning_class = 'text-danger';
+    let x = Number(json['broken_total']) + Number(json['underpaid_total']) + Number(json['unpaid_screener_total']) + Number(json['tos_total']) + Number(json['writing_total']) + Number(json['downloads_total']);
 
     document.querySelectorAll(`.work-pipeline-action`).forEach(el => {
-        el.insertAdjacentHTML(`afterbegin`, `<a ${highest_warning_class == 'hidden' ? 'style="display: none;"' : ''} class="btn btn-danger mts-tv-return-warning-data-launcher" href="#" style="margin-right: 5px;"><i class="fa fa-fw fa-warning"></i></a>`);
+        el.insertAdjacentHTML(`afterbegin`, `<a ${highest_warning_class == 'hidden' ? 'style="display: none;"' : ''} class="btn btn-danger mts-tv-return-warning-data-launcher" href="#" style="margin-right: 5px;"><i class="fa fa-fw fa-warning"></i> ${x}</a>`);
     })
 
     document.querySelectorAll(`.task-project-title`).forEach(el => {
-        el.insertAdjacentHTML(`afterbegin`, `<div ${highest_warning_class == 'hidden' ? 'style="display: none;"' : 'style="display: inline-block;"'}><i class="fa fa-warning ${highest_warning_class} mts-tv-return-warning-data-launcher" style="cursor: pointer; padding-right: 3px;"></i></div>`);
+        el.insertAdjacentHTML(`afterbegin`, `<div ${highest_warning_class == 'hidden' ? 'style="display: none;"' : 'style="display: inline-block;"'}><i class="fa fa-warning ${highest_warning_class} mts-tv-return-warning-data-launcher" style="cursor: pointer; padding-right: 3px;"> (${x})</i></div>`);
     })
 
     let btnHtml = `<i class="fa fa-warning fa-fw ${highest_warning_class} mts-tv-return-warning-data-launcher" style="line-height: 1rem; cursor: pointer; ${highest_warning_class == 'hidden' ? 'display: none;' : ''}" data-toggle="tooltip" data-title="Oh shit!"></i>`;
@@ -308,15 +309,6 @@ function returnsApiExceptionHandler(exception){
 
      Exception text can be accessed with ex.statusText
      */
-
-    const MainContainer = document.getElementById(`MainContent`);
-    if (document.getElementById(`tvjs-view-error`)) return;
-    if (exception.statusText == 'invalidUserAuthKey') MainContainer.insertAdjacentHTML(`afterbegin`, `
-<div id="tvjs-view-error" class="alert alert-danger">
-    <h4>Your TurkerView API Key is invalid.</h4>
-    <p>The HIT Warning feature is free! You just need to claim your free API key (or support the site with a subscription!) from your <a href="https://turkerview.com/account/api/" target="_blank">TurkerView account API dashboard.</a></p>
-</div>`);
-    
 }
 
 async function initReturnReviews(){
@@ -355,7 +347,7 @@ function buildHeaders(userApiKey){
 chrome.storage.local.get([`options`], keys => {
     userApiKey = keys.options.turkerviewApiKey || ``;
     buildHeaders(userApiKey);
-    if (!keys.options.requesterReviewsTurkerview || !keys.options.requesterReviews) return;
+    if (!keys.options.turkerview) return;
     initReturnReviews();
 })
 

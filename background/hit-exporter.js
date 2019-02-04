@@ -202,7 +202,7 @@ function plainTemplateReviews(hit) {
     ]);
 
     if (options.requesterReviews) {
-      const turkerview = options.requesterReviewsTurkerview
+      const turkerview = options.turkerview
         ? plainTemplateTurkerView(hit, reviews)
         : ``;
       const turkopticon = options.requesterReviewsTurkopticon
@@ -280,8 +280,8 @@ function bbCodeTemplateReviews(hit) {
       StorageGetKey(`options`)
     ]);
 
-    if (options.requesterReviews) {
-      const turkerview = options.requesterReviewsTurkerview
+    if (options.turkerview) {
+      const turkerview = options.turkerview
         ? bbCodeTemplateTurkerView(hit, reviews)
         : ``;
       const turkopticon = options.requesterReviewsTurkopticon
