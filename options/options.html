@@ -1,330 +1,457 @@
 <html>
-
-<head>
-    <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8" />
     <title>Options</title>
 
-    <link href="/options/options.css" rel="stylesheet">
+    <link href="/options/options.css" rel="stylesheet" />
 
     <script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
     <script src="/bootstrap/js/popper.min.js"></script>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
 
     <script src="/js/theme.js"></script>
-</head>
+  </head>
 
-<body>
+  <body>
     <nav class="navbar navbar-light bg-primary">
-        <span class="navbar-brand mb-0 text-white">Mturk Suite - Options</span>
-        <div class="float-right">
-            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VYB8NZTKRZBFS" target="_blank" class="btn btn-secondary">Donate</a>
-            <a href="https://github.com/Kadauchi/mturk-suite/wiki" target="_blank" class="btn btn-secondary">Wiki</a>
-            <a href="https://github.com/Kadauchi/mturk-suite/issues" target="_blank" class="btn btn-secondary">Issues</a>
-            <a href="/change_log/change_log.html" target="_blank" class="btn btn-secondary">Change Log</a>
-        </div>
+      <span class="navbar-brand mb-0 text-white">Mturk Suite - Options</span>
+      <div class="float-right">
+        <a
+          href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VYB8NZTKRZBFS"
+          target="_blank"
+          class="btn btn-secondary"
+          >Donate</a
+        >
+        <a href="https://github.com/Kadauchi/mturk-suite/wiki" target="_blank" class="btn btn-secondary">Wiki</a>
+        <a href="https://github.com/Kadauchi/mturk-suite/issues" target="_blank" class="btn btn-secondary">Issues</a>
+        <a href="/change_log/change_log.html" target="_blank" class="btn btn-secondary">Change Log</a>
+      </div>
     </nav>
 
     <div class="container">
-        <!-- Enable Scripts -->
-        <div id="scripts" class="card mt-2">
-            <div class="card-header bg-primary text-white">
-                Enable Scripts
-            </div>
-            <div class="card-block row p-2">
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Keeps the Auto-accept next HIT checkbox always unchecked.">
-                        <input type="checkbox" class="custom-control-input" id="autoAcceptUnchecker">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Auto Accept Unchecker</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Uses your HIT Finder Block List to hide HITs on MTurk.">
-                        <input type="checkbox" class="custom-control-input" id="blockListOnMturk">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Block List On MTurk</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Prevent accidental returns by adding a prompt when returning a HIT.">
-                        <input type="checkbox" class="custom-control-input" id="confirmReturnHIT">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Confirm Return HIT</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Allows you to export HITs in formatted text.">
-                        <input type="checkbox" class="custom-control-input" id="hitExporter">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">HIT Exporter</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Keep tracks of your HITs that are assigned, returned, abandoned, submitted, approved, rejected and pending.">
-                        <input type="checkbox" class="custom-control-input" id="hitTracker">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">HIT Tracker</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Provides extra infomation in the hit details.">
-                        <input type="checkbox" class="custom-control-input" id="hitDetailsSticky">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">HIT Details Sticky</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Adds a link to the last page on all pagination">
-                        <input type="checkbox" class="custom-control-input" id="paginationLastPage">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Pagination Last Page</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Provides extra infomation in the queue.">
-                        <input type="checkbox" class="custom-control-input" id="queueInfoEnhancer">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Queue Info Enhancer</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Reloads the page if you encountered a page request error.">
-                        <input type="checkbox" class="custom-control-input" id="rateLimitReloader">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Rate Limit Reloader</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Remembers your last search filter since MTurk won't.">
-                        <input type="checkbox" class="custom-control-input" id="rememberFilter">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Remember Filter</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Embeds requester reviews.">
-                        <input type="checkbox" class="custom-control-input" id="requesterReviews">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Requester Reviews</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Scrolls to, focuses and expands accepted HITs to fill the browser viewport.">
-                        <input type="checkbox" class="custom-control-input" id="workspaceExpander">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Workspace Expander</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Treat HITs in locations other then your own like blocked HITs.">
-                        <input type="checkbox" class="custom-control-input" id="blockLocation">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Block Location</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Treat HITs that require you to have the Master qualification like blocked HITs if you don't have the qualification.">
-                        <input type="checkbox" class="custom-control-input" id="blockMaster">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Block Masters</span>
-                    </label>
-                </div> 
-            </div>
+      <!-- Enable Scripts -->
+      <div id="scripts" class="card mt-2">
+        <div class="card-header bg-primary text-white">
+          Enable Scripts
         </div>
+        <div class="card-block row p-2">
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Keeps the Auto-accept next HIT checkbox always unchecked."
+            >
+              <input type="checkbox" class="custom-control-input" id="autoAcceptUnchecker" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Auto Accept Unchecker</span>
+            </label>
+          </div>
 
-        <!-- HIT Tracker -->
-        <div id="hit-tracker" class="card mt-2" hidden>
-            <div class="card-header bg-primary text-white">
-                HIT Tracker
-            </div>
-            <div class="card-block row p-2">
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="NOT IMPLEMENTED! Let HIT Tracker automatically sync your database in the background.">
-                        <input type="checkbox" class="custom-control-input" id="hitTrackerAutoSync" disabled>
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Auto Sync</span>
-                    </label>
-                </div>
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Uses your HIT Finder Block List to hide HITs on MTurk."
+            >
+              <input type="checkbox" class="custom-control-input" id="blockListOnMturk" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Block List On MTurk</span>
+            </label>
+          </div>
 
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Shows how much work you've done on the MTurk page.">
-                        <input type="checkbox" class="custom-control-input" id="hitTrackerDisplayCounts">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Display Counts</span>
-                    </label>
-                </div>
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Prevent accidental returns by adding a prompt when returning a HIT."
+            >
+              <input type="checkbox" class="custom-control-input" id="confirmReturnHIT" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Confirm Return HIT</span>
+            </label>
+          </div>
 
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Display today's projected earnings at the top of every page.">
-                        <input type="checkbox" class="custom-control-input" id="hitTrackerDisplayEarnings">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Display Earnings</span>
-                    </label>
-                </div>
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Allows you to export HITs in formatted text."
+            >
+              <input type="checkbox" class="custom-control-input" id="hitExporter" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">HIT Exporter</span>
+            </label>
+          </div>
 
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Allow HIT Tracker to update your database when you accept, submit or return a HIT.">
-                        <input type="checkbox" class="custom-control-input" id="hitTrackerLiveUpdate">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Live Update</span>
-                    </label>
-                </div>
-            </div>
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Keep tracks of your HITs that are assigned, returned, abandoned, submitted, approved, rejected and pending."
+            >
+              <input type="checkbox" class="custom-control-input" id="hitTracker" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">HIT Tracker</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Provides extra infomation in the hit details."
+            >
+              <input type="checkbox" class="custom-control-input" id="hitDetailsSticky" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">HIT Details Sticky</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Adds a link to the last page on all pagination"
+            >
+              <input type="checkbox" class="custom-control-input" id="paginationLastPage" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Pagination Last Page</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Provides extra infomation in the queue."
+            >
+              <input type="checkbox" class="custom-control-input" id="queueInfoEnhancer" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Queue Info Enhancer</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Reloads the page if you encountered a page request error."
+            >
+              <input type="checkbox" class="custom-control-input" id="rateLimitReloader" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Rate Limit Reloader</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Remembers your last search filter since MTurk won't."
+            >
+              <input type="checkbox" class="custom-control-input" id="rememberFilter" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Remember Filter</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Embeds requester reviews from https://turkerview.com/."
+            >
+              <input type="checkbox" class="custom-control-input" id="turkerview" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Turkerview</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Embeds requester reviews from https://turkopticon.ucsd.edu/ and https://turkopticon.info/."
+            >
+              <input type="checkbox" class="custom-control-input" id="turkopticon" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Turkopticon</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Scrolls to, focuses and expands accepted HITs to fill the browser viewport."
+            >
+              <input type="checkbox" class="custom-control-input" id="workspaceExpander" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Workspace Expander</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Treat HITs in locations other then your own like blocked HITs."
+            >
+              <input type="checkbox" class="custom-control-input" id="blockLocation" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Block Location</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Treat HITs that require you to have the Master qualification like blocked HITs if you don't have the qualification."
+            >
+              <input type="checkbox" class="custom-control-input" id="blockMaster" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Block Masters</span>
+            </label>
+          </div>
         </div>
+      </div>
 
-        <!-- HIT Exporter -->
-        <div id="hit-exporter" class="card mt-2" hidden>
-            <div class="card-header bg-primary text-white">
-                HIT Exporter
-            </div>
-            <div class="card-block row p-2">
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Popup with all export options will appear.">
-                        <input name="export" type="radio" class="custom-control-input" id="all">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">All</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Export HITs in a short format.">
-                        <input name="export" type="radio" class="custom-control-input" id="short">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Short</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Export HITs in a plain format.">
-                        <input name="export" type="radio" class="custom-control-input" id="plain">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Plain</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Export HITs in a BBCode format.">
-                        <input name="export" type="radio" class="custom-control-input" id="bbcode">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">BBCode</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Export HITs in a mardown format.">
-                        <input name="export" type="radio" class="custom-control-input" id="markdown">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Markdown</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Directly Export HITs to https://turkerhub.com/.">
-                        <input name="export" type="radio" class="custom-control-input" id="turkerhub">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Turker Hub</span>
-                    </label>
-                </div>
-
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Directly Export HITs to http://www.mturkcrowd.com/.">
-                        <input name="export" type="radio" class="custom-control-input" id="mturkcrowd">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">MTurk Crowd</span>
-                    </label>
-                </div>
-            </div>
+      <!-- HIT Tracker -->
+      <div id="hit-tracker" class="card mt-2" hidden>
+        <div class="card-header bg-primary text-white">
+          HIT Tracker
         </div>
+        <div class="card-block row p-2">
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="NOT IMPLEMENTED! Let HIT Tracker automatically sync your database in the background."
+            >
+              <input type="checkbox" class="custom-control-input" id="hitTrackerAutoSync" disabled />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Auto Sync</span>
+            </label>
+          </div>
 
-        <!-- Requester Reviews -->
-        <div id="requester-reviews" class="card mt-2" hidden>
-            <div class="card-header bg-primary text-white">
-                Requester Reviews
-            </div>
-            <div class="card-block row p-2">
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Use reviews from https://turkerview.com/.">
-                        <input type="checkbox" class="custom-control-input" id="requesterReviewsTurkerview">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Use TurkerView</span>
-                    </label>
-                </div>
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Shows how much work you've done on the MTurk page."
+            >
+              <input type="checkbox" class="custom-control-input" id="hitTrackerDisplayCounts" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Display Counts</span>
+            </label>
+          </div>
 
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Use reviews from https://turkopticon.ucsd.edu/.">
-                        <input type="checkbox" class="custom-control-input" id="requesterReviewsTurkopticon">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Use Turkopticon</span>
-                    </label>
-                </div>
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Display today's projected earnings at the top of every page."
+            >
+              <input type="checkbox" class="custom-control-input" id="hitTrackerDisplayEarnings" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Display Earnings</span>
+            </label>
+          </div>
 
-                <div class="col-4">
-                    <label class="custom-control custom-checkbox" data-toggle="tooltip" style="cursor: help;" title="Use reviews from https://turkopticon.info/.">
-                        <input type="checkbox" class="custom-control-input" id="requesterReviewsTurkopticon2">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Use Turkopticon2</span>
-                    </label>
-                </div>
-            </div>
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Allow HIT Tracker to update your database when you accept, submit or return a HIT."
+            >
+              <input type="checkbox" class="custom-control-input" id="hitTrackerLiveUpdate" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Live Update</span>
+            </label>
+          </div>
         </div>
+      </div>
 
-        <div id="themes" class="card mt-2">
-            <div class="card-header bg-primary text-white">
-                Themes
-            </div>
-            <div class="card-block row p-2">
-                <div class="col-6">
-                    <select id="themeMts" class="custom-select w-100">
-                        <option value="default" selected>MTurk Suite - Default</option>
-                        <option value="flatly">MTurk Suite - Flatly</option>
-                        <option value="darkly">MTurk Suite - Darkly</option>
-                        <option value="cerulean">MTurk Suite - Cerulean</option>
-                        <option value="cosmo">MTurk Suite - Cosmo</option>
-                        <option value="cyborg">MTurk Suite - Cyborg</option>
-                        <option value="journal">MTurk Suite - Journal</option>
-                        <option value="litera">MTurk Suite - Litera</option>
-                        <option value="lumen">MTurk Suite - Lumen</option>
-                        <option value="lux">MTurk Suite - Lux</option>
-                        <option value="materia">MTurk Suite - Materia</option>
-                        <option value="minty">MTurk Suite - Minty</option>
-                        <option value="pulse">MTurk Suite - Pulse</option>
-                        <option value="sandstone">MTurk Suite - Sandstone</option>
-                        <option value="simplex">MTurk Suite - Simplex</option>
-                        <option value="sketchy">MTurk Suite - Sketchy</option>
-                        <option value="slate">MTurk Suite - Slate</option>
-                        <option value="solar">MTurk Suite - Solar</option>
-                        <option value="spacelab">MTurk Suite - Spacelab</option>
-                        <option value="superhero">MTurk Suite - Superhero</option>
-                        <option value="united">MTurk Suite - United</option>
-                        <option value="yeti">MTurk Suite - Yeti</option>
-                    </select>
-                </div>
-
-                <div class="col-6">
-                    <select id="themeMturk" class="custom-select w-100">
-                        <option value="default" selected>MTurk - Default</option>
-                        <option value="flatly">MTurk - Flatly</option>
-                        <option value="darkly">MTurk - Darkly</option>
-                    </select>
-                </div>
-            </div>
+      <!-- HIT Exporter -->
+      <div id="hit-exporter" class="card mt-2" hidden>
+        <div class="card-header bg-primary text-white">
+          HIT Exporter
         </div>
+        <div class="card-block row p-2">
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Popup with all export options will appear."
+            >
+              <input name="export" type="radio" class="custom-control-input" id="all" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">All</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Export HITs in a short format."
+            >
+              <input name="export" type="radio" class="custom-control-input" id="short" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Short</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Export HITs in a plain format."
+            >
+              <input name="export" type="radio" class="custom-control-input" id="plain" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Plain</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Export HITs in a BBCode format."
+            >
+              <input name="export" type="radio" class="custom-control-input" id="bbcode" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">BBCode</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Export HITs in a mardown format."
+            >
+              <input name="export" type="radio" class="custom-control-input" id="markdown" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Markdown</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Directly Export HITs to https://forum.turkerview.com/."
+            >
+              <input name="export" type="radio" class="custom-control-input" id="turkerhub" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">TurkerView Forum</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Directly Export HITs to http://www.mturkcrowd.com/."
+            >
+              <input name="export" type="radio" class="custom-control-input" id="mturkcrowd" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">MTurk Crowd</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Turkerview -->
+      <div id="turkerview-advanced" class="card mt-2" hidden>
+        <div class="card-header bg-primary text-white">
+          Turkerview
+        </div>
+        <div class="card-block row p-2">
+          <div class="col-12">
+            <label class="mb-0" data-toggle="tooltip" style="cursor: help;" title="Your TurkerView API Key"
+              >TurkerView API Key (<a href="https://turkerview.com/account/api/" target="_blank">Get API Key</a>)</label
+            >
+            <input name="turkerviewApiKey" type="text" spellcheck="false" class="form-control" />
+            <div id="turkerviewConnected" class="alert alert-success" style="margin: 5px; display: none;">
+              <p style="margin-bottom: 0;">Connected!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="themes" class="card mt-2">
+        <div class="card-header bg-primary text-white">
+          Themes
+        </div>
+        <div class="card-block row p-2">
+          <div class="col-6">
+            <select id="themeMts" class="custom-select w-100">
+              <option value="default" selected>MTurk Suite - Default</option>
+              <option value="flatly">MTurk Suite - Flatly</option>
+              <option value="darkly">MTurk Suite - Darkly</option>
+              <option value="cerulean">MTurk Suite - Cerulean</option>
+              <option value="cosmo">MTurk Suite - Cosmo</option>
+              <option value="cyborg">MTurk Suite - Cyborg</option>
+              <option value="journal">MTurk Suite - Journal</option>
+              <option value="litera">MTurk Suite - Litera</option>
+              <option value="lumen">MTurk Suite - Lumen</option>
+              <option value="lux">MTurk Suite - Lux</option>
+              <option value="materia">MTurk Suite - Materia</option>
+              <option value="minty">MTurk Suite - Minty</option>
+              <option value="pulse">MTurk Suite - Pulse</option>
+              <option value="sandstone">MTurk Suite - Sandstone</option>
+              <option value="simplex">MTurk Suite - Simplex</option>
+              <option value="sketchy">MTurk Suite - Sketchy</option>
+              <option value="slate">MTurk Suite - Slate</option>
+              <option value="solar">MTurk Suite - Solar</option>
+              <option value="spacelab">MTurk Suite - Spacelab</option>
+              <option value="superhero">MTurk Suite - Superhero</option>
+              <option value="united">MTurk Suite - United</option>
+              <option value="yeti">MTurk Suite - Yeti</option>
+            </select>
+          </div>
+
+          <div class="col-6">
+            <select id="themeMturk" class="custom-select w-100">
+              <option value="default" selected>MTurk - Default</option>
+              <option value="flatly">MTurk - Flatly</option>
+              <option value="darkly">MTurk - Darkly</option>
+            </select>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="/options/options.js"></script>
-</body>
-
+  </body>
 </html>

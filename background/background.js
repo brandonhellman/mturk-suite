@@ -29,7 +29,7 @@ chrome.storage.local.get(`includeList`, keys => {
 });
 
 chrome.storage.local.get(`options`, keys => {
-  if (!keys.options || keys.options.version !== 1) {
+  if (!keys.options || keys.options.version !== 1.2) {
     chrome.storage.local.set({
       options: {
         autoAcceptUnchecker: false,
@@ -48,11 +48,10 @@ chrome.storage.local.get(`options`, keys => {
         queueInfoEnhancer: true,
         rateLimitReloader: true,
         rememberFilter: true,
-        requesterReviews: true,
-        requesterReviewsTurkerview: true,
-        requesterReviewsTurkopticon: true,
-        requesterReviewsTurkopticon2: true,
-        version: 1,
+        turkerview: true,
+        turkopticon: true,
+        turkerviewApiKey: ``,
+        version: 1.2,
         themeMts: `default`,
         themeMturk: `default`,
         workspaceExpander: true

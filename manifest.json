@@ -3,10 +3,9 @@
 
   "name": "MTurk Suite",
 
-  "version": "2.4.6",
+  "version": "2.6.0",
 
-  "description":
-    "Enchances Mechanical Turk to increase your efficiency and earnings.",
+  "description": "Enchances Mechanical Turk to increase your efficiency and earnings.",
 
   "icons": {
     "16": "media/icon_16.png",
@@ -34,8 +33,9 @@
       "background/hit-exporter.js",
       "background/hit-tracker.js",
       "background/omnibox.js",
-      "background/requester-reviews.js",
-      "background/web-request.js"
+      "background/reviews.js",
+      "background/web-request.js",
+      "js/fetch-turkerview.js"
     ],
     "persistent": true
   },
@@ -126,6 +126,18 @@
     },
 
     {
+      "js": [
+        "js/moment.js",
+        "js/moment-duration-format.js",
+        "js/moment-timezone.js",
+        "mturk/turkerview/return-reviews.js",
+        "mturk/turkerview/hit-reviews.js"
+      ],
+      "matches": ["https://worker.mturk.com/projects/*/tasks*"],
+      "run_at": "document_end"
+    },
+
+    {
       "js": ["mturk/context-menu-worker-id.js"],
       "matches": ["https://worker.mturk.com/*"],
       "run_at": "document_end"
@@ -168,6 +180,25 @@
 
     {
       "js": ["mturk/hit-exporter.js"],
+      "matches": [
+        "https://worker.mturk.com/",
+        "https://worker.mturk.com/?*",
+        "https://worker.mturk.com/projects",
+        "https://worker.mturk.com/projects/",
+        "https://worker.mturk.com/projects?*",
+        "https://worker.mturk.com/projects/?*",
+        "https://worker.mturk.com/tasks*",
+        "https://worker.mturk.com/requesters/*"
+      ],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": [
+        "js/moment.js",
+        "js/moment-duration-format.js",
+        "mturk/turkerview/hit-ratings.js"
+      ],
       "matches": [
         "https://worker.mturk.com/",
         "https://worker.mturk.com/?*",
@@ -250,7 +281,7 @@
     },
 
     {
-      "js": ["mturk/requester-reviews.js"],
+      "js": ["mturk/reviews.js"],
       "matches": [
         "https://worker.mturk.com/",
         "https://worker.mturk.com/?*",
