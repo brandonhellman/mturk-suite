@@ -5,8 +5,7 @@
 
   "version": "2.5.1",
 
-  "description":
-    "Enchances Mechanical Turk to increase your efficiency and earnings.",
+  "description": "Enchances Mechanical Turk to increase your efficiency and earnings.",
 
   "icons": {
     "16": "media/icon_16.png",
@@ -34,7 +33,7 @@
       "background/hit-exporter.js",
       "background/hit-tracker.js",
       "background/omnibox.js",
-      "background/requester-reviews.js",
+      "background/reviews.js",
       "background/web-request.js",
       "js/fetch-turkerview.js"
     ],
@@ -130,13 +129,11 @@
       "js": [
         "js/moment.js",
         "js/moment-duration-format.js",
-        "js/moment-timezone.js",  
+        "js/moment-timezone.js",
         "mturk/turkerview/return-reviews.js",
         "mturk/turkerview/hit-reviews.js"
       ],
-      "matches": [
-        "https://worker.mturk.com/projects/*/tasks*"
-      ],
+      "matches": ["https://worker.mturk.com/projects/*/tasks*"],
       "run_at": "document_end"
     },
 
@@ -284,7 +281,7 @@
     },
 
     {
-      "js": ["mturk/requester-reviews.js"],
+      "js": ["mturk/reviews.js"],
       "matches": [
         "https://worker.mturk.com/",
         "https://worker.mturk.com/?*",

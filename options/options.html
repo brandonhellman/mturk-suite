@@ -170,11 +170,24 @@
               class="custom-control custom-checkbox"
               data-toggle="tooltip"
               style="cursor: help;"
-              title="Embeds requester reviews."
+              title="Embeds requester reviews from https://turkerview.com/."
             >
-              <input type="checkbox" class="custom-control-input" id="requesterReviews" />
+              <input type="checkbox" class="custom-control-input" id="turkerview" />
               <span class="custom-control-indicator"></span>
-              <span class="custom-control-description">Requester Reviews</span>
+              <span class="custom-control-description">Turkerview</span>
+            </label>
+          </div>
+
+          <div class="col-4">
+            <label
+              class="custom-control custom-checkbox"
+              data-toggle="tooltip"
+              style="cursor: help;"
+              title="Embeds requester reviews from https://turkopticon.ucsd.edu/ and https://turkopticon.info/."
+            >
+              <input type="checkbox" class="custom-control-input" id="turkopticon" />
+              <span class="custom-control-indicator"></span>
+              <span class="custom-control-description">Turkopticon</span>
             </label>
           </div>
 
@@ -378,51 +391,12 @@
         </div>
       </div>
 
-      <!-- Requester Reviews -->
-      <div id="requester-reviews" class="card mt-2" hidden>
+      <!-- Turkerview -->
+      <div id="turkerview-advanced" class="card mt-2" hidden>
         <div class="card-header bg-primary text-white">
-          Requester Reviews
+          Turkerview
         </div>
         <div class="card-block row p-2">
-          <div class="col-4">
-            <label
-              class="custom-control custom-checkbox"
-              data-toggle="tooltip"
-              style="cursor: help;"
-              title="Use reviews from https://turkerview.com/."
-            >
-              <input type="checkbox" class="custom-control-input" id="requesterReviewsTurkerview" />
-              <span class="custom-control-indicator"></span>
-              <span class="custom-control-description">Use TurkerView</span>
-            </label>
-          </div>
-
-          <div class="col-4">
-            <label
-              class="custom-control custom-checkbox"
-              data-toggle="tooltip"
-              style="cursor: help;"
-              title="Use reviews from https://turkopticon.ucsd.edu/."
-            >
-              <input type="checkbox" class="custom-control-input" id="requesterReviewsTurkopticon" />
-              <span class="custom-control-indicator"></span>
-              <span class="custom-control-description">Use Turkopticon</span>
-            </label>
-          </div>
-
-          <div class="col-4">
-            <label
-              class="custom-control custom-checkbox"
-              data-toggle="tooltip"
-              style="cursor: help;"
-              title="Use reviews from https://turkopticon.info/."
-            >
-              <input type="checkbox" class="custom-control-input" id="requesterReviewsTurkopticon2" />
-              <span class="custom-control-indicator"></span>
-              <span class="custom-control-description">Use Turkopticon2</span>
-            </label>
-          </div>
-
           <div class="col-12">
             <label class="mb-0" data-toggle="tooltip" style="cursor: help;" title="Your TurkerView API Key"
               >TurkerView API Key (<a href="https://turkerview.com/account/api/" target="_blank">Get API Key</a>)</label
