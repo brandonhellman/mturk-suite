@@ -733,23 +733,23 @@ chrome.notifications.onButtonClicked.addListener((id, btn) => {
 });
 
 const turkerviewClass = ({ wages }) => {
-  if (!wages) return `muted`;
+  if (!wages) return `default`;
   if (wages.average.wage > 10.5) return `success`;
   if (wages.average.wage > 7.25) return `warning`;
   if (wages.average.wage > 0.0) return `danger`;
-  return `muted`;
+  return `default`;
 };
 
 const turkerviewReviewClass = (rid) => {
   const review = turkerviewDB[rid];
-  return review ? turkerviewClass(review) : `muted`;
+  return review ? turkerviewClass(review) : `default`;
 };
 
 const turkopticonClass = ({ average }) => {
   if (average > 3.75) return `success`;
   if (average > 2.25) return `warning`;
   if (average > 0.0) return `danger`;
-  return `muted`;
+  return `default`;
 };
 
 const turkopticonReviewClass = (rid) => {
