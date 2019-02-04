@@ -308,15 +308,6 @@ function returnsApiExceptionHandler(exception){
 
      Exception text can be accessed with ex.statusText
      */
-
-    const MainContainer = document.getElementById(`MainContent`);
-    if (document.getElementById(`tvjs-view-error`)) return;
-    if (exception.statusText == 'invalidUserAuthKey') MainContainer.insertAdjacentHTML(`afterbegin`, `
-<div id="tvjs-view-error" class="alert alert-danger">
-    <h4>Your TurkerView API Key is invalid.</h4>
-    <p>The HIT Warning feature is free! You just need to claim your free API key (or support the site with a subscription!) from your <a href="https://turkerview.com/account/api/" target="_blank">TurkerView account API dashboard.</a></p>
-</div>`);
-    
 }
 
 async function initReturnReviews(){
@@ -325,7 +316,8 @@ async function initReturnReviews(){
 
     if (tv_storage_check){
         const tv_last_active = moment(JSON.parse(tv_storage_check).last_sync).tz('America/Los_Angeles');
-        const diff = tv_last_active.diff(moment().tz('America/Los_Angeles'), 'seconds')
+        //const diff = tv_last_active.diff(moment().tz('America/Los_Angeles'), 'seconds')
+        const diff = moment().tz('America/Los_Angeles').diff(tv_last_active, 'hours')
         console.log(diff);
         // TVJS is still installed on this user's machine (most likely) - don't add a 2nd return review dialog, we'll have TVJS defer to MTS later
         if (diff < 36) return;
