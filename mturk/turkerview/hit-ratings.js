@@ -204,7 +204,7 @@ let ViewHeaders;
 let HitData;
 
 chrome.storage.local.get([`options`], keys => {
-    if (!keys.options.requesterReviewsTurkerview || !keys.options.requesterReviews) return;
+    if (!keys.options.turkerview) return;
     userApiKey = keys.options.turkerviewApiKey || ``;
     buildHeaders(userApiKey);
     hitRatings();
