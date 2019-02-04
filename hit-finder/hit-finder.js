@@ -1,408 +1,432 @@
 /* globals chrome $ */
 
-const finderDB = {}
-const reviewsDB = {}
-const includeAlerted = []
-const includePushbulleted = []
+const finderDB = {};
+const reviewsDB = {};
+const includeAlerted = [];
+const includePushbulleted = [];
 
-let totalScans = 0
-let pageRequestErrors = 0
-let alarm = false
-let alarmAudio = null
-let alarmRunning = false
-let finderTimeout = null
+let totalScans = 0;
+let pageRequestErrors = 0;
+let alarm = false;
+let alarmAudio = null;
+let alarmRunning = false;
+let finderTimeout = null;
 
-const storage = {}
+const storage = {};
 
 chrome.storage.local.get([`hitFinder`, `blockList`, `includeList`, `reviews`], (keys) => {
   for (const key of Object.keys(keys)) {
-    storage[key] = keys[key]
+    storage[key] = keys[key];
   }
 
-  finderUpdate()
-  blockListUpdate()
-  includeListUpdate()
+  finderUpdate();
+  blockListUpdate();
+  includeListUpdate();
 
   chrome.storage.onChanged.addListener((changes) => {
     if (changes.reviews) {
-      storage.reviews = changes.reviews.newValue
-      updateRequesterReviews(reviewsDB)
+      storage.reviews = changes.reviews.newValue;
+      updateRequesterReviews(reviewsDB);
     }
-  })
-})
+  });
+});
 
-function finderApply () {
+function finderApply() {
   for (const prop in storage.hitFinder) {
-    storage.hitFinder[prop] = document.getElementById(prop)[typeof (storage.hitFinder[prop]) === `boolean` ? `checked` : `value`]
+    storage.hitFinder[prop] = document.getElementById(prop)[
+      typeof storage.hitFinder[prop] === `boolean` ? `checked` : `value`
+    ];
   }
 
   chrome.storage.local.set({
-    hitFinder: storage.hitFinder
-  })
+    hitFinder: storage.hitFinder,
+  });
 }
 
-function finderUpdate () {
+function finderUpdate() {
   for (const prop in storage.hitFinder) {
-    document.getElementById(prop)[typeof (storage.hitFinder[prop]) === `boolean` ? `checked` : `value`] = storage.hitFinder[prop]
+    document.getElementById(prop)[typeof storage.hitFinder[prop] === `boolean` ? `checked` : `value`] =
+      storage.hitFinder[prop];
   }
 }
 
-function finderToggle () {
-  const active = document.getElementById(`find`).classList.toggle(`active`)
+function finderToggle() {
+  const active = document.getElementById(`find`).classList.toggle(`active`);
 
   if (active) {
-    finderFetch()
+    finderFetch();
   }
 }
 
-function finderFetchURL () {
-  const url = new window.URL(`https://worker.mturk.com/`)
-  url.searchParams.append(`sort`, storage.hitFinder[`filter-sort`])
-  url.searchParams.append(`page_size`, storage.hitFinder[`filter-page-size`])
-  url.searchParams.append(`filters[masters]`, storage.hitFinder[`filter-masters`])
-  url.searchParams.append(`filters[qualified]`, storage.hitFinder[`filter-qualified`])
-  url.searchParams.append(`filters[min_reward]`, storage.hitFinder[`filter-min-reward`])
-  url.searchParams.append(`filters[search_term]`, storage.hitFinder[`filter-search-term`])
-  url.searchParams.append(`format`, `json`)
+function finderFetchURL() {
+  const url = new window.URL(`https://worker.mturk.com/`);
+  url.searchParams.append(`sort`, storage.hitFinder[`filter-sort`]);
+  url.searchParams.append(`page_size`, storage.hitFinder[`filter-page-size`]);
+  url.searchParams.append(`filters[masters]`, storage.hitFinder[`filter-masters`]);
+  url.searchParams.append(`filters[qualified]`, storage.hitFinder[`filter-qualified`]);
+  url.searchParams.append(`filters[min_reward]`, storage.hitFinder[`filter-min-reward`]);
+  url.searchParams.append(`filters[search_term]`, storage.hitFinder[`filter-search-term`]);
+  url.searchParams.append(`format`, `json`);
 
-  return url
+  return url;
 }
 
-function finderNextFetch () {
-  const [lastScan] = arguments
+function finderNextFetch() {
+  const [lastScan] = arguments;
 
-  const speed = Number(storage.hitFinder[`speed`])
+  const speed = Number(storage.hitFinder.speed);
 
   if (speed > 0) {
-    const delay = lastScan + speed - window.performance.now()
-    finderTimeout = setTimeout(finderFetch, delay)
+    const delay = lastScan + speed - window.performance.now();
+    finderTimeout = setTimeout(finderFetch, delay);
   } else {
-    finderToggle()
+    finderToggle();
   }
 }
 
-function finderLoggedOut () {
-  finderToggle()
-  window.textToSpeech(`HIT Finder Stopped, you are logged out of MTurk.`, `Google US English`)
+function finderLoggedOut() {
+  finderToggle();
+  window.textToSpeech(`HIT Finder Stopped, you are logged out of MTurk.`, `Google US English`);
 }
 
-async function finderFetch () {
-  const start = window.performance.now()
+async function finderFetch() {
+  const start = window.performance.now();
 
-  clearTimeout(finderTimeout)
+  clearTimeout(finderTimeout);
 
   if (!document.getElementById(`find`).classList.contains(`active`)) {
-    return
+    return;
   }
 
   try {
     const response = await window.fetch(finderFetchURL(), {
-      credentials: `include`
-    })
+      credentials: `include`,
+    });
 
     if (~response.url.indexOf(`https://worker.mturk.com`)) {
       if (response.ok) {
-        await finderProcess(await response.json())
+        await finderProcess(await response.json());
       }
       if (response.status === 429) {
-        document.getElementById(`page-request-errors`).textContent = ++pageRequestErrors
+        document.getElementById(`page-request-errors`).textContent = ++pageRequestErrors;
       }
 
-      finderNextFetch(start)
+      finderNextFetch(start);
     } else {
-      finderLoggedOut()
+      finderLoggedOut();
     }
   } catch (error) {
-    console.error(error)
-    finderNextFetch(start)
+    console.error(error);
+    finderNextFetch(start);
   } finally {
-    document.getElementById(`total-scans`).textContent = ++totalScans
+    document.getElementById(`total-scans`).textContent = ++totalScans;
   }
 }
 
-function finderProcess () {
+function finderProcess() {
   return new Promise(async (resolve) => {
-    const [json] = arguments
+    const [json] = arguments;
 
-    const recentFragment = document.createDocumentFragment()
-    const loggedFragment = document.createDocumentFragment()
-    const includedFragment = document.createDocumentFragment()
-    let sound = false
-    let blocked = 0
+    const recentFragment = document.createDocumentFragment();
+    const loggedFragment = document.createDocumentFragment();
+    const includedFragment = document.createDocumentFragment();
+    let sound = false;
+    let blocked = 0;
 
-    reviewsForFinder([...new Set(json.results.map((o) => o.requester_id))])
+    reviewsForFinder([...new Set(json.results.map((o) => o.requester_id))]);
 
     for (const hit of json.results) {
       if (blockListed(hit) || minimumAvailable(hit) || minimumRequesterRating(hit)) {
-        blocked++
-        continue
+        blocked++;
+        continue;
       }
 
-      const included = includeListed(hit)
-      const requesterTVReviewClass = await requesterReviewGetTVClass(hit.requester_id)
-      const requesterReviewClass = await requesterReviewGetClass(hit.requester_id)
-      const trackerRequester = await hitTrackerMatchObject(`requester_id`, hit.requester_id)
-      const trackerTitle = await hitTrackerMatchObject(`title`, hit.title)
+      const included = includeListed(hit);
+      const requesterTVReviewClass = await requesterReviewGetTVClass(hit.requester_id);
+      const requesterReviewClass = await requesterReviewGetClass(hit.requester_id);
+      const trackerRequester = await hitTrackerMatchObject(`requester_id`, hit.requester_id);
+      const trackerTitle = await hitTrackerMatchObject(`title`, hit.title);
       const hfOptions = await StorageGetKey(`hitFinder`);
 
-      const row = document.createElement(`tr`)
+      const row = document.createElement(`tr`);
 
       if (included) {
-        row.classList.add(`included`)
+        row.classList.add(`included`);
       }
       if (hfOptions[`display-colored-rows`]) {
-        row.classList.add(`table-${(requesterTVReviewClass != `default` ? requesterTVReviewClass : requesterReviewClass)}`)
+        row.classList.add(
+          `table-${requesterTVReviewClass != `default` ? requesterTVReviewClass : requesterReviewClass}`,
+        );
       }
 
-      const actions = document.createElement(`td`)
-      actions.className = `w-1`
-      row.appendChild(actions)
+      const actions = document.createElement(`td`);
+      actions.className = `w-1`;
+      row.appendChild(actions);
 
-      const actionsContainer = document.createElement(`div`)
-      actionsContainer.className = `btn-group`
-      actions.appendChild(actionsContainer)
+      const actionsContainer = document.createElement(`div`);
+      actionsContainer.className = `btn-group`;
+      actions.appendChild(actionsContainer);
 
-      const hitInfo = document.createElement(`button`)
-      hitInfo.type = `button`
-      hitInfo.className = `btn btn-sm btn-primary`
-      hitInfo.dataset.toggle = `modal`
-      hitInfo.dataset.target = `#hit-info-modal`
-      hitInfo.dataset.key = hit.hit_set_id
-      actionsContainer.appendChild(hitInfo)
+      const hitInfo = document.createElement(`button`);
+      hitInfo.type = `button`;
+      hitInfo.className = `btn btn-sm btn-primary`;
+      hitInfo.dataset.toggle = `modal`;
+      hitInfo.dataset.target = `#hit-info-modal`;
+      hitInfo.dataset.key = hit.hit_set_id;
+      actionsContainer.appendChild(hitInfo);
 
-      const hitInfoIcon = document.createElement(`i`)
-      hitInfoIcon.className = `fa fa-info-circle`
-      hitInfo.appendChild(hitInfoIcon)
+      const hitInfoIcon = document.createElement(`i`);
+      hitInfoIcon.className = `fa fa-info-circle`;
+      hitInfo.appendChild(hitInfoIcon);
 
-      const time = document.createElement(`td`)
-      time.className = `w-1`
-      time.textContent = timeNow()
-      row.appendChild(time)
+      const time = document.createElement(`td`);
+      time.className = `w-1`;
+      time.textContent = timeNow();
+      row.appendChild(time);
 
-      const requester = document.createElement(`td`)
-      row.appendChild(requester)
+      const requester = document.createElement(`td`);
+      row.appendChild(requester);
 
-      const requesterContainer = document.createElement(`div`)
-      requesterContainer.className = `btn-group`
-      requester.appendChild(requesterContainer)
+      const requesterContainer = document.createElement(`div`);
+      requesterContainer.className = `btn-group`;
+      requester.appendChild(requesterContainer);
 
-      const requesterTurkerViewReviews = document.createElement(`button`)
-      requesterTurkerViewReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterTVReviewClass} btn-turkerview`
-      requesterTurkerViewReviews.dataset.toggle = `modal`
-      requesterTurkerViewReviews.dataset.target = `#requester-review-modal`
-      requesterTurkerViewReviews.dataset.key = hit.requester_id
+      const requesterTurkerViewReviews = document.createElement(`button`);
+      requesterTurkerViewReviews.className = `btn btn-sm btn-${
+        hit.requester_id
+      } btn-${requesterTVReviewClass} btn-turkerview`;
+      requesterTurkerViewReviews.dataset.toggle = `modal`;
+      requesterTurkerViewReviews.dataset.target = `#requester-review-modal`;
+      requesterTurkerViewReviews.dataset.key = hit.requester_id;
 
-      const turkerviewIcon = document.createElement(`img`)
-      turkerviewIcon.src = `https://turkerview.com/assets/images/tv-white.png`
-      turkerviewIcon.style.maxHeight = `13px`
-      requesterTurkerViewReviews.appendChild(turkerviewIcon)
-      requesterContainer.appendChild(requesterTurkerViewReviews)
-      
-      const requesterReviews = document.createElement(`button`)
-      requesterReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterReviewClass} btn-turkopticon`
-      requesterReviews.dataset.toggle = `modal`
-      requesterReviews.dataset.target = `#requester-review-modal`
-      requesterReviews.dataset.key = hit.requester_id
-      requesterContainer.appendChild(requesterReviews)
+      const turkerviewIcon = document.createElement(`img`);
+      turkerviewIcon.src = `https://turkerview.com/assets/images/tv-white.png`;
+      turkerviewIcon.style.maxHeight = `13px`;
+      requesterTurkerViewReviews.appendChild(turkerviewIcon);
+      requesterContainer.appendChild(requesterTurkerViewReviews);
 
-      const requesterReviewsIcon = document.createElement(`i`)
-      requesterReviewsIcon.className = `fa fa-user`
-      requesterReviews.appendChild(requesterReviewsIcon)
+      const requesterReviews = document.createElement(`button`);
+      requesterReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterReviewClass} btn-turkopticon`;
+      requesterReviews.dataset.toggle = `modal`;
+      requesterReviews.dataset.target = `#requester-review-modal`;
+      requesterReviews.dataset.key = hit.requester_id;
+      requesterContainer.appendChild(requesterReviews);
 
-      const requesterTracker = document.createElement(`button`)
-      requesterTracker.type = `button`
-      requesterTracker.className = `btn btn-sm btn-${trackerRequester.color} mr-1`
-      requesterContainer.appendChild(requesterTracker)
+      const requesterReviewsIcon = document.createElement(`i`);
+      requesterReviewsIcon.className = `fa fa-user`;
+      requesterReviews.appendChild(requesterReviewsIcon);
 
-      const requesterTrackerIcon = document.createElement(`i`)
-      requesterTrackerIcon.className = `fa fa-${trackerRequester.icon}`
-      requesterTracker.appendChild(requesterTrackerIcon)
+      const requesterTracker = document.createElement(`button`);
+      requesterTracker.type = `button`;
+      requesterTracker.className = `btn btn-sm btn-${trackerRequester.color} mr-1`;
+      requesterContainer.appendChild(requesterTracker);
 
-      const requesterLink = document.createElement(`a`)
-      requesterLink.href = `https://worker.mturk.com/requesters/${hit.requester_id}/projects`
-      requesterLink.target = `_blank`
-      requesterLink.textContent = hit.requester_name
-      requesterContainer.appendChild(requesterLink)
+      const requesterTrackerIcon = document.createElement(`i`);
+      requesterTrackerIcon.className = `fa fa-${trackerRequester.icon}`;
+      requesterTracker.appendChild(requesterTrackerIcon);
 
-      const title = document.createElement(`td`)
-      row.appendChild(title)
+      const requesterLink = document.createElement(`a`);
+      requesterLink.href = `https://worker.mturk.com/requesters/${hit.requester_id}/projects`;
+      requesterLink.target = `_blank`;
+      requesterLink.textContent = hit.requester_name;
+      requesterContainer.appendChild(requesterLink);
 
-      const titleContainer = document.createElement(`div`)
-      titleContainer.className = `btn-group`
-      title.appendChild(titleContainer)
+      const title = document.createElement(`td`);
+      row.appendChild(title);
 
-      const sharer = document.createElement(`button`)
-      sharer.type = `button`
-      sharer.className = `btn btn-sm btn-primary`
-      sharer.dataset.toggle = `modal`
-      sharer.dataset.target = `#hit-sharer-modal`
-      sharer.dataset.key = hit.hit_set_id
-      titleContainer.appendChild(sharer)
+      const titleContainer = document.createElement(`div`);
+      titleContainer.className = `btn-group`;
+      title.appendChild(titleContainer);
 
-      const shareIcon = document.createElement(`i`)
-      shareIcon.className = `fa fa-share`
-      sharer.appendChild(shareIcon)
+      const sharer = document.createElement(`button`);
+      sharer.type = `button`;
+      sharer.className = `btn btn-sm btn-primary`;
+      sharer.dataset.toggle = `modal`;
+      sharer.dataset.target = `#hit-sharer-modal`;
+      sharer.dataset.key = hit.hit_set_id;
+      titleContainer.appendChild(sharer);
 
-      const titleTracker = document.createElement(`button`)
-      titleTracker.type = `button`
-      titleTracker.className = `btn btn-sm btn-${trackerTitle.color} mr-1`
-      titleContainer.appendChild(titleTracker)
+      const shareIcon = document.createElement(`i`);
+      shareIcon.className = `fa fa-share`;
+      sharer.appendChild(shareIcon);
 
-      const titleTrackerIcon = document.createElement(`i`)
-      titleTrackerIcon.className = `fa fa-${trackerTitle.icon}`
-      titleTracker.appendChild(titleTrackerIcon)
+      const titleTracker = document.createElement(`button`);
+      titleTracker.type = `button`;
+      titleTracker.className = `btn btn-sm btn-${trackerTitle.color} mr-1`;
+      titleContainer.appendChild(titleTracker);
 
-      const titleLink = document.createElement(`a`)
-      titleLink.href = `https://worker.mturk.com/projects/${hit.hit_set_id}/tasks`
-      titleLink.target = `_blank`
-      titleLink.textContent = hit.title
-      titleContainer.appendChild(titleLink)
+      const titleTrackerIcon = document.createElement(`i`);
+      titleTrackerIcon.className = `fa fa-${trackerTitle.icon}`;
+      titleTracker.appendChild(titleTrackerIcon);
 
-      const available = document.createElement(`td`)
-      available.className = `text-center w-1`
-      available.textContent = hit.assignable_hits_count
-      row.appendChild(available)
+      const titleLink = document.createElement(`a`);
+      titleLink.href = `https://worker.mturk.com/projects/${hit.hit_set_id}/tasks`;
+      titleLink.target = `_blank`;
+      titleLink.textContent = hit.title;
+      titleContainer.appendChild(titleLink);
 
-      const reward = document.createElement(`td`)
-      reward.className = `text-center`
-      row.appendChild(reward)
+      const available = document.createElement(`td`);
+      available.className = `text-center w-1`;
+      available.textContent = hit.assignable_hits_count;
+      row.appendChild(available);
 
-      const rewardLink = document.createElement(`a`)
-      rewardLink.href = `https://worker.mturk.com/projects/${hit.hit_set_id}/tasks/accept_random`
-      rewardLink.target = `_blank`
-      rewardLink.textContent = toMoneyString(hit.monetary_reward.amount_in_dollars)
-      reward.appendChild(rewardLink)
+      const reward = document.createElement(`td`);
+      reward.className = `text-center`;
+      row.appendChild(reward);
 
-      const masters = document.createElement(`td`)
-      masters.className = `text-center w-1`
-      masters.textContent = hit.project_requirements.filter((o) => [`2F1QJWKUDD8XADTFD2Q0G6UTO95ALH`, `2NDP2L92HECWY8NS8H3CK0CP5L9GHO`, `21VZU98JHSTLZ5BPP4A9NOBJEK3DPG`].includes(o.qualification_type_id)).length > 0 ? `Y` : `N`
-      row.appendChild(masters)
+      const rewardLink = document.createElement(`a`);
+      rewardLink.href = `https://worker.mturk.com/projects/${hit.hit_set_id}/tasks/accept_random`;
+      rewardLink.target = `_blank`;
+      rewardLink.textContent = toMoneyString(hit.monetary_reward.amount_in_dollars);
+      reward.appendChild(rewardLink);
 
-      const recentRow = toggleColumns(row.cloneNode(true), `recent`)
-      recentRow.id = `recent-${hit.hit_set_id}`
+      const masters = document.createElement(`td`);
+      masters.className = `text-center w-1`;
+      masters.textContent =
+        hit.project_requirements.filter((o) =>
+          [
+            `2F1QJWKUDD8XADTFD2Q0G6UTO95ALH`,
+            `2NDP2L92HECWY8NS8H3CK0CP5L9GHO`,
+            `21VZU98JHSTLZ5BPP4A9NOBJEK3DPG`,
+          ].includes(o.qualification_type_id),
+        ).length > 0
+          ? `Y`
+          : `N`;
+      row.appendChild(masters);
 
-      const loggedRow = toggleColumns(row.cloneNode(true), `logged`)
-      loggedRow.id = `logged-${hit.hit_set_id}`
+      const recentRow = toggleColumns(row.cloneNode(true), `recent`);
+      recentRow.id = `recent-${hit.hit_set_id}`;
 
-      const includedRow = toggleColumns(row.cloneNode(true), `included`)
-      includedRow.id = `included-${hit.hit_set_id}`
+      const loggedRow = toggleColumns(row.cloneNode(true), `logged`);
+      loggedRow.id = `logged-${hit.hit_set_id}`;
 
-      recentFragment.appendChild(recentRow)
+      const includedRow = toggleColumns(row.cloneNode(true), `included`);
+      includedRow.id = `included-${hit.hit_set_id}`;
 
-      const loggedElement = document.getElementById(`logged-${hit.hit_set_id}`)
-      if (loggedElement) loggedElement.replaceWith(loggedRow)
-      else loggedFragment.appendChild(loggedRow)
+      recentFragment.appendChild(recentRow);
+
+      const loggedElement = document.getElementById(`logged-${hit.hit_set_id}`);
+      if (loggedElement) loggedElement.replaceWith(loggedRow);
+      else loggedFragment.appendChild(loggedRow);
 
       if (!finderDB[hit.hit_set_id]) {
-        sound = true
-        finderDB[hit.hit_set_id] = hit
+        sound = true;
+        finderDB[hit.hit_set_id] = hit;
       }
 
       if (included && !includeAlerted.includes(hit.hit_set_id)) {
-        includedAlert(included, hit)
-        document.getElementById(`include-list-hits-card`).style.display = ``
-        includedFragment.appendChild(includedRow)
+        includedAlert(included, hit);
+        document.getElementById(`include-list-hits-card`).style.display = ``;
+        includedFragment.appendChild(includedRow);
       }
     }
 
-    toggleColumns(document.getElementById(`recent-hits-thead`).children[0], `recent`)
-    toggleColumns(document.getElementById(`logged-hits-thead`).children[0], `logged`)
-    removeChildren(document.getElementById(`recent-hits-tbody`))
+    toggleColumns(document.getElementById(`recent-hits-thead`).children[0], `recent`);
+    toggleColumns(document.getElementById(`logged-hits-thead`).children[0], `logged`);
+    removeChildren(document.getElementById(`recent-hits-tbody`));
 
-    document.getElementById(`recent-hits-tbody`).insertBefore(recentFragment, document.getElementById(`recent-hits-tbody`).firstChild)
-    document.getElementById(`logged-hits-tbody`).insertBefore(loggedFragment, document.getElementById(`logged-hits-tbody`).firstChild)
-    document.getElementById(`include-list-hits-tbody`).insertBefore(includedFragment, document.getElementById(`include-list-hits-tbody`).firstChild)
+    document
+      .getElementById(`recent-hits-tbody`)
+      .insertBefore(recentFragment, document.getElementById(`recent-hits-tbody`).firstChild);
+    document
+      .getElementById(`logged-hits-tbody`)
+      .insertBefore(loggedFragment, document.getElementById(`logged-hits-tbody`).firstChild);
+    document
+      .getElementById(`include-list-hits-tbody`)
+      .insertBefore(includedFragment, document.getElementById(`include-list-hits-tbody`).firstChild);
 
     if (sound && storage.hitFinder[`alert-new-sound`] !== `none`) {
-      const audio = new window.Audio()
-      audio.src = `/media/audio/${storage.hitFinder[`alert-new-sound`]}.ogg`
-      audio.play()
+      const audio = new window.Audio();
+      audio.src = `/media/audio/${storage.hitFinder[`alert-new-sound`]}.ogg`;
+      audio.play();
     }
 
-    document.getElementById(`hits-found`).textContent = `Found: ${json.num_results} | Blocked: ${blocked} | ${new Date().toLocaleTimeString()}`
-    document.getElementById(`hits-logged`).textContent = document.getElementById(`logged-hits-tbody`).children.length
+    document.getElementById(`hits-found`).textContent = `Found: ${
+      json.num_results
+    } | Blocked: ${blocked} | ${new Date().toLocaleTimeString()}`;
+    document.getElementById(`hits-logged`).textContent = document.getElementById(`logged-hits-tbody`).children.length;
 
-    resolve()
-  })
+    resolve();
+  });
 }
 
-function minimumAvailable () {
-  const [hit] = arguments
+function minimumAvailable() {
+  const [hit] = arguments;
 
   if (hit.assignable_hits_count < Number(storage.hitFinder[`filter-min-available`])) {
-    return true
+    return true;
   }
 
-  return false
+  return false;
 }
 
-function minimumRequesterRating () {
-  const [hit] = arguments
+function minimumRequesterRating() {
+  const [hit] = arguments;
 
-  const ratingAverage = requesterRatingAverage(hit.requester_id)
+  const ratingAverage = requesterRatingAverage(hit.requester_id);
 
   if (ratingAverage > 0 && ratingAverage < Number(storage.hitFinder[`filter-min-requester-rating`])) {
-    return true
+    return true;
   }
 
-  return false
+  return false;
 }
 
-function blockListed (hit) {
+function blockListed(hit) {
   for (const match in storage.blockList) {
-    const bl = storage.blockList[match]
+    const bl = storage.blockList[match];
     if (bl.strict) {
-      const compared = strictCompare(match, [hit.hit_set_id, hit.requester_id, hit.requester_name, hit.title])
+      const compared = strictCompare(match, [hit.hit_set_id, hit.requester_id, hit.requester_name, hit.title]);
       if (compared === true) {
-        return true
+        return true;
       }
     } else {
-      const compared = looseCompare(match, [hit.hit_set_id, hit.requester_id, hit.requester_name, hit.title])
+      const compared = looseCompare(match, [hit.hit_set_id, hit.requester_id, hit.requester_name, hit.title]);
       if (compared === true) {
-        return true
+        return true;
       }
     }
   }
-  return false
+  return false;
 }
 
-function includeListed (hit) {
+function includeListed(hit) {
   for (const match in storage.includeList) {
-    const il = storage.includeList[match]
+    const il = storage.includeList[match];
     if (il.strict) {
-      const compared = strictCompare(match, [hit.hit_set_id, hit.requester_id, hit.requester_name, hit.title])
+      const compared = strictCompare(match, [hit.hit_set_id, hit.requester_id, hit.requester_name, hit.title]);
       if (compared === true) {
-        return il
+        return il;
       }
     } else {
-      const compared = looseCompare(match, [hit.hit_set_id, hit.requester_id, hit.requester_name, hit.title])
+      const compared = looseCompare(match, [hit.hit_set_id, hit.requester_id, hit.requester_name, hit.title]);
       if (compared === true) {
-        return il
+        return il;
       }
     }
   }
-  return false
+  return false;
 }
 
-function includedAlert (il, hit) {
-  const alerted = includeAlerted.includes(hit.hit_set_id)
-  const pushbulleted = includePushbulleted.includes(hit.hit_set_id)
+function includedAlert(il, hit) {
+  const alerted = includeAlerted.includes(hit.hit_set_id);
+  const pushbulleted = includePushbulleted.includes(hit.hit_set_id);
 
   if (alerted) {
-    return
+    return;
   }
 
   if (alarm && il.alarm === true) {
-    alarmSound()
+    alarmSound();
   }
 
   if (il.sound === true) {
     if (storage.hitFinder[`alert-include-sound`] === `voice`) {
-      window.textToSpeech(`Include list match found! ${il.name}`, `Google US English`)
+      window.textToSpeech(`Include list match found! ${il.name}`, `Google US English`);
     } else {
-      const audio = new window.Audio()
-      audio.src = `/media/audio/${storage.hitFinder[`alert-include-sound`]}.ogg`
-      audio.play()
+      const audio = new window.Audio();
+      audio.src = `/media/audio/${storage.hitFinder[`alert-include-sound`]}.ogg`;
+      audio.play();
     }
   }
 
@@ -417,10 +441,10 @@ function includedAlert (il, hit) {
           { title: `Title`, message: hit.title },
           { title: `Requester`, message: hit.requester_name },
           { title: `Reward`, message: toMoneyString(hit.monetary_reward.amount_in_dollars) },
-          { title: `Available`, message: hit.assignable_hits_count.toString() }
+          { title: `Available`, message: hit.assignable_hits_count.toString() },
         ],
-        ...(window.chrome ? { buttons: [{ title: `Preview` }, { title: `Accept` }] } : null)
-      })
+        ...(window.chrome ? { buttons: [{ title: `Preview` }, { title: `Accept` }] } : null),
+      });
     } catch (error) {
       chrome.notifications.create(hit.hit_set_id, {
         type: `list`,
@@ -431,9 +455,9 @@ function includedAlert (il, hit) {
           { title: `Title`, message: hit.title },
           { title: `Requester`, message: hit.requester_name },
           { title: `Reward`, message: toMoneyString(hit.monetary_reward.amount_in_dollars) },
-          { title: `Available`, message: hit.assignable_hits_count.toString() }
+          { title: `Available`, message: hit.assignable_hits_count.toString() },
         ],
-      })
+      });
     }
   }
 
@@ -442,887 +466,659 @@ function includedAlert (il, hit) {
       type: `POST`,
       url: `https://api.pushbullet.com/v2/pushes`,
       headers: {
-        Authorization: `Bearer ${storage.hitFinder[`alert-pushbullet-token`]}`
+        Authorization: `Bearer ${storage.hitFinder[`alert-pushbullet-token`]}`,
       },
       data: {
         type: `note`,
         title: `Include list match found!`,
-        body: `Title: ${hit.title}\nReq: ${hit.requester_name}\nReward: ${toMoneyString(hit.monetary_reward.amount_in_dollars)}\nAvail: ${hit.assignable_hits_count}`
-      }
-    })
+        body: `Title: ${hit.title}\nReq: ${hit.requester_name}\nReward: ${toMoneyString(
+          hit.monetary_reward.amount_in_dollars,
+        )}\nAvail: ${hit.assignable_hits_count}`,
+      },
+    });
 
-    includePushbulleted.unshift(hit.hit_set_id)
+    includePushbulleted.unshift(hit.hit_set_id);
 
     setTimeout(() => {
-      includePushbulleted.pop()
-    }, 900000)
+      includePushbulleted.pop();
+    }, 900000);
   }
 
-  includeAlerted.unshift(hit.hit_set_id)
+  includeAlerted.unshift(hit.hit_set_id);
 
   setTimeout(() => {
-    includeAlerted.pop()
-  }, Number(storage.hitFinder[`alert-include-delay`]) * 60000)
+    includeAlerted.pop();
+  }, Number(storage.hitFinder[`alert-include-delay`]) * 60000);
 }
 
-function strictCompare (string, array) {
+function strictCompare(string, array) {
   for (const value of array) {
     if (string === value) {
-      return true
+      return true;
     }
   }
-  return false
+  return false;
 }
 
-function looseCompare (string, array) {
+function looseCompare(string, array) {
   for (const value of array) {
     if (value.toLowerCase().indexOf(string.toLowerCase()) !== -1) {
-      return true
+      return true;
     }
   }
-  return false
+  return false;
 }
 
-function alarmSound () {
+function alarmSound() {
   if (!alarm || alarmRunning) {
-    return
+    return;
   }
 
-  alarmAudio = new window.Audio()
-  alarmAudio.src = `/media/audio/alarm.ogg`
-  alarmAudio.loop = true
-  alarmAudio.play()
+  alarmAudio = new window.Audio();
+  alarmAudio.src = `/media/audio/alarm.ogg`;
+  alarmAudio.loop = true;
+  alarmAudio.play();
 
-  alarmRunning = true
+  alarmRunning = true;
 }
 
-function blockListUpdate () {
-  const sorted = Object.keys(storage.blockList).map((currentValue) => {
-    storage.blockList[currentValue].term = currentValue
-    return storage.blockList[currentValue]
-  }).sort((a, b) => a.name.localeCompare(b.name, `en`, { numeric: true }))
+function blockListUpdate() {
+  const sorted = Object.keys(storage.blockList)
+    .map((currentValue) => {
+      storage.blockList[currentValue].term = currentValue;
+      return storage.blockList[currentValue];
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, `en`, { numeric: true }));
 
-  const body = document.getElementById(`block-list-modal`).getElementsByClassName(`modal-body`)[0]
+  const body = document.getElementById(`block-list-modal`).getElementsByClassName(`modal-body`)[0];
 
   while (body.firstChild) {
-    body.removeChild(body.firstChild)
+    body.removeChild(body.firstChild);
   }
 
-  body.appendChild((() => {
-    const fragment = document.createDocumentFragment()
+  body.appendChild(
+    (() => {
+      const fragment = document.createDocumentFragment();
 
-    for (const bl of sorted) {
-      const button = document.createElement(`button`)
-      button.type = `button`
-      button.className = `btn btn-sm btn-danger ml-1 my-1 bl-btn`
-      button.textContent = bl.name
-      button.dataset.toggle = `modal`
-      button.dataset.target = `#block-list-edit-modal`
-      button.dataset.key = bl.match
-      fragment.appendChild(button)
-    }
+      for (const bl of sorted) {
+        const button = document.createElement(`button`);
+        button.type = `button`;
+        button.className = `btn btn-sm btn-danger ml-1 my-1 bl-btn`;
+        button.textContent = bl.name;
+        button.dataset.toggle = `modal`;
+        button.dataset.target = `#block-list-edit-modal`;
+        button.dataset.key = bl.match;
+        fragment.appendChild(button);
+      }
 
-    return fragment
-  })())
+      return fragment;
+    })(),
+  );
 
   for (const key in finderDB) {
-    const hit = finderDB[key]
+    const hit = finderDB[key];
 
     if (blockListed(hit)) {
-      const recent = document.getElementById(`recent-${hit.hit_set_id}`)
-      const logged = document.getElementById(`logged-${hit.hit_set_id}`)
-      const included = document.getElementById(`included-${hit.hit_set_id}`)
+      const recent = document.getElementById(`recent-${hit.hit_set_id}`);
+      const logged = document.getElementById(`logged-${hit.hit_set_id}`);
+      const included = document.getElementById(`included-${hit.hit_set_id}`);
 
-      if (recent) recent.parentNode.removeChild(recent)
-      if (logged) logged.parentNode.removeChild(logged)
-      if (included) included.parentNode.removeChild(included)
+      if (recent) recent.parentNode.removeChild(recent);
+      if (logged) logged.parentNode.removeChild(logged);
+      if (included) included.parentNode.removeChild(included);
 
-      delete finderDB[key]
+      delete finderDB[key];
     }
   }
 
   chrome.storage.local.set({
-    blockList: storage.blockList
-  })
+    blockList: storage.blockList,
+  });
 }
 
-function includeListUpdate () {
-  const sorted = Object.keys(storage.includeList).map((currentValue) => {
-    storage.includeList[currentValue].match = currentValue
-    return storage.includeList[currentValue]
-  }).sort((a, b) => a.name.localeCompare(b.name, `en`, { numeric: true }))
+function includeListUpdate() {
+  const sorted = Object.keys(storage.includeList)
+    .map((currentValue) => {
+      storage.includeList[currentValue].match = currentValue;
+      return storage.includeList[currentValue];
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, `en`, { numeric: true }));
 
-  const body = document.getElementById(`include-list-modal`).getElementsByClassName(`modal-body`)[0]
+  const body = document.getElementById(`include-list-modal`).getElementsByClassName(`modal-body`)[0];
 
   while (body.firstChild) {
-    body.removeChild(body.firstChild)
+    body.removeChild(body.firstChild);
   }
 
-  body.appendChild((() => {
-    const fragment = document.createDocumentFragment()
+  body.appendChild(
+    (() => {
+      const fragment = document.createDocumentFragment();
 
-    for (const il of sorted) {
-      const button = document.createElement(`button`)
-      button.type = `button`
-      button.className = `btn btn-sm btn-success ml-1 my-1 il-btn`
-      button.textContent = il.name
-      button.dataset.toggle = `modal`
-      button.dataset.target = `#include-list-edit-modal`
-      button.dataset.key = il.match
-      fragment.appendChild(button)
-    }
+      for (const il of sorted) {
+        const button = document.createElement(`button`);
+        button.type = `button`;
+        button.className = `btn btn-sm btn-success ml-1 my-1 il-btn`;
+        button.textContent = il.name;
+        button.dataset.toggle = `modal`;
+        button.dataset.target = `#include-list-edit-modal`;
+        button.dataset.key = il.match;
+        fragment.appendChild(button);
+      }
 
-    return fragment
-  })())
+      return fragment;
+    })(),
+  );
 
   for (const key in finderDB) {
-    const hit = finderDB[key]
+    const hit = finderDB[key];
 
-    const element = document.getElementById(`logged-${hit.hit_set_id}`)
+    const element = document.getElementById(`logged-${hit.hit_set_id}`);
 
     if (element) {
       if (includeListed(hit)) {
-        element.classList.add(`included`)
+        element.classList.add(`included`);
       } else {
-        element.classList.remove(`included`)
+        element.classList.remove(`included`);
       }
     }
   }
 
   chrome.storage.local.set({
-    includeList: storage.includeList
-  })
+    includeList: storage.includeList,
+  });
 }
 
 function requesterHourlyTVClass(hourly) {
   if (hourly == null) return `text-muted`;
 
-  if (hourly > 10.50) return `text-success`;
+  if (hourly > 10.5) return `text-success`;
   if (hourly > 7.25) return `text-warning`;
   if (hourly > 0.0) return `text-danger`;
   return `text-muted`;
 }
 
-chrome.storage.local.get(`options`, keys => {
+chrome.storage.local.get(`options`, (keys) => {
   const { options } = keys;
 
-  if (options[`turkerviewApiKey`].length == 40 || options[`disable-tv-announcement`] || !options[`requesterReviews`] || !options[`requesterReviewsTurkerview`]) 
+  if (
+    options.turkerviewApiKey.length == 40 ||
+    options[`disable-tv-announcement`] ||
+    !options.requesterReviews ||
+    !options.requesterReviewsTurkerview
+  )
     document.getElementById(`tv-finder-announce`).style.display = `none`;
 
-  document.getElementById(`view-api-save`).addEventListener(`click`, function(){
-    let temp_api_key = document.getElementById(`view-api-key`).value;
-    
-    if (temp_api_key.length == 40){
-      options[`turkerviewApiKey`] = temp_api_key;
+  document.getElementById(`view-api-save`).addEventListener(`click`, function() {
+    const temp_api_key = document.getElementById(`view-api-key`).value;
+
+    if (temp_api_key.length == 40) {
+      options.turkerviewApiKey = temp_api_key;
       chrome.storage.local.set({ options });
       alert(`Awesome, we saved your API key for future use!`);
       window.location.reload();
-    } else{
+    } else {
       alert(`We cannot save the provided key as it isn't valid.`);
     }
-    
   });
 
-  document.getElementById(`disable-finder-tv-announcement`).addEventListener(`click`, function(){
-    if (!confirm(`Are you sure you want to hide this reminder? HIT Finder will be unable to retrieve TV data without an API Key after February 7th`)) return;
+  document.getElementById(`disable-finder-tv-announcement`).addEventListener(`click`, function() {
+    if (
+      !confirm(
+        `Are you sure you want to hide this reminder? HIT Finder will be unable to retrieve TV data without an API Key after February 7th`,
+      )
+    )
+      return;
     options[`disable-tv-announcement`] = true;
-    chrome.storage.local.set({options});
-    $('#turkerview-finder-announcement-modal').modal('toggle');
-    document.getElementById(`tv-finder-announce`).style.display = `none`
-  })
+    chrome.storage.local.set({ options });
+    $(`#turkerview-finder-announcement-modal`).modal(`toggle`);
+    document.getElementById(`tv-finder-announce`).style.display = `none`;
+  });
+});
 
-})
-
-
-function timeNow () {
-  const date = new Date()
-  let hours = date.getHours()
-  let minutes = date.getMinutes()
-  let ampm = hours >= 12 ? `p` : `a`
-  hours = hours % 12
-  hours = hours || 12
-  minutes = minutes < 10 ? `0` + minutes : minutes
-  return `${hours}:${minutes}${ampm}`
+function timeNow() {
+  const date = new Date();
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  const ampm = hours >= 12 ? `p` : `a`;
+  hours %= 12;
+  hours = hours || 12;
+  minutes = minutes < 10 ? `0${minutes}` : minutes;
+  return `${hours}:${minutes}${ampm}`;
 }
 
-function toggleColumns () {
-  const [element, type] = arguments
+function toggleColumns() {
+  const [element, type] = arguments;
 
-  element.children[1].style.display = storage.hitFinder[`display-${type}-column-time`] ? `` : `none`
-  element.children[2].style.display = storage.hitFinder[`display-${type}-column-requester`] ? `` : `none`
-  element.children[3].style.display = storage.hitFinder[`display-${type}-column-title`] ? `` : `none`
-  element.children[4].style.display = storage.hitFinder[`display-${type}-column-available`] ? `` : `none`
-  element.children[5].style.display = storage.hitFinder[`display-${type}-column-reward`] ? `` : `none`
-  element.children[6].style.display = storage.hitFinder[`display-${type}-column-masters`] ? `` : `none`
+  element.children[1].style.display = storage.hitFinder[`display-${type}-column-time`] ? `` : `none`;
+  element.children[2].style.display = storage.hitFinder[`display-${type}-column-requester`] ? `` : `none`;
+  element.children[3].style.display = storage.hitFinder[`display-${type}-column-title`] ? `` : `none`;
+  element.children[4].style.display = storage.hitFinder[`display-${type}-column-available`] ? `` : `none`;
+  element.children[5].style.display = storage.hitFinder[`display-${type}-column-reward`] ? `` : `none`;
+  element.children[6].style.display = storage.hitFinder[`display-${type}-column-masters`] ? `` : `none`;
 
-  return element
+  return element;
 }
 
-function removeChildren () {
-  const [element] = arguments
+function removeChildren() {
+  const [element] = arguments;
 
   while (element.firstChild) {
-    element.removeChild(element.firstChild)
+    element.removeChild(element.firstChild);
   }
 }
 
-function toMoneyString () {
-  const [string] = arguments
-  return `$${Number(string).toFixed(2).toLocaleString(`en-US`, { minimumFractionDigits: 2 })}`
+function toMoneyString() {
+  const [string] = arguments;
+  return `$${Number(string)
+    .toFixed(2)
+    .toLocaleString(`en-US`, { minimumFractionDigits: 2 })}`;
 }
 
-function toDurationString () {
-  const [string] = arguments
+function toDurationString() {
+  const [string] = arguments;
 
-  let seconds = string
-  let minute = Math.floor(seconds / 60)
-  seconds = seconds % 60
-  let hour = Math.floor(minute / 60)
-  minute = minute % 60
-  let day = Math.floor(hour / 24)
-  hour = hour % 24
+  let seconds = string;
+  let minute = Math.floor(seconds / 60);
+  seconds %= 60;
+  let hour = Math.floor(minute / 60);
+  minute %= 60;
+  const day = Math.floor(hour / 24);
+  hour %= 24;
 
-  let durationString = ``
+  let durationString = ``;
 
-  if (day > 0) durationString += `${day} day${day > 1 ? `s` : ``} `
-  if (hour > 0) durationString += `${hour} hour${hour > 1 ? `s` : ``} `
-  if (minute > 0) durationString += `${minute} minute${minute > 1 ? `s` : ``}`
+  if (day > 0) durationString += `${day} day${day > 1 ? `s` : ``} `;
+  if (hour > 0) durationString += `${hour} hour${hour > 1 ? `s` : ``} `;
+  if (minute > 0) durationString += `${minute} minute${minute > 1 ? `s` : ``}`;
 
-  return durationString.trim()
+  return durationString.trim();
 }
 
 chrome.notifications.onButtonClicked.addListener((id, btn) => {
   if (btn === 0) {
-    window.open(`https://worker.mturk.com/projects/${id}/tasks`)
+    window.open(`https://worker.mturk.com/projects/${id}/tasks`);
   }
   if (btn === 1) {
-    window.open(`https://worker.mturk.com/projects/${id}/tasks/accept_random`)
+    window.open(`https://worker.mturk.com/projects/${id}/tasks/accept_random`);
   }
 
-  chrome.notifications.clear(id)
-})
+  chrome.notifications.clear(id);
+});
 
-function getReviewsDB() {
-  return new Promise(resolve => {
-    const open = indexedDB.open(`requesterReviewsDB`, 1);
-
-    open.onsuccess = event => {
-      resolve(event.target.result);
-    };
-
-    open.onupgradeneeded = event => {
-      const db = event.target.result;
-      db.createObjectStore(`requester`, { keyPath: `id` });
-      resolve(db);
-    };
-  });
-}
-
-function getReviews(rids) {
-  return new Promise(async resolve => {
-    const db = await getReviewsDB();
-    const transaction = db.transaction([`requester`], `readonly`);
-    const objectStore = transaction.objectStore(`requester`);
-
-    const reviews = {};
-
-    rids.forEach(rid => {
-      objectStore.get(rid).onsuccess = event => {
-        reviews[rid] = event.target.result || { id: rid, time: 0 };
-      };
-    });
-
-    transaction.oncomplete = () => resolve(reviews);
-  });
-}
-
-async function saveReviews(reviews) {
-  const db = await getReviewsDB();
-  const transaction = db.transaction([`requester`], `readwrite`);
-  const objectStore = transaction.objectStore(`requester`);
-  const time = new Date().getTime();
-
-  Object.keys(reviews).forEach(rid => {
-    const review = reviews[rid];
-    review.id = rid;
-    review.time = time;
-    objectStore.put(review);
-  });
-}
-
-async function clearTurkerViewCache(){
-  const db = await getReviewsDB();
-  const transaction = db.transaction([`requester`], `readwrite`);
-  const objectStore = transaction.objectStore(`requester`);
-
-  var request = objectStore.getAll();
-
-  transaction.oncomplete = () => {
-    const clear_transaction = db.transaction([`requester`], `readwrite`);
-    const clear_objectStore = clear_transaction.objectStore(`requester`);
-    request.result.forEach(rid => {
-      if (rid.turkerview == null) return;
-      rid.turkerview = null;
-      clear_objectStore.put(rid);
-    });
-  }
-
-}
-
-function updateCheck(reviews) {
-  return new Promise(async resolve => {
-    const time = new Date().getTime() - 1800000;
-    //const time = new Date().getTime() - 10000; //time-testing
-    const update = Object.keys(reviews).some(rid => reviews[rid].time < time);
-    resolve(update);
-  });
-}
-
-function formatResponse(response) {
-  return new Promise(async resolve => {
-    const json = await response.json();
-
-    if (response.url.includes(`https://api.turkopticon.info/`)) {
-      const formattedTO2 = json.data.reduce((readable, requester) => {
-        const { aggregates } = requester.attributes;
-        const reviews = Object.keys(aggregates).reduce((review, time) => {
-          const {
-            broken,
-            comm,
-            pending,
-            recommend,
-            rejected,
-            reward,
-            tos
-          } = aggregates[time];
-
-          const reformatted = {
-            tos: tos[0],
-            broken: broken[0],
-            rejected: rejected[0],
-            pending:
-              pending > 0 ? `${(pending / 86400).toFixed(2)} days` : null,
-            hourly:
-              reward[1] > 0 ? (reward[0] / reward[1] * 3600).toFixed(2) : null,
-            comm:
-              comm[1] > 0 ? `${Math.round(comm[0] / comm[1] * 100)}%` : null,
-            recommend:
-              recommend[1] > 0
-                ? `${Math.round(recommend[0] / recommend[1] * 100)}%`
-                : null
-          };
-
-          return { ...review, [time]: reformatted };
-        }, {});
-
-        return { ...readable, [requester.id]: reviews };
-      }, {});
-
-      resolve(formattedTO2);
-    } else if (response.url.includes(`turkerview`)){
-      resolve(json.requesters);
-    } else {
-      resolve(json);
-    }
-  });
-}
-
-function fetchReviews(site, url) {
-  return new Promise(async resolve => {
-    const {
-      requesterReviewsTurkerview,
-      requesterReviewsTurkopticon,
-      requesterReviewsTurkopticon2
-    } = await StorageGetKey(`options`);
-    try {
-      if (site == `turkerview` && !requesterReviewsTurkerview) {
-        clearTurkerViewCache();
-        resolve({site, json: null});
-        return;
-      }
-      const response = (site == `turkerview`) ? await FetchTVWithTimeout(url, { headers: ViewHeaders }, 500) : await Fetch(url, undefined, 500)
-      const json = response.ok ? await formatResponse(response) : null;
-
-      if (site == `turkerview` && !response.ok){
-        //We can handle TurkerView API Errors here.
-        if (response.statusText == `invalidUserAuthKey`) clearTurkerViewCache();
-        else if (response.statusText == `dailyLimitExceeded`) clearTurkerViewCache();
-      } 
-
-      resolve({ site, json });
-    } catch (error) {
-      resolve({ site, json: null });
-    }
-  });
-}
-
-function averageReviews(reviews) {
-  return new Promise(async resolve => {
-    const {
-      requesterReviewsTurkerview,
-      requesterReviewsTurkopticon,
-      requesterReviewsTurkopticon2
-    } = await StorageGetKey(`options`);
-
-    const avg = Object.keys(reviews).reduce((obj, rid) => {
-      const review = reviews[rid];
-
-      if (review) {
-        const tv = requesterReviewsTurkerview ? review.turkerview : null;
-        const to = requesterReviewsTurkopticon ? review.turkopticon : null;
-        const to2 = requesterReviewsTurkopticon2 ? review.turkopticon2 : null;
-
-        const toPay = to ? to.attrs.pay : null;
-        const to2Pay = to2 ? to2.all.hourly / 3 : null;
-
-        if (toPay || to2Pay) {
-          const average = [toPay, to2Pay]
-            .filter(pay => pay !== null)
-            .map((pay, i, filtered) => Number(pay) / filtered.length)
-            .reduce((a, b) => a + b);
-          review.average = average;
-        }
-      }
-
-      if (!review.average) review.average = 0;
-
-      return { ...obj, [rid]: review };
-    }, {});
-
-    resolve(avg);
-  });
-}
-
-function updateReviews(reviews) {
-  return new Promise(async resolve => {
-    const rids = Object.keys(reviews);
-
-    const updates = await Promise.all([
-      fetchReviews(
-        `turkerview`,
-        `https://view.turkerview.com/v1/requesters/?requester_ids=${rids}`
-      ),
-      fetchReviews(
-        `turkopticon`,
-        `https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${rids}`
-      ),
-      fetchReviews(
-        `turkopticon2`,
-        `https://api.turkopticon.info/requesters?rids=${rids}`
-      )
-    ]);
-
-    const updated = rids.reduce((obj, rid) => {
-      const review = updates.reduce((o, update) => {
-        const { site, json } = update;
-        const data =
-          (json ? json[rid] : null) ||
-          (reviews[rid] ? reviews[rid][site] : null);
-        return { ...o, [site]: data };
-      }, {});
-
-      return { ...obj, [rid]: review };
-    }, {});
-
-    const averaged = await averageReviews(updated);
-
-    resolve(averaged);
-    saveReviews(averaged);
-  });
-}
-
-async function reviewsForFinder(rids) {
-  const reviews = await getReviews(rids);
-  const needsUpdate = await updateCheck(reviews);
-
-  updateRequesterReviews(needsUpdate ? await updateReviews(reviews) : reviews);
-}
-
-// This seems to never get called, remove?
-function requesterReviewsUpdate (objectReviews, arrayIds) {
-  return new Promise(async (resolve) => {
-    function getReviews (stringSite, stringURL) {
-      return new Promise(async (resolve) => {
-        try {
-          const response = await window.fetch(stringURL)
-
-          if (response.status === 200) {
-            const json = await response.json()
-            resolve([stringSite, json.data ? Object.assign(...json.data.map((item) => ({
-              [item.id]: item.attributes.aggregates
-            }))) : json])
-          } else {
-            resolve()
-          }
-        } catch (error) {
-          resolve()
-        }
-      })
+function reviewsForFinder(rids) {
+  chrome.storage.local.get([`options`], ({ options }) => {
+    if (options.turkopticon) {
+      handleTurkerview(rids);
     }
 
-    const getReviewsAll = await Promise.all([
-      getTVReviews(`https://view.turkerview.com/v1/requesters/?requester_ids=${arrayIds}&from=mts`),
-      getReviews(`turkopticon`, `https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${arrayIds}`),
-      getReviews(`turkopticon2`, `https://api.turkopticon.info/requesters?rids=${arrayIds}&fields[requesters]=aggregates`)
-    ])
-
-    for (const item of getReviewsAll) {
-      if (item && item.length > 0) {
-        const site = item[0]
-        const reviews = item[1]
-
-        for (const key in reviews) {
-          objectReviews[key][site] = reviews[key]
-        }
-      }
+    if (options.turkerview) {
+      handleTurkopticon(rids);
     }
+  });
 
-    const time = new Date().getTime()
-    const transaction = requesterReviewsDB.transaction([`requester`], `readwrite`)
-    const objectStore = transaction.objectStore(`requester`)
-
-    for (const key in objectReviews) {
-      const obj = objectReviews[key]
-
-      obj.id = key
-      obj.time = time
-      objectStore.put(obj)
-    }
-
-    resolve(objectReviews)
-  })
+  // updateRequesterReviews(needsUpdate ? await updateReviews(reviews) : reviews);
 }
 
-function requesterRatingTVAverage () {
-  const [requesterId] = arguments
+function requesterRatingTVAverage() {
+  const [requesterId] = arguments;
 
-  const review = reviewsDB[requesterId]
+  const review = reviewsDB[requesterId];
 
   if (review && review.turkerview) {
     return review.turkerview.wages.average.wage;
   }
 
-  return 0
+  return 0;
 }
 
-function requesterRatingAverage () {
-  const [requesterId] = arguments
+function requesterRatingAverage() {
+  const [requesterId] = arguments;
 
-  const review = reviewsDB[requesterId]
+  const review = reviewsDB[requesterId];
 
   if (review) {
     return review.average;
   }
 
-  return 0
+  return 0;
 }
 
-async function requesterReviewGetTVClass () {
-  const [requesterId] = arguments
+async function requesterReviewGetTVClass() {
+  const [requesterId] = arguments;
 
-  const average = requesterRatingTVAverage(requesterId)
-  return (average > 10.50 ? `success` : average > 7.25 ? `warning` : average > 0 ? `danger` : `default`)
+  const average = requesterRatingTVAverage(requesterId);
+  return average > 10.5 ? `success` : average > 7.25 ? `warning` : average > 0 ? `danger` : `default`;
 }
 
-async function requesterReviewGetClass () {
-  const [requesterId] = arguments
+async function requesterReviewGetClass() {
+  const [requesterId] = arguments;
 
-  const average = requesterRatingAverage(requesterId)
-  return (average > 3.75 ? `success` : average > 2.25 ? `warning` : average > 0 ? `danger` : `default`)
+  const average = requesterRatingAverage(requesterId);
+  return average > 3.75 ? `success` : average > 2.25 ? `warning` : average > 0 ? `danger` : `default`;
 }
 
-async function updateRequesterReviews (reviews) {
+async function updateRequesterReviews(reviews) {
   for (const key in reviews) {
-    reviewsDB[key] = reviews[key]
+    reviewsDB[key] = reviews[key];
 
-    const reviewClass = await requesterReviewGetClass(key)
-    const reviewTVClass = await requesterReviewGetTVClass(key)
+    const reviewClass = await requesterReviewGetClass(key);
+    const reviewTVClass = await requesterReviewGetTVClass(key);
 
     if (reviewClass) {
       for (const element of document.getElementsByClassName(`btn-${key} btn-turkopticon`)) {
-        element.classList.remove(`btn-success`, `btn-warning`, `btn-danger`)
-        element.classList.add(`btn-${reviewClass}`)
+        element.classList.remove(`btn-success`, `btn-warning`, `btn-danger`);
+        element.classList.add(`btn-${reviewClass}`);
       }
       for (const element of document.getElementsByClassName(`table-${key}`)) {
-        element.classList.remove(`table-success`, `table-warning`, `table-danger`)
+        element.classList.remove(`table-success`, `table-warning`, `table-danger`);
         if (storage.hitFinder[`display-colored-rows`]) {
-          element.classList.add(`table-${reviewClass}`)
+          element.classList.add(`table-${reviewClass}`);
         }
       }
     }
 
-    if (reviewTVClass){
+    if (reviewTVClass) {
       for (const element of document.getElementsByClassName(`btn-${key} btn-turkerview`)) {
-        element.classList.remove(`btn-succes`, `btn-warning`, `btn-danger`)
-        element.classList.add(`btn-${reviewTVClass}`)
+        element.classList.remove(`btn-succes`, `btn-warning`, `btn-danger`);
+        element.classList.add(`btn-${reviewTVClass}`);
       }
     }
   }
 }
 
 let hitTrackerDB = (() => {
-  const open = window.indexedDB.open(`hitTrackerDB`, 1)
+  const open = window.indexedDB.open(`hitTrackerDB`, 1);
 
   open.onsuccess = (event) => {
-    hitTrackerDB = event.target.result
-  }
-})()
+    hitTrackerDB = event.target.result;
+  };
+})();
 
-function hitTrackerMatch () {
-  const [name, value] = arguments
+function hitTrackerMatch() {
+  const [name, value] = arguments;
 
-  let resolveValue
+  let resolveValue;
 
   return new Promise((resolve) => {
-    const transaction = hitTrackerDB.transaction([`hit`], `readonly`)
-    const objectStore = transaction.objectStore(`hit`)
-    const myIndex = objectStore.index(name)
-    const myIDBKeyRange = window.IDBKeyRange.only(value)
+    const transaction = hitTrackerDB.transaction([`hit`], `readonly`);
+    const objectStore = transaction.objectStore(`hit`);
+    const myIndex = objectStore.index(name);
+    const myIDBKeyRange = window.IDBKeyRange.only(value);
 
     myIndex.openCursor(myIDBKeyRange).onsuccess = (event) => {
-      const cursor = event.target.result
+      const cursor = event.target.result;
 
       if (cursor) {
         if (cursor.value.state.match(/Submitted|Approved|Rejected|Paid/)) {
-          resolveValue = true
+          resolveValue = true;
         } else {
-          cursor.continue()
+          cursor.continue();
         }
       } else {
-        resolveValue = false
+        resolveValue = false;
       }
-    }
+    };
 
     transaction.oncomplete = (event) => {
-      resolve(resolveValue)
-    }
-  })
+      resolve(resolveValue);
+    };
+  });
 }
 
-function hitTrackerMatchObject () {
-  const [name, value] = arguments
+function hitTrackerMatchObject() {
+  const [name, value] = arguments;
 
-  let resolveValue
+  let resolveValue;
 
   return new Promise(async (resolve) => {
-    const match = await hitTrackerMatch(name, value)
-    resolveValue = match ? { color: `success`, icon: `check` } : { color: `secondary`, icon: `minus` }
-    resolve(resolveValue)
-  })
+    const match = await hitTrackerMatch(name, value);
+    resolveValue = match ? { color: `success`, icon: `check` } : { color: `secondary`, icon: `minus` };
+    resolve(resolveValue);
+  });
 }
 
-function saveToFileJSON () {
-  const [name, json] = arguments
+function saveToFileJSON() {
+  const [name, json] = arguments;
 
-  const today = new Date()
-  const month = today.getMonth() + 1
-  const day = today.getDate()
-  const year = today.getFullYear()
-  const date = `${year}${month < 10 ? `0` : ``}${month}${day < 10 ? `0` : ``}${day}`
+  const today = new Date();
+  const month = today.getMonth() + 1;
+  const day = today.getDate();
+  const year = today.getFullYear();
+  const date = `${year}${month < 10 ? `0` : ``}${month}${day < 10 ? `0` : ``}${day}`;
 
-  const data = JSON.stringify(json)
+  const data = JSON.stringify(json);
 
-  const exportFile = document.createElement(`a`)
-  exportFile.href = window.URL.createObjectURL(new window.Blob([data], { type: `application/json` }))
-  exportFile.download = `mts-backup-${date}-${name}.json`
+  const exportFile = document.createElement(`a`);
+  exportFile.href = window.URL.createObjectURL(new window.Blob([data], { type: `application/json` }));
+  exportFile.download = `mts-backup-${date}-${name}.json`;
 
-  document.body.appendChild(exportFile)
-  exportFile.click()
-  document.body.removeChild(exportFile)
+  document.body.appendChild(exportFile);
+  exportFile.click();
+  document.body.removeChild(exportFile);
 }
 
-function loadFromFileJSON () {
-  const [file] = arguments
+function loadFromFileJSON() {
+  const [file] = arguments;
 
   return new Promise((resolve) => {
-    const reader = new window.FileReader()
-    reader.readAsText(file)
+    const reader = new window.FileReader();
+    reader.readAsText(file);
 
     reader.onload = (event) => {
-      const json = JSON.parse(event.target.result)
-      resolve(json)
-    }
-  })
+      const json = JSON.parse(event.target.result);
+      resolve(json);
+    };
+  });
 }
 
 $(`[data-toggle="tooltip"]`).tooltip({
   delay: {
-    show: 500
-  }
-})
+    show: 500,
+  },
+});
 
 $(`#block-list-add-modal`).on(`show.bs.modal`, (event) => {
-  const name = event.relatedTarget.dataset.name
-  const match = event.relatedTarget.dataset.match
+  const name = event.relatedTarget.dataset.name;
+  const match = event.relatedTarget.dataset.match;
 
-  document.getElementById(`block-list-add-name`).value = name || ``
-  document.getElementById(`block-list-add-match`).value = match || ``
-  document.getElementById(`block-list-add-strict`).checked = true
-})
+  document.getElementById(`block-list-add-name`).value = name || ``;
+  document.getElementById(`block-list-add-match`).value = match || ``;
+  document.getElementById(`block-list-add-strict`).checked = true;
+});
 
 $(`#block-list-edit-modal`).on(`show.bs.modal`, (event) => {
-  const key = event.relatedTarget.dataset.key
-  const item = storage.blockList[key]
+  const key = event.relatedTarget.dataset.key;
+  const item = storage.blockList[key];
 
-  document.getElementById(`block-list-edit-name`).value = item.name
-  document.getElementById(`block-list-edit-match`).value = item.match
-  document.getElementById(`block-list-edit-strict`).checked = item.strict
+  document.getElementById(`block-list-edit-name`).value = item.name;
+  document.getElementById(`block-list-edit-match`).value = item.match;
+  document.getElementById(`block-list-edit-strict`).checked = item.strict;
 
-  document.getElementById(`block-list-edit-delete`).dataset.key = key
-})
+  document.getElementById(`block-list-edit-delete`).dataset.key = key;
+});
 
 $(`#include-list-add-modal`).on(`show.bs.modal`, (event) => {
-  const name = event.relatedTarget.dataset.name
-  const match = event.relatedTarget.dataset.match
+  const name = event.relatedTarget.dataset.name;
+  const match = event.relatedTarget.dataset.match;
 
-  document.getElementById(`include-list-add-name`).value = name || ``
-  document.getElementById(`include-list-add-match`).value = match || ``
-  document.getElementById(`include-list-add-strict`).checked = true
-  document.getElementById(`include-list-add-sound`).checked = true
-  document.getElementById(`include-list-add-alarm`).checked = false
-  document.getElementById(`include-list-add-notification`).checked = true
-  document.getElementById(`include-list-add-pushbullet`).checked = false
-})
+  document.getElementById(`include-list-add-name`).value = name || ``;
+  document.getElementById(`include-list-add-match`).value = match || ``;
+  document.getElementById(`include-list-add-strict`).checked = true;
+  document.getElementById(`include-list-add-sound`).checked = true;
+  document.getElementById(`include-list-add-alarm`).checked = false;
+  document.getElementById(`include-list-add-notification`).checked = true;
+  document.getElementById(`include-list-add-pushbullet`).checked = false;
+});
 
 $(`#include-list-edit-modal`).on(`show.bs.modal`, (event) => {
-  const key = event.relatedTarget.dataset.key
-  const item = storage.includeList[key]
+  const key = event.relatedTarget.dataset.key;
+  const item = storage.includeList[key];
 
-  document.getElementById(`include-list-edit-name`).value = item.name
-  document.getElementById(`include-list-edit-match`).value = item.match
-  document.getElementById(`include-list-edit-strict`).checked = item.strict
-  document.getElementById(`include-list-edit-sound`).checked = item.sound
-  document.getElementById(`include-list-edit-alarm`).checked = item.alarm
-  document.getElementById(`include-list-edit-notification`).checked = item.notification
-  document.getElementById(`include-list-edit-pushbullet`).checked = item.pushbullet
+  document.getElementById(`include-list-edit-name`).value = item.name;
+  document.getElementById(`include-list-edit-match`).value = item.match;
+  document.getElementById(`include-list-edit-strict`).checked = item.strict;
+  document.getElementById(`include-list-edit-sound`).checked = item.sound;
+  document.getElementById(`include-list-edit-alarm`).checked = item.alarm;
+  document.getElementById(`include-list-edit-notification`).checked = item.notification;
+  document.getElementById(`include-list-edit-pushbullet`).checked = item.pushbullet;
 
-  document.getElementById(`include-list-edit-delete`).dataset.key = key
-})
+  document.getElementById(`include-list-edit-delete`).dataset.key = key;
+});
 
 $(`#settngs-modal`).on(`show.bs.modal`, (event) => {
   for (const prop in storage.hitFinder) {
-    document.getElementById(prop)[typeof (storage.hitFinder[prop]) === `boolean` ? `checked` : `value`] = storage.hitFinder[prop]
+    document.getElementById(prop)[typeof storage.hitFinder[prop] === `boolean` ? `checked` : `value`] =
+      storage.hitFinder[prop];
   }
-})
+});
 
 $(`#hit-info-modal`).on(`show.bs.modal`, (event) => {
-  const key = event.relatedTarget.dataset.key
-  const hit = finderDB[key]
+  const key = event.relatedTarget.dataset.key;
+  const hit = finderDB[key];
 
-  document.getElementById(`hit-info-title`).textContent = hit.title
-  document.getElementById(`hit-info-requester`).textContent = `${hit.requester_name} [${hit.requester_id}]`
-  document.getElementById(`hit-info-reward`).textContent = toMoneyString(hit.monetary_reward.amount_in_dollars)
-  document.getElementById(`hit-info-duration`).textContent = toDurationString(hit.assignment_duration_in_seconds)
-  document.getElementById(`hit-info-available`).textContent = hit.assignable_hits_count
-  document.getElementById(`hit-info-description`).textContent = hit.description
-  document.getElementById(`hit-info-requirements`).textContent = hit.project_requirements.map((o) => `${o.qualification_type.name} ${o.comparator} ${o.qualification_values.map(v => v).join(`, `)}`.trim()).join(`; `) || `None`
+  document.getElementById(`hit-info-title`).textContent = hit.title;
+  document.getElementById(`hit-info-requester`).textContent = `${hit.requester_name} [${hit.requester_id}]`;
+  document.getElementById(`hit-info-reward`).textContent = toMoneyString(hit.monetary_reward.amount_in_dollars);
+  document.getElementById(`hit-info-duration`).textContent = toDurationString(hit.assignment_duration_in_seconds);
+  document.getElementById(`hit-info-available`).textContent = hit.assignable_hits_count;
+  document.getElementById(`hit-info-description`).textContent = hit.description;
+  document.getElementById(`hit-info-requirements`).textContent =
+    hit.project_requirements
+      .map((o) =>
+        `${o.qualification_type.name} ${o.comparator} ${o.qualification_values.map((v) => v).join(`, `)}`.trim(),
+      )
+      .join(`; `) || `None`;
 
-  document.getElementById(`hit-info-block-requester`).dataset.key = key
-  document.getElementById(`hit-info-block-requester`).dataset.name = hit.requester_name
-  document.getElementById(`hit-info-block-requester`).dataset.match = hit.requester_id
+  document.getElementById(`hit-info-block-requester`).dataset.key = key;
+  document.getElementById(`hit-info-block-requester`).dataset.name = hit.requester_name;
+  document.getElementById(`hit-info-block-requester`).dataset.match = hit.requester_id;
 
-  document.getElementById(`hit-info-block-hit`).dataset.key = key
-  document.getElementById(`hit-info-block-hit`).dataset.name = hit.title
-  document.getElementById(`hit-info-block-hit`).dataset.match = hit.hit_set_id
+  document.getElementById(`hit-info-block-hit`).dataset.key = key;
+  document.getElementById(`hit-info-block-hit`).dataset.name = hit.title;
+  document.getElementById(`hit-info-block-hit`).dataset.match = hit.hit_set_id;
 
-  document.getElementById(`hit-info-include-requester`).dataset.key = key
-  document.getElementById(`hit-info-include-requester`).dataset.name = hit.requester_name
-  document.getElementById(`hit-info-include-requester`).dataset.match = hit.requester_id
+  document.getElementById(`hit-info-include-requester`).dataset.key = key;
+  document.getElementById(`hit-info-include-requester`).dataset.name = hit.requester_name;
+  document.getElementById(`hit-info-include-requester`).dataset.match = hit.requester_id;
 
-  document.getElementById(`hit-info-include-hit`).dataset.key = key
-  document.getElementById(`hit-info-include-hit`).dataset.name = hit.title
-  document.getElementById(`hit-info-include-hit`).dataset.match = hit.hit_set_id
-})
+  document.getElementById(`hit-info-include-hit`).dataset.key = key;
+  document.getElementById(`hit-info-include-hit`).dataset.name = hit.title;
+  document.getElementById(`hit-info-include-hit`).dataset.match = hit.hit_set_id;
+});
 
 $(`#hit-sharer-modal`).on(`show.bs.modal`, (event) => {
-  const key = event.relatedTarget.dataset.key
+  const key = event.relatedTarget.dataset.key;
 
   for (const element of event.target.getElementsByClassName(`hit-sharer`)) {
-    element.dataset.key = key
+    element.dataset.key = key;
   }
-})
+});
 
 $(`#requester-review-modal`).on(`show.bs.modal`, async (event) => {
-  const key = event.relatedTarget.dataset.key
-  const review = reviewsDB[key]
+  const key = event.relatedTarget.dataset.key;
+  const review = reviewsDB[key];
 
-  const tv = review.turkerview
-  const to = review.turkopticon
-  const to2 = review.turkopticon2
+  const tv = review.turkerview;
+  const to = review.turkopticon;
+  const to2 = review.turkopticon2;
 
   const options = await StorageGetKey(`options`);
 
   if (options.requesterReviewsTurkerview) {
     if (tv) {
-      document.getElementById(`review-who`).textContent = tv.requester_name
-      document.getElementById(`review-turkerview-link`).href = `https://turkerview.com/requesters/${key}`
-      document.getElementById(`review-turkerview-link`).innerHTML = `TurkerView (${tv.reviews.toLocaleString()} Reviews)`
-      document.getElementById(`review-turkerview-ratings-hourly`).innerHTML = `<strong class="pull-right text-${tv.wages.average.class}">${toMoneyString(tv.wages.average.wage)}/hr</strong>`
-      document.getElementById(`review-turkerview-ratings-pay`).innerHTML = `<span class="pull-right text-${tv.ratings.pay.class}">${tv.ratings.pay.text} <i class="fa ${tv.ratings.pay.faicon}"></i></span>` || `-`
-      document.getElementById(`review-turkerview-ratings-fast`).innerHTML = `<span class="pull-right text-${tv.ratings.fast.class}">${tv.ratings.fast.text}</span>` || `-`
-      document.getElementById(`review-turkerview-ratings-comm`).innerHTML = `<span class="pull-right text-${tv.ratings.comm.class}">${tv.ratings.comm.text}</span>` || `-`
-      document.getElementById(`review-turkerview-rejections`).innerHTML = tv.rejections === 0 ? '<i class="fa fa-check text-success"></i> No Rejections' : `<i class="fa fa-times text-danger"></i> <a href="https://turkerview.com/requesters/${key}/reviews/rejected/" target="_blank">Rejected Work</a>`
-      document.getElementById(`review-turkerview-reviews`).textContent = tv.reviews.toLocaleString()
-      document.getElementById(`review-turkerview-blocks`).innerHTML = tv.blocks === 0 ? '<i class="fa fa-check text-success"></i> No Blocks' : '<i class="fa fa-times text-danger"></i> Blocks Reported'
+      document.getElementById(`review-who`).textContent = tv.requester_name;
+      document.getElementById(`review-turkerview-link`).href = `https://turkerview.com/requesters/${key}`;
+      document.getElementById(
+        `review-turkerview-link`,
+      ).innerHTML = `TurkerView (${tv.reviews.toLocaleString()} Reviews)`;
+      document.getElementById(`review-turkerview-ratings-hourly`).innerHTML = `<strong class="pull-right text-${
+        tv.wages.average.class
+      }">${toMoneyString(tv.wages.average.wage)}/hr</strong>`;
+      document.getElementById(`review-turkerview-ratings-pay`).innerHTML =
+        `<span class="pull-right text-${tv.ratings.pay.class}">${tv.ratings.pay.text} <i class="fa ${
+          tv.ratings.pay.faicon
+        }"></i></span>` || `-`;
+      document.getElementById(`review-turkerview-ratings-fast`).innerHTML =
+        `<span class="pull-right text-${tv.ratings.fast.class}">${tv.ratings.fast.text}</span>` || `-`;
+      document.getElementById(`review-turkerview-ratings-comm`).innerHTML =
+        `<span class="pull-right text-${tv.ratings.comm.class}">${tv.ratings.comm.text}</span>` || `-`;
+      document.getElementById(`review-turkerview-rejections`).innerHTML =
+        tv.rejections === 0
+          ? `<i class="fa fa-check text-success"></i> No Rejections`
+          : `<i class="fa fa-times text-danger"></i> <a href="https://turkerview.com/requesters/${key}/reviews/rejected/" target="_blank">Rejected Work</a>`;
+      document.getElementById(`review-turkerview-reviews`).textContent = tv.reviews.toLocaleString();
+      document.getElementById(`review-turkerview-blocks`).innerHTML =
+        tv.blocks === 0
+          ? `<i class="fa fa-check text-success"></i> No Blocks`
+          : `<i class="fa fa-times text-danger"></i> Blocks Reported`;
 
-      document.getElementById(`review-turkerview-profile-link`).innerHTML = `<a href="https://turkerview.com/requesters/${key}" target="_blank">Profile <i class="fa fa-external-link"></i></a>`
-      document.getElementById(`review-turkerview-reviews-link`).innerHTML = `<a href="https://turkerview.com/requesters/${key}/reviews" target="_blank">Reviews <i class="fa fa-external-link"></i></a>`
+      document.getElementById(
+        `review-turkerview-profile-link`,
+      ).innerHTML = `<a href="https://turkerview.com/requesters/${key}" target="_blank">Profile <i class="fa fa-external-link"></i></a>`;
+      document.getElementById(
+        `review-turkerview-reviews-link`,
+      ).innerHTML = `<a href="https://turkerview.com/requesters/${key}/reviews" target="_blank">Reviews <i class="fa fa-external-link"></i></a>`;
 
-      document.getElementById(`review-turkerview-review`).style.display = ``
-      document.getElementById(`review-turkerview-no-reviews`).style.display = `none`
+      document.getElementById(`review-turkerview-review`).style.display = ``;
+      document.getElementById(`review-turkerview-no-reviews`).style.display = `none`;
 
-      document.getElementById(`review-turkerview-user-title`).innerHTML = `Your Reviews (${tv.user_reviews.toLocaleString()} Reviews)`
+      document.getElementById(
+        `review-turkerview-user-title`,
+      ).innerHTML = `Your Reviews (${tv.user_reviews.toLocaleString()} Reviews)`;
 
       document.getElementById(`tv-user-div`).innerHTML = `
       <div class="row" style="display: ${tv.user_reviews == 0 ? `none` : ``};">
           <div class="col"><p style="margin-bottom: 0.15rem;" class="text-muted"><strong>Hourly Avg:</strong></p></div>
-          <div class="col"><p style="margin-bottom: 0.15rem;" class="text-muted pull-right"><strong class="${requesterHourlyTVClass(tv.wages.user_average.wage)}">$${tv.wages.user_average.wage}/hr</strong></p></div>
+          <div class="col"><p style="margin-bottom: 0.15rem;" class="text-muted pull-right"><strong class="${requesterHourlyTVClass(
+            tv.wages.user_average.wage,
+          )}">$${tv.wages.user_average.wage}/hr</strong></p></div>
         </div>
-      <span class="text-muted" style="display: ${tv.user_reviews > 0 ? `none` : `block`}; text-align: center; margin-top: 3px;">You don't have any data for this Requester!
+      <span class="text-muted" style="display: ${
+        tv.user_reviews > 0 ? `none` : `block`
+      }; text-align: center; margin-top: 3px;">You don't have any data for this Requester!
         <div style="text-align: center; font-size: 0.714rem;">
           <a class="text-success" href="https://turkerview.com/review.php" target="_blank">How Do I Review on TV?</a>
         </div>
-      </span>`
-
+      </span>`;
     } else {
-      document.getElementById(`review-turkerview-link`).href = `https://turkerview.com/requesters/${key}`
-      document.getElementById(`review-turkerview-link`).innerHTML = `TurkerView`
-      document.getElementById(`review-turkerview-review`).style.display = `none`
-      document.getElementById(`review-turkerview-no-reviews`).style.display = ``
-      document.getElementById(`review-turkerview-user-title`).innerHTML = `Your Reviews`
-      document.getElementById(`tv-user-div`).innerHTML = ``
+      document.getElementById(`review-turkerview-link`).href = `https://turkerview.com/requesters/${key}`;
+      document.getElementById(`review-turkerview-link`).innerHTML = `TurkerView`;
+      document.getElementById(`review-turkerview-review`).style.display = `none`;
+      document.getElementById(`review-turkerview-no-reviews`).style.display = ``;
+      document.getElementById(`review-turkerview-user-title`).innerHTML = `Your Reviews`;
+      document.getElementById(`tv-user-div`).innerHTML = ``;
     }
-    document.getElementById(`review-turkerview`).style.display = ``
+    document.getElementById(`review-turkerview`).style.display = ``;
   } else {
-    document.getElementById(`review-turkerview`).style.display = `none`
+    document.getElementById(`review-turkerview`).style.display = `none`;
   }
 
   if (options.requesterReviewsTurkopticon) {
     if (to) {
-      document.getElementById(`review-turkopticon-link`).href = `https://turkopticon.ucsd.edu/${key}`
-      document.getElementById(`review-turkopticon-attrs-pay`).textContent = `${to.attrs.pay} / 5` || `- / 5`
-      document.getElementById(`review-turkopticon-attrs-fast`).textContent = `${to.attrs.fast} / 5` || `- / 5`
-      document.getElementById(`review-turkopticon-attrs-comm`).textContent = `${to.attrs.comm} / 5` || `- / 5`
-      document.getElementById(`review-turkopticon-attrs-fair`).textContent = `${to.attrs.fair} / 5` || `- / 5`
-      document.getElementById(`review-turkopticon-reviews`).textContent = to.reviews
-      document.getElementById(`review-turkopticon-tos_flags`).textContent = to.tos_flags
+      document.getElementById(`review-turkopticon-link`).href = `https://turkopticon.ucsd.edu/${key}`;
+      document.getElementById(`review-turkopticon-attrs-pay`).textContent = `${to.attrs.pay} / 5` || `- / 5`;
+      document.getElementById(`review-turkopticon-attrs-fast`).textContent = `${to.attrs.fast} / 5` || `- / 5`;
+      document.getElementById(`review-turkopticon-attrs-comm`).textContent = `${to.attrs.comm} / 5` || `- / 5`;
+      document.getElementById(`review-turkopticon-attrs-fair`).textContent = `${to.attrs.fair} / 5` || `- / 5`;
+      document.getElementById(`review-turkopticon-reviews`).textContent = to.reviews;
+      document.getElementById(`review-turkopticon-tos_flags`).textContent = to.tos_flags;
 
-      document.getElementById(`review-turkopticon-review`).style.display = ``
-      document.getElementById(`review-turkopticon-no-reviews`).style.display = `none`
+      document.getElementById(`review-turkopticon-review`).style.display = ``;
+      document.getElementById(`review-turkopticon-no-reviews`).style.display = `none`;
     } else {
-      document.getElementById(`review-turkopticon-review`).style.display = `none`
-      document.getElementById(`review-turkopticon-no-reviews`).style.display = ``
+      document.getElementById(`review-turkopticon-review`).style.display = `none`;
+      document.getElementById(`review-turkopticon-no-reviews`).style.display = ``;
     }
-    document.getElementById(`review-turkopticon`).style.display = ``
+    document.getElementById(`review-turkopticon`).style.display = ``;
   } else {
-    document.getElementById(`review-turkopticon`).style.display = `none`
+    document.getElementById(`review-turkopticon`).style.display = `none`;
   }
 
   if (options.requesterReviewsTurkopticon2) {
     if (to2) {
-      const {all, recent} = to2;
+      const { all, recent } = to2;
 
-      document.getElementById(`review-turkopticon2-link`).href = `https://turkopticon.info/requesters/${key}`
+      document.getElementById(`review-turkopticon2-link`).href = `https://turkopticon.info/requesters/${key}`;
       document.getElementById(`review-turkopticon2-recent-reward`).textContent = recent.hourly;
       document.getElementById(`review-turkopticon2-recent-pending`).textContent = recent.pending;
       document.getElementById(`review-turkopticon2-recent-comm`).textContent = recent.comm;
@@ -1339,276 +1135,275 @@ $(`#requester-review-modal`).on(`show.bs.modal`, async (event) => {
       document.getElementById(`review-turkopticon2-all-tos`).textContent = all.tos;
       document.getElementById(`review-turkopticon2-all-broken`).textContent = all.broken;
 
-      document.getElementById(`review-turkopticon2-review`).style.display = ``
-      document.getElementById(`review-turkopticon2-no-reviews`).style.display = `none`
+      document.getElementById(`review-turkopticon2-review`).style.display = ``;
+      document.getElementById(`review-turkopticon2-no-reviews`).style.display = `none`;
     } else {
-      document.getElementById(`review-turkopticon2-review`).style.display = `none`
-      document.getElementById(`review-turkopticon2-no-reviews`).style.display = ``
+      document.getElementById(`review-turkopticon2-review`).style.display = `none`;
+      document.getElementById(`review-turkopticon2-no-reviews`).style.display = ``;
     }
   } else {
-    document.getElementById(`review-turkopticon2`).style.display = `none`
+    document.getElementById(`review-turkopticon2`).style.display = `none`;
   }
-})
+});
 
 $(document).on(`close.bs.alert`, `#alarm-alert`, (event) => {
   if (alarmAudio) {
-    alarmAudio.pause()
-    alarmAudio.currentTime = 0
+    alarmAudio.pause();
+    alarmAudio.currentTime = 0;
   }
 
-  alarm = false
-  alarmRunning = false
-})
+  alarm = false;
+  alarmRunning = false;
+});
 
-document.getElementById(`find`).addEventListener(`click`, finderToggle)
+document.getElementById(`find`).addEventListener(`click`, finderToggle);
 
 document.getElementById(`speed`).addEventListener(`change`, (event) => {
-  storage.hitFinder.speed = event.target.value
+  storage.hitFinder.speed = event.target.value;
 
   chrome.storage.local.set({
-    finder: storage.hitFinder
-  })
-})
+    finder: storage.hitFinder,
+  });
+});
 
 document.getElementById(`block-list-delete`).addEventListener(`click`, (event) => {
-  const result = window.confirm(`Are you sure you delete your entire Block List?`)
+  const result = window.confirm(`Are you sure you delete your entire Block List?`);
 
   if (result) {
-    storage.blockList = {}
-    blockListUpdate()
+    storage.blockList = {};
+    blockListUpdate();
   }
-})
+});
 
 document.getElementById(`block-list-export`).addEventListener(`click`, (event) => {
-  saveToFileJSON(`block-list`, storage.blockList)
-})
+  saveToFileJSON(`block-list`, storage.blockList);
+});
 
 document.getElementById(`block-list-import`).addEventListener(`change`, async (event) => {
-  const json = await loadFromFileJSON(event.target.files[0])
+  const json = await loadFromFileJSON(event.target.files[0]);
 
   for (const key in json) {
-    const item = json[key]
+    const item = json[key];
 
     if (item.name.length && item.match.length) {
       storage.blockList[key] = {
         name: item.name,
         match: item.match,
-        strict: typeof (item.strict) === `boolean` ? item.strict : true
-      }
+        strict: typeof item.strict === `boolean` ? item.strict : true,
+      };
     }
   }
 
-  blockListUpdate()
-})
+  blockListUpdate();
+});
 
 document.getElementById(`block-list-add-save`).addEventListener(`click`, (event) => {
-  const name = document.getElementById(`block-list-add-name`).value
-  const match = document.getElementById(`block-list-add-match`).value
+  const name = document.getElementById(`block-list-add-name`).value;
+  const match = document.getElementById(`block-list-add-match`).value;
 
   if (name.length && match.length) {
     storage.blockList[match] = {
-      name: name,
-      match: match,
-      strict: document.getElementById(`block-list-add-strict`).checked
-    }
+      name,
+      match,
+      strict: document.getElementById(`block-list-add-strict`).checked,
+    };
 
-    blockListUpdate()
+    blockListUpdate();
   }
-})
+});
 
 document.getElementById(`block-list-edit-save`).addEventListener(`click`, (event) => {
-  const name = document.getElementById(`block-list-edit-name`).value
-  const match = document.getElementById(`block-list-edit-match`).value
+  const name = document.getElementById(`block-list-edit-name`).value;
+  const match = document.getElementById(`block-list-edit-match`).value;
 
   if (name.length && match.length) {
     storage.blockList[match] = {
-      name: name,
-      match: match,
-      strict: document.getElementById(`block-list-edit-strict`).checked
-    }
+      name,
+      match,
+      strict: document.getElementById(`block-list-edit-strict`).checked,
+    };
 
-    blockListUpdate()
+    blockListUpdate();
   }
-})
+});
 
 document.getElementById(`block-list-edit-delete`).addEventListener(`click`, (event) => {
-  const key = event.target.dataset.key
-  delete storage.blockList[key]
-  blockListUpdate()
-})
+  const key = event.target.dataset.key;
+  delete storage.blockList[key];
+  blockListUpdate();
+});
 
 document.getElementById(`include-list-delete`).addEventListener(`click`, (event) => {
-  const result = window.confirm(`Are you sure you delete your entire Include List?`)
+  const result = window.confirm(`Are you sure you delete your entire Include List?`);
 
   if (result) {
-    storage.includeList = {}
-    includeListUpdate()
+    storage.includeList = {};
+    includeListUpdate();
   }
-})
+});
 
 document.getElementById(`include-list-import`).addEventListener(`change`, async (event) => {
-  const json = await loadFromFileJSON(event.target.files[0])
+  const json = await loadFromFileJSON(event.target.files[0]);
 
   for (const key in json) {
-    const item = json[key]
+    const item = json[key];
 
     if (item.name.length && item.match.length) {
       storage.includeList[key] = {
         name: item.name,
         match: item.match,
-        strict: typeof (item.strict) === `boolean` ? item.strict : true,
-        sound: typeof (item.sound) === `boolean` ? item.sound : true,
-        alarm: typeof (item.alarm) === `boolean` ? item.alarm : false,
-        pushbullet: typeof (item.pushbullet) === `boolean` ? item.pushbullet : false,
-        notification: typeof (item.notification) === `boolean` ? item.notification : true
-      }
+        strict: typeof item.strict === `boolean` ? item.strict : true,
+        sound: typeof item.sound === `boolean` ? item.sound : true,
+        alarm: typeof item.alarm === `boolean` ? item.alarm : false,
+        pushbullet: typeof item.pushbullet === `boolean` ? item.pushbullet : false,
+        notification: typeof item.notification === `boolean` ? item.notification : true,
+      };
     }
   }
 
-  includeListUpdate()
-})
+  includeListUpdate();
+});
 
 document.getElementById(`include-list-export`).addEventListener(`click`, (event) => {
-  saveToFileJSON(`include-list`, storage.includeList)
-})
+  saveToFileJSON(`include-list`, storage.includeList);
+});
 
 document.getElementById(`include-list-add-save`).addEventListener(`click`, (event) => {
-  const name = document.getElementById(`include-list-add-name`).value
-  const match = document.getElementById(`include-list-add-match`).value
+  const name = document.getElementById(`include-list-add-name`).value;
+  const match = document.getElementById(`include-list-add-match`).value;
 
   if (name.length && match.length) {
     storage.includeList[match] = {
-      name: name,
-      match: match,
+      name,
+      match,
       strict: document.getElementById(`include-list-add-strict`).checked,
       sound: document.getElementById(`include-list-add-sound`).checked,
       alarm: document.getElementById(`include-list-add-alarm`).checked,
       notification: document.getElementById(`include-list-add-notification`).checked,
-      pushbullet: document.getElementById(`include-list-add-pushbullet`).checked
-    }
+      pushbullet: document.getElementById(`include-list-add-pushbullet`).checked,
+    };
 
-    includeListUpdate()
+    includeListUpdate();
   }
-})
+});
 
 document.getElementById(`include-list-edit-save`).addEventListener(`click`, (event) => {
-  const name = document.getElementById(`include-list-edit-name`).value
-  const match = document.getElementById(`include-list-edit-match`).value
+  const name = document.getElementById(`include-list-edit-name`).value;
+  const match = document.getElementById(`include-list-edit-match`).value;
 
   if (name.length && match.length) {
     storage.includeList[match] = {
-      name: name,
-      match: match,
+      name,
+      match,
       strict: document.getElementById(`include-list-edit-strict`).checked,
       sound: document.getElementById(`include-list-edit-sound`).checked,
       alarm: document.getElementById(`include-list-edit-alarm`).checked,
       notification: document.getElementById(`include-list-edit-notification`).checked,
-      pushbullet: document.getElementById(`include-list-edit-pushbullet`).checked
-    }
+      pushbullet: document.getElementById(`include-list-edit-pushbullet`).checked,
+    };
 
-    includeListUpdate()
+    includeListUpdate();
   }
-})
+});
 
 document.getElementById(`include-list-edit-delete`).addEventListener(`click`, (event) => {
-  const key = event.target.dataset.key
-  delete storage.includeList[key]
-  includeListUpdate()
-})
+  const key = event.target.dataset.key;
+  delete storage.includeList[key];
+  includeListUpdate();
+});
 
-document.getElementById(`settings-apply`).addEventListener(`click`, finderApply)
+document.getElementById(`settings-apply`).addEventListener(`click`, finderApply);
 
 document.getElementById(`alarm-on`).addEventListener(`click`, (event) => {
   if (!alarm) {
-    alarm = true
+    alarm = true;
 
-    const alert = document.createElement(`div`)
-    alert.id = `alarm-alert`
-    alert.className = `alert alert-info alert-dismissible fade show`
+    const alert = document.createElement(`div`);
+    alert.id = `alarm-alert`;
+    alert.className = `alert alert-info alert-dismissible fade show`;
 
-    const message = document.createElement(`strong`)
-    message.textContent = `Alarm is active!`
-    alert.appendChild(message)
+    const message = document.createElement(`strong`);
+    message.textContent = `Alarm is active!`;
+    alert.appendChild(message);
 
-    const close = document.createElement(`button`)
-    close.type = `button`
-    close.className = `close`
-    close.textContent = `×`
-    close.dataset.dismiss = `alert`
-    alert.appendChild(close)
+    const close = document.createElement(`button`);
+    close.type = `button`;
+    close.className = `close`;
+    close.textContent = `×`;
+    close.dataset.dismiss = `alert`;
+    alert.appendChild(close);
 
-    document.body.prepend(alert)
+    document.body.prepend(alert);
   }
-})
+});
 
 document.getElementById(`include-hits-clear`).addEventListener(`click`, (event) => {
-  document.getElementById(`include-list-hits-card`).style.display = `none`
-  removeChildren(document.getElementById(`include-list-hits-tbody`))
-})
+  document.getElementById(`include-list-hits-card`).style.display = `none`;
+  removeChildren(document.getElementById(`include-list-hits-tbody`));
+});
 
 document.getElementById(`recent-hits-toggle`).addEventListener(`click`, (event) => {
-  const classList = document.getElementById(`recent-hits-toggle`).firstElementChild.classList
-  classList.toggle(`fa-caret-up`)
-  classList.toggle(`fa-caret-down`)
+  const classList = document.getElementById(`recent-hits-toggle`).firstElementChild.classList;
+  classList.toggle(`fa-caret-up`);
+  classList.toggle(`fa-caret-down`);
 
-  const element = document.getElementById(`recent-hits-card`).getElementsByClassName(`card-block`)[0]
-  element.style.display = element.style.display === `none` ? `` : `none`
-})
+  const element = document.getElementById(`recent-hits-card`).getElementsByClassName(`card-block`)[0];
+  element.style.display = element.style.display === `none` ? `` : `none`;
+});
 
 document.getElementById(`logged-hits-toggle`).addEventListener(`click`, (event) => {
-  const classList = document.getElementById(`logged-hits-toggle`).firstElementChild.classList
-  classList.toggle(`fa-caret-up`)
-  classList.toggle(`fa-caret-down`)
+  const classList = document.getElementById(`logged-hits-toggle`).firstElementChild.classList;
+  classList.toggle(`fa-caret-up`);
+  classList.toggle(`fa-caret-down`);
 
-  const element = document.getElementById(`logged-hits-card`).getElementsByClassName(`card-block`)[0]
-  element.style.display = element.style.display === `none` ? `` : `none`
-})
+  const element = document.getElementById(`logged-hits-card`).getElementsByClassName(`card-block`)[0];
+  element.style.display = element.style.display === `none` ? `` : `none`;
+});
 
 document.getElementById(`hit-export-short`).addEventListener(`click`, (event) => {
-  const key = event.target.dataset.key
-  const hit = finderDB[key]
+  const key = event.target.dataset.key;
+  const hit = finderDB[key];
   chrome.runtime.sendMessage({ hit, hitExporter: `short` });
-})
+});
 
 document.getElementById(`hit-export-plain`).addEventListener(`click`, (event) => {
-  const key = event.target.dataset.key
-  const hit = finderDB[key]
+  const key = event.target.dataset.key;
+  const hit = finderDB[key];
   chrome.runtime.sendMessage({ hit, hitExporter: `plain` });
-})
+});
 
 document.getElementById(`hit-export-bbcode`).addEventListener(`click`, (event) => {
-  const key = event.target.dataset.key
-  const hit = finderDB[key]
+  const key = event.target.dataset.key;
+  const hit = finderDB[key];
   chrome.runtime.sendMessage({ hit, hitExporter: `bbcode` });
-
-})
+});
 
 document.getElementById(`hit-export-markdown`).addEventListener(`click`, (event) => {
-  const key = event.target.dataset.key
-  const hit = finderDB[key]
+  const key = event.target.dataset.key;
+  const hit = finderDB[key];
   chrome.runtime.sendMessage({ hit, hitExporter: `markdown` });
-})
+});
 
 document.getElementById(`hit-export-turkerhub`).addEventListener(`click`, (event) => {
-  const result = window.prompt(`Are you sure you want to export this HIT to Forum.TurkerView.com?`)
+  const result = window.prompt(`Are you sure you want to export this HIT to Forum.TurkerView.com?`);
 
   if (result !== null) {
-    const key = event.target.dataset.key
-    const hit = finderDB[key]
+    const key = event.target.dataset.key;
+    const hit = finderDB[key];
     chrome.runtime.sendMessage({ hit, hitExporter: `turkerhub`, message: result }, (response) => {
       /* mark as exported eventually */
     });
   }
-})
+});
 
 document.getElementById(`hit-export-mturkcrowd`).addEventListener(`click`, (event) => {
-  const result = window.prompt(`Are you sure you want to export this HIT to MTurkCrowd.com?`)
+  const result = window.prompt(`Are you sure you want to export this HIT to MTurkCrowd.com?`);
 
   if (result !== null) {
-    const key = event.target.dataset.key
-    const hit = finderDB[key]
+    const key = event.target.dataset.key;
+    const hit = finderDB[key];
     chrome.runtime.sendMessage({ hit, hitExporter: `mturkcrowd`, message: result }, (response) => {
       /* mark as exported eventually */
     });
   }
-})
+});
