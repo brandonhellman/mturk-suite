@@ -637,8 +637,7 @@ chrome.storage.local.get(`options`, (keys) => {
   if (
     options.turkerviewApiKey.length == 40 ||
     options[`disable-tv-announcement`] ||
-    !options.requesterReviews ||
-    !options.requesterReviewsTurkerview
+    !options.turkerview
   )
     document.getElementById(`tv-finder-announce`).style.display = `none`;
 
@@ -656,12 +655,6 @@ chrome.storage.local.get(`options`, (keys) => {
   });
 
   document.getElementById(`disable-finder-tv-announcement`).addEventListener(`click`, function() {
-    if (
-      !confirm(
-        `Are you sure you want to hide this reminder? HIT Finder will be unable to retrieve TV data without an API Key after February 7th`,
-      )
-    )
-      return;
     options[`disable-tv-announcement`] = true;
     chrome.storage.local.set({ options });
     $(`#turkerview-finder-announcement-modal`).modal(`toggle`);
@@ -810,11 +803,11 @@ async function handleTurkopticon(rids) {
 function reviewsForFinder(rids) {
   chrome.storage.local.get([`options`], ({ options }) => {
     if (options.turkopticon) {
-      handleTurkerview(rids);
+      handleTurkopticon(rids);
     }
 
     if (options.turkerview) {
-      handleTurkopticon(rids);
+      handleTurkerview(rids);
     }
   });
 }
