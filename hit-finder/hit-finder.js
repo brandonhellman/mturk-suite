@@ -624,7 +624,6 @@ chrome.storage.local.get(`options`, keys => {
   });
 
   document.getElementById(`disable-finder-tv-announcement`).addEventListener(`click`, function(){
-    if (!confirm(`Are you sure you want to hide this reminder? HIT Finder will be unable to retrieve TV data without an API Key after February 7th`)) return;
     options[`disable-tv-announcement`] = true;
     chrome.storage.local.set({options});
     $('#turkerview-finder-announcement-modal').modal('toggle');
