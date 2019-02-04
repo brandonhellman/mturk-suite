@@ -9,6 +9,22 @@ changeLog.push({
 })
 
 changeLog.push({
+  version: '2.6.1',
+  date: 'Monday, Februrary 4, 2019',
+  'HIT Finder': [
+    'MTS options for Turkerview and Turkopticon will now enable/disabled the correct thing in HIT Finder',
+    'Fixed the coloring issue for rows that was introduced in the last update.'
+  ],
+  'Turkerview': [
+    'Fixed the TO/TV hot-swap going on in HIT Finder.',
+    'Fixed perma-display of API notices for users who entered their API key.',
+    'Fixed language in TV HF announcement to be more clear MTS will be fine without TV.',
+    'Fixed return warnings',
+    'Fixed a bug w/ display of Connected! alert'
+  ]
+})
+
+changeLog.push({
   version: '2.6.0',
   date: 'Monday, Februrary 4, 2019',
   'General': [
