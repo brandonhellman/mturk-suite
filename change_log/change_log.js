@@ -1,6 +1,24 @@
 const changeLog = [];
 
 changeLog.push({
+  version: 'Announcement',
+  date: 'from Kadauchi',
+  'Turkerview': [
+    'You do NOT need to subscribe to Turkerview to use MTurk Suite.',
+  ]
+})
+
+changeLog.push({
+  version: '2.6.0',
+  date: 'Monday, Februrary 4, 2019',
+  'General': [
+    'Split Turkerview and Turkopticon.',
+    'New cache system for Turkopticion to increase reliabiliy and reduce their server strain.',
+    'Reviews should now appear again under the "Status Detail" pages.'
+  ]
+})
+
+changeLog.push({
   version: '2.5.1',
   date: 'Thursday, January 31, 2019',
   'General': [
