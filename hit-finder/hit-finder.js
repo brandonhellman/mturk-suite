@@ -149,8 +149,13 @@ function finderProcess() {
       if (included) {
         row.classList.add(`included`);
       }
+
       if (storage.hitFinder[`display-colored-rows`]) {
-        row.classList.add(`table-${requesterReviewClass}`);
+        if (requesterTVReviewClass !== `default`) {
+          row.classList.add(`tv`, `table-${requesterTVReviewClass}`);
+        } else {
+          row.classList.add(`table-${requesterReviewClass}`);
+        }
       }
 
       const actions = document.createElement(`td`);
@@ -634,11 +639,7 @@ function requesterHourlyTVClass(hourly) {
 chrome.storage.local.get(`options`, (keys) => {
   const { options } = keys;
 
-  if (
-    options.turkerviewApiKey.length == 40 ||
-    options[`disable-tv-announcement`] ||
-    !options.turkerview
-  )
+  if (options.turkerviewApiKey.length == 40 || options[`disable-tv-announcement`] || !options.turkerview)
     document.getElementById(`tv-finder-announce`).style.display = `none`;
 
   document.getElementById(`view-api-save`).addEventListener(`click`, function() {
@@ -754,7 +755,7 @@ const turkopticonClass = ({ average }) => {
 
 const turkopticonReviewClass = (rid) => {
   const review = turkopticonDB[rid];
-  return review ? turkopticonClass(review) : `muted`;
+  return review ? turkopticonClass(review) : `default`;
 };
 
 const turkopticonAverage = (rid) => {
@@ -776,10 +777,16 @@ async function handleTurkerview(rids) {
     });
 
     document.querySelectorAll(`.row-${rid}`).forEach((el) => {
-      el.classList.remove(`table-default`, `table-success`, `table-warning`, `table-danger`);
-
       if (storage.hitFinder[`display-colored-rows`]) {
-        el.classList.add(`table-${turkerviewClass(review)}`);
+        const classIs = turkerviewClass(review);
+
+        // Has been colored by TV
+        if (classIs !== `default`) {
+          el.classList.remove(`table-default`, `table-success`, `table-warning`, `table-danger`);
+          el.classList.add(`tv`);
+        }
+
+        el.classList.add(`table-${classIs}`);
       }
     });
   });
@@ -799,9 +806,8 @@ async function handleTurkopticon(rids) {
     });
 
     document.querySelectorAll(`.row-${rid}`).forEach((el) => {
-      el.classList.remove(`table-default`, `table-success`, `table-warning`, `table-danger`);
-
-      if (storage.hitFinder[`display-colored-rows`]) {
+      if (storage.hitFinder[`display-colored-rows`] && !el.classList.contains(`tv`)) {
+        el.classList.remove(`table-default`, `table-success`, `table-warning`, `table-danger`);
         el.classList.add(`table-${turkopticonClass(review)}`);
       }
     });
@@ -1017,7 +1023,7 @@ $(`#requester-review-modal`).on(`show.bs.modal`, async (event) => {
   const options = await StorageGetKey(`options`);
 
   if (options.turkerview) {
-    if (tv) {
+    if (tv && tv.ratings) {
       document.getElementById(`review-who`).textContent = tv.requester_name;
       document.getElementById(`review-turkerview-link`).href = `https://turkerview.com/requesters/${rid}`;
       document.getElementById(
