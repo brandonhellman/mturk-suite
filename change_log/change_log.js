@@ -9,6 +9,15 @@ changeLog.push({
 })
 
 changeLog.push({
+  version: '2.6.2',
+  date: 'Monday, Februrary 4, 2019',
+  'HIT Finder': [
+    'Rows colored by TV first then TO vs before where TV would never color. More options to come soon.',
+    'TV ratings should still display in the popup even if TO is disabled or lagging behind in updates.'
+  ]
+})
+
+changeLog.push({
   version: '2.6.1',
   date: 'Monday, Februrary 4, 2019',
   'HIT Finder': [
