@@ -771,8 +771,16 @@ async function handleTurkerview(rids) {
     turkerviewDB[rid] = review;
 
     document.querySelectorAll(`.btn-${rid}.btn-turkerview`).forEach((el) => {
-      el.classList.remove(`btn-succes`, `btn-warning`, `btn-danger`);
+      el.classList.remove(`btn-success`, `btn-warning`, `btn-danger`);
       el.classList.add(`btn-${turkerviewClass(review)}`);
+    });
+
+    document.querySelectorAll(`.row-${rid}`).forEach((el) => {
+      el.classList.remove(`table-default`, `table-success`, `table-warning`, `table-danger`);
+
+      if (storage.hitFinder[`display-colored-rows`]) {
+        el.classList.add(`table-${turkerviewClass(review)}`);
+      }
     });
   });
 }
@@ -1004,7 +1012,7 @@ $(`#requester-review-modal`).on(`show.bs.modal`, async (event) => {
   const rid = event.relatedTarget.dataset.key;
 
   const tv = turkerviewDB[rid];
-  const { turkopticon: to, turkopticon2: to2 } = turkopticonDB[rid];
+  const { turkopticon: to, turkopticon2: to2 } = turkopticonDB[rid] || {};
 
   const options = await StorageGetKey(`options`);
 
