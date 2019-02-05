@@ -9,6 +9,16 @@ changeLog.push({
 })
 
 changeLog.push({
+  version: '2.6.3',
+  date: 'Tuesday, Februrary 5, 2019',
+  'HIT Finder': [
+    'Rows will be colored by TV first then TO.',
+    'Row colors shouldn\'t be more stable now.',
+    'Fixed issue with old review stats showing if the requester had no reviews.'
+  ]
+})
+
+changeLog.push({
   version: '2.6.2',
   date: 'Monday, Februrary 4, 2019',
   'HIT Finder': [
