@@ -9,6 +9,15 @@ changeLog.push({
 })
 
 changeLog.push({
+  version: '2.6.4',
+  date: 'Monday, Februrary 11, 2019',
+  'HIT Exporting': [
+    'Fixed export issues caused by the recent updates.',
+    'Fixed issue trying to export from the queue.'
+  ]
+})
+
+changeLog.push({
   version: '2.6.3',
   date: 'Tuesday, Februrary 5, 2019',
   'HIT Finder': [
