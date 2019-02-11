@@ -44,8 +44,12 @@ function bbCodeTemplateDirectModifier(template, message) {
 
 function hitToQualifications(hit) {
   const qual = (o) => `${o.qualification_type.name} ${o.comparator} ${o.qualification_values.join(`, `)}`;
-  const quals = hit.project_requirements.map(qual).join(`; `) || `None`;
-  return quals;
+  if (hit.project_requirements) {
+    const quals = hit.project_requirements.map(qual).join(`; `) || `None`;
+    return quals;
+  } 
+  
+  return `Not available from queue exports.`
 }
 
 function hitExporterNotification(title, body) {
