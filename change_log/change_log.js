@@ -9,6 +9,14 @@ changeLog.push({
 })
 
 changeLog.push({
+  version: '2.6.5',
+  date: 'Sunday, Februrary 24, 2019',
+  'HIT Exporting': [
+    'Remaining HIT export issues should now be resolved.'
+  ]
+})
+
+changeLog.push({
   version: '2.6.4',
   date: 'Monday, Februrary 11, 2019',
   'HIT Exporting': [
