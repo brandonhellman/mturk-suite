@@ -119,7 +119,7 @@ function shortTemplateURLs(hit) {
   addParam(`action`, `bulkshortener`);
   addParam(`title`, `MTurk`);
   addParam(`signature`, `39f6cf4959`);
-  addParam(`urls[]`, `https://worker.mturk.com/requesters${requester_id}/projects`);
+  addParam(`urls[]`, `https://worker.mturk.com/requesters/${requester_id}/projects`);
   addParam(`urls[]`, `https://worker.mturk.com/projects/${hit_set_id}/tasks`);
   addParam(`urls[]`, `https://worker.mturk.com/projects/${hit_set_id}/tasks/accept_random`);
 
@@ -205,7 +205,7 @@ function plainTemplate(hit) {
     const qualifications = hitToQualifications(hit);
 
     const template = `Title: ${title} • https://worker.mturk.com/projects/${hit_set_id}/tasks • https://worker.mturk.com/projects/${hit_set_id}/tasks/accept_random
-      Requester: ${requester_name} • https://worker.mturk.com/requesters${requester_id}/projects
+      Requester: ${requester_name} • https://worker.mturk.com/requesters/${requester_id}/projects
       ${reviews}
       Reward: ${reward}
       Duration: ${moment.duration(duration, `seconds`).format()}
