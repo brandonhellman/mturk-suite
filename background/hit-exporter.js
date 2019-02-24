@@ -78,7 +78,7 @@ function hitExporterToClipboard(string, hit, sendResponse) {
  */
 
 function templateTurkerView(review) {
-  if (review instanceof Object === false) return `No Reviews`;
+  if (!review || !review.ratings) return `No Reviews`;
 
   const { ratings, wages, rejections, blocks } = review;
   const { pay, fast, comm } = ratings;
@@ -89,7 +89,7 @@ function templateTurkerView(review) {
 }
 
 function templateTurkopticon(review) {
-  if (review instanceof Object === false) return `No Reviews`;
+  if (!review || !review.attrs) return `No Reviews`;
 
   const { attrs, reviews, tos_flags } = review;
   const { pay, fast, comm, fair } = attrs;
@@ -98,7 +98,7 @@ function templateTurkopticon(review) {
 }
 
 function templateTurkopticon2(review) {
-  if (review instanceof Object === false) return `No Reviews`;
+  if (!review || !review.all) return `No Reviews`;
 
   const { all } = review;
   const { hourly, pending, comm, recommend, rejected, tos, broken } = all;
