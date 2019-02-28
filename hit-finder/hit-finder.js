@@ -149,8 +149,13 @@ function finderProcess() {
       if (included) {
         row.classList.add(`included`);
       }
+
       if (storage.hitFinder[`display-colored-rows`]) {
-        row.classList.add(`table-${requesterReviewClass}`);
+        if (requesterTVReviewClass !== `default`) {
+          row.classList.add(`tv`, `table-${requesterTVReviewClass}`);
+        } else {
+          row.classList.add(`table-${requesterReviewClass}`);
+        }
       }
 
       const actions = document.createElement(`td`);
@@ -634,11 +639,7 @@ function requesterHourlyTVClass(hourly) {
 chrome.storage.local.get(`options`, (keys) => {
   const { options } = keys;
 
-  if (
-    options.turkerviewApiKey.length == 40 ||
-    options[`disable-tv-announcement`] ||
-    !options.turkerview
-  )
+  if (options.turkerviewApiKey.length == 40 || options[`disable-tv-announcement`] || !options.turkerview)
     document.getElementById(`tv-finder-announce`).style.display = `none`;
 
   document.getElementById(`view-api-save`).addEventListener(`click`, function() {
@@ -733,28 +734,28 @@ chrome.notifications.onButtonClicked.addListener((id, btn) => {
 });
 
 const turkerviewClass = ({ wages }) => {
-  if (!wages) return `muted`;
+  if (!wages) return `default`;
   if (wages.average.wage > 10.5) return `success`;
   if (wages.average.wage > 7.25) return `warning`;
   if (wages.average.wage > 0.0) return `danger`;
-  return `muted`;
+  return `default`;
 };
 
 const turkerviewReviewClass = (rid) => {
   const review = turkerviewDB[rid];
-  return review ? turkerviewClass(review) : `muted`;
+  return review ? turkerviewClass(review) : `default`;
 };
 
 const turkopticonClass = ({ average }) => {
   if (average > 3.75) return `success`;
   if (average > 2.25) return `warning`;
   if (average > 0.0) return `danger`;
-  return `muted`;
+  return `default`;
 };
 
 const turkopticonReviewClass = (rid) => {
   const review = turkopticonDB[rid];
-  return review ? turkopticonClass(review) : `muted`;
+  return review ? turkopticonClass(review) : `default`;
 };
 
 const turkopticonAverage = (rid) => {
@@ -771,8 +772,22 @@ async function handleTurkerview(rids) {
     turkerviewDB[rid] = review;
 
     document.querySelectorAll(`.btn-${rid}.btn-turkerview`).forEach((el) => {
-      el.classList.remove(`btn-succes`, `btn-warning`, `btn-danger`);
+      el.classList.remove(`btn-success`, `btn-warning`, `btn-danger`);
       el.classList.add(`btn-${turkerviewClass(review)}`);
+    });
+
+    document.querySelectorAll(`.row-${rid}`).forEach((el) => {
+      if (storage.hitFinder[`display-colored-rows`]) {
+        const classIs = turkerviewClass(review);
+
+        // Has been colored by TV
+        if (classIs !== `default`) {
+          el.classList.remove(`table-default`, `table-success`, `table-warning`, `table-danger`);
+          el.classList.add(`tv`);
+        }
+
+        el.classList.add(`table-${classIs}`);
+      }
     });
   });
 }
@@ -791,9 +806,8 @@ async function handleTurkopticon(rids) {
     });
 
     document.querySelectorAll(`.row-${rid}`).forEach((el) => {
-      el.classList.remove(`table-default`, `table-success`, `table-warning`, `table-danger`);
-
-      if (storage.hitFinder[`display-colored-rows`]) {
+      if (storage.hitFinder[`display-colored-rows`] && !el.classList.contains(`tv`)) {
+        el.classList.remove(`table-default`, `table-success`, `table-warning`, `table-danger`);
         el.classList.add(`table-${turkopticonClass(review)}`);
       }
     });
@@ -1004,12 +1018,12 @@ $(`#requester-review-modal`).on(`show.bs.modal`, async (event) => {
   const rid = event.relatedTarget.dataset.key;
 
   const tv = turkerviewDB[rid];
-  const { turkopticon: to, turkopticon2: to2 } = turkopticonDB[rid];
+  const { turkopticon: to, turkopticon2: to2 } = turkopticonDB[rid] || {};
 
   const options = await StorageGetKey(`options`);
 
   if (options.turkerview) {
-    if (tv) {
+    if (tv && tv.ratings) {
       document.getElementById(`review-who`).textContent = tv.requester_name;
       document.getElementById(`review-turkerview-link`).href = `https://turkerview.com/requesters/${rid}`;
       document.getElementById(

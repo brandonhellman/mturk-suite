@@ -1,20 +1,21 @@
-function hitExporterReviewDatabase() {
-  return new Promise(resolve => {
-    const request = window.indexedDB.open(`requesterReviewsDB`, 1);
-    request.onsuccess = event => resolve(event.target.result);
-  });
-}
-
-function hitExporterReviewsGet(id) {
-  return new Promise(async resolve => {
-    const database = await hitExporterReviewDatabase();
-    const transaction = database.transaction([`requester`], `readonly`);
+const getReview = (rid, name) =>
+  new Promise((resolve) => {
+    const { db } = REVIEWS[name];
+    const transaction = db.transaction([`requester`], `readonly`);
     const objectStore = transaction.objectStore(`requester`);
-    const request = objectStore.get(id);
-    request.onsuccess = event =>
-      resolve(event.target.result ? event.target.result : null);
+    objectStore.get(rid).onsuccess = (event) => resolve(event.target.result ? event.target.result : null);
   });
-}
+
+const hitExporterReviewsGet = (rid) =>
+  new Promise(async (resolve) => {
+    const [turkerview, turkopticon, turkopticon2] = await Promise.all([
+      getReview(rid, `turkerview`),
+      getReview(rid, `turkopticon`),
+      getReview(rid, `turkopticon2`),
+    ]);
+
+    resolve({ turkerview, turkopticon, turkopticon2 });
+  });
 
 function hitExporterCleanString(string) {
   return (
@@ -32,28 +33,29 @@ function bbCodeTemplateDirectModifier(template, message) {
       // Adds the "Exported from MTurk Suite v?.?.? to the provided template.
       .replace(
         `[/td][/tr][/table]`,
-        `\n[tr][td][center][size=2]HIT exported from [url=http://mturksuite.com/]Mturk Suite[/url] v${version}[/size][/center][/td][/tr][/table]`
+        `\n[tr][td][center][size=2]HIT exported from [url=http://mturksuite.com/]Mturk Suite[/url] v${version}[/size][/center][/td][/tr][/table]`,
       )
       // Wraps each line with the <p> html element tag.
       .split(`\n`)
-      .map(line => `<p>${line}</p>`)
-      .join(`\n`)
+      .map((line) => `<p>${line}</p>`)
+      .join(`\n`),
   );
 }
 
 function hitToQualifications(hit) {
-  const qual = o =>
-    `${o.qualification_type.name} ${o.comparator} ${o.qualification_values.join(
-      `, `
-    )}`;
-  const quals = hit.project_requirements.map(qual).join(`; `) || `None`;
-  return quals;
+  const qual = (o) => `${o.qualification_type.name} ${o.comparator} ${o.qualification_values.join(`, `)}`;
+  if (hit.project_requirements) {
+    const quals = hit.project_requirements.map(qual).join(`; `) || `None`;
+    return quals;
+  } 
+  
+  return `Not available from queue exports.`
 }
 
 function hitExporterNotification(title, body) {
   const notification = new Notification(title, {
     icon: `/media/icon_128.png`,
-    body
+    body,
   });
   window.setTimeout(notification.close.bind(notification), 7500);
 }
@@ -67,28 +69,27 @@ function hitExporterToClipboard(string, hit, sendResponse) {
   textarea.select();
   document.execCommand(`copy`);
   document.body.removeChild(textarea);
-  hitExporterNotification(
-    `HIT Export Successful!`,
-    `Export has been copied to your clipboard.`
-  );
+  hitExporterNotification(`HIT Export Successful!`, `Export has been copied to your clipboard.`);
   sendResponse({ success: true, id: hitId });
 }
 
 /*
-* Requester Review Templates
-*/
+ * Requester Review Templates
+ */
 
 function templateTurkerView(review) {
-  if (review instanceof Object === false) return `No Reviews`;
+  if (!review || !review.ratings) return `No Reviews`;
 
-  const { ratings, wages, rejections, tos, blocks } = review;
+  const { ratings, wages, rejections, blocks } = review;
   const { pay, fast, comm } = ratings;
 
-  return `[Hrly=$${wages.average.wage}] [Pay=${pay.text}] [Approval=${fast.text}] [Comm=${comm.text}] [Rej=${rejections}] [Blk=${blocks}]`;
+  return `[Hrly=$${wages.average.wage}] [Pay=${pay.text}] [Approval=${fast.text}] [Comm=${
+    comm.text
+  }] [Rej=${rejections}] [Blk=${blocks}]`;
 }
 
 function templateTurkopticon(review) {
-  if (review instanceof Object === false) return `No Reviews`;
+  if (!review || !review.attrs) return `No Reviews`;
 
   const { attrs, reviews, tos_flags } = review;
   const { pay, fast, comm, fair } = attrs;
@@ -97,7 +98,7 @@ function templateTurkopticon(review) {
 }
 
 function templateTurkopticon2(review) {
-  if (review instanceof Object === false) return `No Reviews`;
+  if (!review || !review.all) return `No Reviews`;
 
   const { all } = review;
   const { hourly, pending, comm, recommend, rejected, tos, broken } = all;
@@ -106,8 +107,8 @@ function templateTurkopticon2(review) {
 }
 
 /*
-* Short Exporter Functions
-*/
+ * Short Exporter Functions
+ */
 
 // Attempts to shorten URLs through Tjololo's https://ns4t.net/.
 function shortTemplateURLs(hit) {
@@ -118,17 +119,11 @@ function shortTemplateURLs(hit) {
   addParam(`action`, `bulkshortener`);
   addParam(`title`, `MTurk`);
   addParam(`signature`, `39f6cf4959`);
-  addParam(
-    `urls[]`,
-    `https://worker.mturk.com/requesters${requester_id}/projects`
-  );
+  addParam(`urls[]`, `https://worker.mturk.com/requesters/${requester_id}/projects`);
   addParam(`urls[]`, `https://worker.mturk.com/projects/${hit_set_id}/tasks`);
-  addParam(
-    `urls[]`,
-    `https://worker.mturk.com/projects/${hit_set_id}/tasks/accept_random`
-  );
+  addParam(`urls[]`, `https://worker.mturk.com/projects/${hit_set_id}/tasks/accept_random`);
 
-  return new Promise(async resolve => {
+  return new Promise(async (resolve) => {
     const response = await window.fetch(url);
     const text = await response.text();
     const urls = response.ok ? text.split(`;`) : null;
@@ -137,20 +132,16 @@ function shortTemplateURLs(hit) {
 }
 
 function shortTemplateMasters(hit) {
-  const ids = [
-    `2F1QJWKUDD8XADTFD2Q0G6UTO95ALH`,
-    `2NDP2L92HECWY8NS8H3CK0CP5L9GHO`,
-    `21VZU98JHSTLZ5BPP4A9NOBJEK3DPG`
-  ];
+  const ids = [`2F1QJWKUDD8XADTFD2Q0G6UTO95ALH`, `2NDP2L92HECWY8NS8H3CK0CP5L9GHO`, `21VZU98JHSTLZ5BPP4A9NOBJEK3DPG`];
 
-  const includesIds = o => ids.includes(o.qualification_type_id).length;
+  const includesIds = (o) => ids.includes(o.qualification_type_id).length;
   const hasMasters = hit.project_requirements.some(includesIds);
   const masters = hasMasters ? `MASTERS • ` : ``;
   return masters;
 }
 
 function shortTemplate(hit) {
-  return new Promise(async resolve => {
+  return new Promise(async (resolve) => {
     const { hit_set_id, requester_name, title, monetary_reward } = hit;
     const reward = `${monetary_reward.amount_in_dollars.toFixed(2)}`;
     const masters = shortTemplateMasters(hit);
@@ -173,8 +164,8 @@ async function hitExporterShort(request, sender, sendResponse) {
 }
 
 /*
-* Plain Exporter Functions
-*/
+ * Plain Exporter Functions
+ */
 
 function plainTemplateTurkerView(hit, reviews) {
   const { requester_id } = hit;
@@ -195,49 +186,29 @@ function plainTemplateTurkopticon2(hit, reviews) {
 }
 
 function plainTemplateReviews(hit) {
-  return new Promise(async resolve => {
-    const [reviews, options] = await Promise.all([
-      hitExporterReviewsGet(hit.requester_id),
-      StorageGetKey(`options`)
-    ]);
+  return new Promise(async (resolve) => {
+    const [reviews, options] = await Promise.all([hitExporterReviewsGet(hit.requester_id), StorageGetKey(`options`)]);
 
-    if (options.requesterReviews) {
-      const turkerview = options.turkerview
-        ? plainTemplateTurkerView(hit, reviews)
-        : ``;
-      const turkopticon = options.requesterReviewsTurkopticon
-        ? plainTemplateTurkopticon(hit, reviews)
-        : ``;
-      const turkopticon2 = options.requesterReviewsTurkopticon2
-        ? plainTemplateTurkopticon2(hit, reviews)
-        : ``;
-      resolve(`${turkerview + turkopticon + turkopticon2}  `);
-    } else {
-      resolve(`  `);
-    }
+    const turkerview = options.turkerview ? plainTemplateTurkerView(hit, reviews) : ``;
+    const turkopticon = options.turkopticon ? plainTemplateTurkopticon(hit, reviews) : ``;
+    const turkopticon2 = options.turkopticon ? plainTemplateTurkopticon2(hit, reviews) : ``;
+    resolve(`${turkerview + turkopticon + turkopticon2}  `);
   });
 }
 
 function plainTemplate(hit) {
-  return new Promise(async resolve => {
-    const {
-      assignable_hits_count,
-      description,
-      hit_set_id,
-      requester_name,
-      requester_id,
-      title
-    } = hit;
+  return new Promise(async (resolve) => {
+    const { assignable_hits_count, description, hit_set_id, requester_name, requester_id, title } = hit;
     const reviews = await plainTemplateReviews(hit);
     const reward = `${hit.monetary_reward.amount_in_dollars.toFixed(2)}`;
     const duration = hit.assignment_duration_in_seconds;
     const qualifications = hitToQualifications(hit);
 
     const template = `Title: ${title} • https://worker.mturk.com/projects/${hit_set_id}/tasks • https://worker.mturk.com/projects/${hit_set_id}/tasks/accept_random
-      Requester: ${requester_name} • https://worker.mturk.com/requesters${requester_id}/projects
+      Requester: ${requester_name} • https://worker.mturk.com/requesters/${requester_id}/projects
       ${reviews}
       Reward: ${reward}
-      Duration: ${moment.duration(duration, "seconds").format()}
+      Duration: ${moment.duration(duration, `seconds`).format()}
       Available: ${assignable_hits_count}
       Description: ${description}
       Qualifications: ${qualifications}`;
@@ -252,8 +223,8 @@ async function hitExporterPlain(request, sender, sendResponse) {
 }
 
 /*
-* BBCode Exporter Functions
-*/
+ * BBCode Exporter Functions
+ */
 
 function bbCodeTemplateTurkerView(hit, reviews) {
   const { requester_id } = hit;
@@ -274,39 +245,19 @@ function bbCodeTemplateTurkopticon2(hit, reviews) {
 }
 
 function bbCodeTemplateReviews(hit) {
-  return new Promise(async resolve => {
-    const [reviews, options] = await Promise.all([
-      hitExporterReviewsGet(hit.requester_id),
-      StorageGetKey(`options`)
-    ]);
+  return new Promise(async (resolve) => {
+    const [reviews, options] = await Promise.all([hitExporterReviewsGet(hit.requester_id), StorageGetKey(`options`)]);
 
-    if (options.turkerview) {
-      const turkerview = options.turkerview
-        ? bbCodeTemplateTurkerView(hit, reviews)
-        : ``;
-      const turkopticon = options.requesterReviewsTurkopticon
-        ? bbCodeTemplateTurkopticon(hit, reviews)
-        : ``;
-      const turkopticon2 = options.requesterReviewsTurkopticon2
-        ? bbCodeTemplateTurkopticon2(hit, reviews)
-        : ``;
-      resolve(turkerview + turkopticon + turkopticon2);
-    } else {
-      resolve(`  `);
-    }
+    const turkerview = options.turkerview ? bbCodeTemplateTurkerView(hit, reviews) : ``;
+    const turkopticon = options.turkopticon ? bbCodeTemplateTurkopticon(hit, reviews) : ``;
+    const turkopticon2 = options.turkopticon ? bbCodeTemplateTurkopticon2(hit, reviews) : ``;
+    resolve(turkerview + turkopticon + turkopticon2);
   });
 }
 
 function bbCodeTemplate(hit) {
-  return new Promise(async resolve => {
-    const {
-      assignable_hits_count,
-      description,
-      hit_set_id,
-      requester_name,
-      requester_id,
-      title
-    } = hit;
+  return new Promise(async (resolve) => {
+    const { assignable_hits_count, description, hit_set_id, requester_name, requester_id, title } = hit;
     const reviews = await bbCodeTemplateReviews(hit);
     const reward = `${hit.monetary_reward.amount_in_dollars.toFixed(2)}`;
     const duration = hit.assignment_duration_in_seconds;
@@ -315,7 +266,7 @@ function bbCodeTemplate(hit) {
     const template = `[table][tr][td][b]Title:[/b] [url="https://worker.mturk.com/projects/${hit_set_id}/tasks"]${title}[/url] | [url="https://worker.mturk.com/projects/${hit_set_id}/tasks/accept_random"]Accept[/url]
       [b]Requester:[/b] [url="https://worker.mturk.com/requesters/${requester_id}/projects"]${requester_name}[/url] [${requester_id}] [url="https://worker.mturk.com/contact_requester/hit_type_messages/new?hit_type_message[hit_type_id]=YOURMTURKHIT&hit_type_message[requester_id]=${requester_id}"]Contact[/url]
       ${reviews}[b]Reward:[/b] ${reward}
-      [b]Duration:[/b] ${moment.duration(duration, "seconds").format()}
+      [b]Duration:[/b] ${moment.duration(duration, `seconds`).format()}
       [b]Available:[/b] ${assignable_hits_count}
       [b]Description:[/b] ${description}
       [b]Qualifications:[/b] ${qualifications}[/td][/tr][/table]`;
@@ -329,8 +280,8 @@ async function hitExporterBBCode(request, sender, sendResponse) {
 }
 
 /*
-* Markdown Exporter Functions
-*/
+ * Markdown Exporter Functions
+ */
 
 function markdownTemplateTurkerView(hit, reviews) {
   const { requester_id } = hit;
@@ -351,56 +302,33 @@ function markdownTemplateTurkopticon2(hit, reviews) {
 }
 
 function markdownTemplateReviews(hit) {
-  return new Promise(async resolve => {
-    const [reviews, options] = await Promise.all([
-      hitExporterReviewsGet(hit.requester_id),
-      StorageGetKey(`options`)
-    ]);
+  return new Promise(async (resolve) => {
+    const [reviews, options] = await Promise.all([hitExporterReviewsGet(hit.requester_id), StorageGetKey(`options`)]);
 
-    if (options.requesterReviews) {
-      const turkerview = options.requesterReviewsTurkerview
-        ? markdownTemplateTurkerView(hit, reviews)
-        : ``;
-      const turkopticon = options.requesterReviewsTurkopticon
-        ? markdownTemplateTurkopticon(hit, reviews)
-        : ``;
-      const turkopticon2 = options.requesterReviewsTurkopticon2
-        ? markdownTemplateTurkopticon2(hit, reviews)
-        : ``;
-      resolve(`${turkerview + turkopticon + turkopticon2}  `);
-    } else {
-      resolve(`  `);
-    }
+    const turkerview = options.turkerview ? markdownTemplateTurkerView(hit, reviews) : ``;
+    const turkopticon = options.turkopticon ? markdownTemplateTurkopticon(hit, reviews) : ``;
+    const turkopticon2 = options.turkopticon ? markdownTemplateTurkopticon2(hit, reviews) : ``;
+    resolve(`${turkerview + turkopticon + turkopticon2}  `);
   });
 }
 
 function markdownTemplate(hit) {
-  return new Promise(async resolve => {
-    const template = `> **Title:** [${
-      hit.title
-    }](https://worker.mturk.com/projects/${
+  return new Promise(async (resolve) => {
+    const template = `> **Title:** [${hit.title}](https://worker.mturk.com/projects/${
       hit.hit_set_id
-    }/tasks) | [Accept](https://worker.mturk.com/projects/${
-      hit.hit_set_id
-    }/tasks/accept_random)  
-      **Requester:** [${
-        hit.requester_name
-      }](https://worker.mturk.com/requesters${hit.requester_id}/projects) [${
+    }/tasks) | [Accept](https://worker.mturk.com/projects/${hit.hit_set_id}/tasks/accept_random)  
+      **Requester:** [${hit.requester_name}](https://worker.mturk.com/requesters${hit.requester_id}/projects) [${
       hit.requester_id
     }] [Contact](https://worker.mturk.com/contact_requester/hit_type_messages/new?hit_type_message[hit_type_id]=YOURMTURKHIT&hit_type_message[requester_id]=${
       hit.requester_id
     })  
-      ${await markdownTemplateReviews(hit)}**Reward:** $${
-      hit.monetary_reward.amount_in_dollars
-    }  
-      **Duration:** ${moment.duration(hit.assignment_duration_in_seconds, "seconds").format()}  
+      ${await markdownTemplateReviews(hit)}**Reward:** $${hit.monetary_reward.amount_in_dollars}  
+      **Duration:** ${moment.duration(hit.assignment_duration_in_seconds, `seconds`).format()}  
       **Available:** ${hit.assignable_hits_count}  
       **Description:** ${hit.description}  
       **Qualifications:** ${hit.project_requirements
-        .map(o =>
-          `${o.qualification_type.name} ${
-            o.comparator
-          } ${o.qualification_values.map(v => v).join(`, `)}`.trim()
+        .map((o) =>
+          `${o.qualification_type.name} ${o.comparator} ${o.qualification_values.map((v) => v).join(`, `)}`.trim(),
         )
         .join(`; `) || `None`}`;
     resolve(template);
@@ -413,30 +341,25 @@ async function hitExporterMarkdown(request, sender, sendResponse) {
 }
 
 /*
-* Turker Hub Exporter Functions
-*/
+ * Turker Hub Exporter Functions
+ */
 
 function turkerHubFetchDaily() {
   return new Promise(async (resolve, reject) => {
     const response = await window.fetch(
       `https://forum.turkerview.com/forums/daily-mturk-hits-threads.2/?order=post_date&direction=desc`,
       {
-        credentials: `include`
-      }
+        credentials: `include`,
+      },
     );
 
     if (response.ok) {
-      const doc = new DOMParser().parseFromString(
-        await response.text(),
-        `text/html`
-      );
+      const doc = new DOMParser().parseFromString(await response.text(), `text/html`);
       const xfToken = doc.getElementsByName(`_xfToken`);
 
       if (xfToken.length > 0 && xfToken[0].value.length > 0) {
         const newestThread = Math.max(
-          ...[...doc.querySelectorAll(`li[id^="thread-"]`)].map(el =>
-            Number(el.id.replace(/[^0-9.]/g, ``))
-          )
+          ...[...doc.querySelectorAll(`li[id^="thread-"]`)].map((el) => Number(el.id.replace(/[^0-9.]/g, ``))),
         );
         resolve({ token: xfToken, thread: newestThread });
       } else {
@@ -453,14 +376,14 @@ function turkerHubCheckPosts(hit, thread) {
     const response = await window.fetch(
       `https://forum.turkerview.com/hub.php?action=getPosts&thread_id=${thread}&order_by=post_date`,
       {
-        credentials: `include`
-      }
+        credentials: `include`,
+      },
     );
 
     if (response.ok) {
       const json = await response.json();
 
-      json.posts.forEach(post => {
+      json.posts.forEach((post) => {
         if (post.message.includes(hit.hit_set_id)) {
           throw new Error(`HIT was recently posted`);
         }
@@ -475,16 +398,11 @@ function turkerHubCheckPosts(hit, thread) {
 
 function turkerHubPostExport(thread, token, string) {
   return new Promise(async (resolve, reject) => {
-    const response = await window.fetch(
-      `https://forum.turkerview.com/threads/${thread}/add-reply`,
-      {
-        credentials: `include`,
-        method: `post`,
-        body: new URLSearchParams(
-          `_xfToken=${token[0].value}&message_html=${string}`
-        )
-      }
-    );
+    const response = await window.fetch(`https://forum.turkerview.com/threads/${thread}/add-reply`, {
+      credentials: `include`,
+      method: `post`,
+      body: new URLSearchParams(`_xfToken=${token[0].value}&message_html=${string}`),
+    });
 
     if (response.ok) {
       resolve();
@@ -501,45 +419,31 @@ async function hitExporterTurkerHub(request, sender, sendResponse) {
     const template = await bbCodeTemplate(request.hit);
     const modified = bbCodeTemplateDirectModifier(template, request.message);
     await turkerHubPostExport(data.thread, data.token, modified);
-    hitExporterNotification(
-      `HIT Exporter Successful!`,
-      `TurkerView Forum export posted on Forum.TurkerView.com`
-    );
+    hitExporterNotification(`HIT Exporter Successful!`, `TurkerView Forum export posted on Forum.TurkerView.com`);
     sendResponse({ success: true, id: request.hit.hit_set_id });
   } catch (error) {
-    hitExporterNotification(
-      `HIT Exporter Failed!`,
-      `TurkerView Forum export failed with the error ${error}`
-    );
+    hitExporterNotification(`HIT Exporter Failed!`, `TurkerView Forum export failed with the error ${error}`);
     sendResponse({ success: false, id: request.hit.hit_set_id });
   }
 }
 
 /*
-* MTurk Crowd Exporter Functions
-*/
+ * MTurk Crowd Exporter Functions
+ */
 
 function mturkCrowdFetchDaily() {
   return new Promise(async (resolve, reject) => {
-    const response = await window.fetch(
-      `https://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`,
-      {
-        credentials: `include`
-      }
-    );
+    const response = await window.fetch(`https://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`, {
+      credentials: `include`,
+    });
 
     if (response.ok) {
-      const doc = new DOMParser().parseFromString(
-        await response.text(),
-        `text/html`
-      );
+      const doc = new DOMParser().parseFromString(await response.text(), `text/html`);
       const xfToken = doc.getElementsByName(`_xfToken`);
 
       if (xfToken.length > 0 && xfToken[0].value.length > 0) {
         const newestThread = Math.max(
-          ...[...doc.querySelectorAll(`li[id^="thread-"]`)].map(el =>
-            Number(el.id.replace(/[^0-9.]/g, ``))
-          )
+          ...[...doc.querySelectorAll(`li[id^="thread-"]`)].map((el) => Number(el.id.replace(/[^0-9.]/g, ``))),
         );
         resolve({ token: xfToken, thread: newestThread });
       } else {
@@ -556,14 +460,14 @@ function mturkCrowdCheckPosts(hit, thread) {
     const response = await window.fetch(
       `https://www.mturkcrowd.com/api.php?action=getPosts&thread_id=${thread}&order_by=post_date`,
       {
-        credentials: `include`
-      }
+        credentials: `include`,
+      },
     );
 
     if (response.ok) {
       const json = await response.json();
 
-      json.posts.forEach(post => {
+      json.posts.forEach((post) => {
         if (post.message.includes(hit.hit_set_id)) {
           throw new Error(`HIT was recently posted`);
         }
@@ -578,16 +482,11 @@ function mturkCrowdCheckPosts(hit, thread) {
 
 function mturkCrowdPostExport(thread, token, string) {
   return new Promise(async (resolve, reject) => {
-    const response = await window.fetch(
-      `https://www.mturkcrowd.com/threads/${thread}/add-reply`,
-      {
-        credentials: `include`,
-        method: `post`,
-        body: new URLSearchParams(
-          `_xfToken=${token[0].value}&message_html=${string}`
-        )
-      }
-    );
+    const response = await window.fetch(`https://www.mturkcrowd.com/threads/${thread}/add-reply`, {
+      credentials: `include`,
+      method: `post`,
+      body: new URLSearchParams(`_xfToken=${token[0].value}&message_html=${string}`),
+    });
 
     if (response.ok) {
       resolve();
@@ -604,16 +503,10 @@ async function hitExporterMturkCrowd(request, sender, sendResponse) {
     const template = await bbCodeTemplate(request.hit);
     const modified = bbCodeTemplateDirectModifier(template, request.message);
     await mturkCrowdPostExport(data.thread, data.token, modified);
-    hitExporterNotification(
-      `HIT Export Successful!`,
-      `MTurk Crowd export posted on MTurkCrowd.com`
-    );
+    hitExporterNotification(`HIT Export Successful!`, `MTurk Crowd export posted on MTurkCrowd.com`);
     sendResponse({ success: true, id: request.hit.hit_set_id });
   } catch (error) {
-    hitExporterNotification(
-      `HIT Export Failed!`,
-      `MTurk Crowd export failed with the error ${error}`
-    );
+    hitExporterNotification(`HIT Export Failed!`, `MTurk Crowd export failed with the error ${error}`);
     sendResponse({ success: false, id: request.hit.hit_set_id });
   }
 }
@@ -622,20 +515,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const { hitExporter } = request;
 
   if (hitExporter) {
-    if (hitExporter === `short`)
-      hitExporterShort(request, sender, sendResponse);
-    if (hitExporter === `plain`)
-      hitExporterPlain(request, sender, sendResponse);
-    if (hitExporter === `bbcode`)
-      hitExporterBBCode(request, sender, sendResponse);
-    if (hitExporter === `markdown`)
-      hitExporterMarkdown(request, sender, sendResponse);
-    if (hitExporter === `turkerhub`)
-      hitExporterTurkerHub(request, sender, sendResponse);
-    if (hitExporter === `mturkcrowd`)
-      hitExporterMturkCrowd(request, sender, sendResponse);
+    if (hitExporter === `short`) hitExporterShort(request, sender, sendResponse);
+    if (hitExporter === `plain`) hitExporterPlain(request, sender, sendResponse);
+    if (hitExporter === `bbcode`) hitExporterBBCode(request, sender, sendResponse);
+    if (hitExporter === `markdown`) hitExporterMarkdown(request, sender, sendResponse);
+    if (hitExporter === `turkerhub`) hitExporterTurkerHub(request, sender, sendResponse);
+    if (hitExporter === `mturkcrowd`) hitExporterMturkCrowd(request, sender, sendResponse);
     return true;
   }
-  
+
   return false;
 });

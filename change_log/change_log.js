@@ -9,6 +9,58 @@ changeLog.push({
 })
 
 changeLog.push({
+  version: '2.6.5',
+  date: 'Sunday, Februrary 24, 2019',
+  'HIT Exporting': [
+    'Remaining HIT export issues should now be resolved.'
+  ]
+})
+
+changeLog.push({
+  version: '2.6.4',
+  date: 'Monday, Februrary 11, 2019',
+  'HIT Exporting': [
+    'Fixed export issues caused by the recent updates.',
+    'Fixed issue trying to export from the queue.'
+  ]
+})
+
+changeLog.push({
+  version: '2.6.3',
+  date: 'Tuesday, Februrary 5, 2019',
+  'HIT Finder': [
+    'Rows will be colored by TV first then TO.',
+    'Row colors shouldn\'t be more stable now.',
+    'Fixed issue with old review stats showing if the requester had no reviews.'
+  ]
+})
+
+changeLog.push({
+  version: '2.6.2',
+  date: 'Monday, Februrary 4, 2019',
+  'HIT Finder': [
+    'Rows colored by TV first then TO vs before where TV would never color. More options to come soon for row coloring.',
+    'TV ratings should still display in the popup even if TO is disabled or lagging behind in updates.'
+  ]
+})
+
+changeLog.push({
+  version: '2.6.1',
+  date: 'Monday, Februrary 4, 2019',
+  'HIT Finder': [
+    'MTS options for Turkerview and Turkopticon will now enable/disabled the correct thing in HIT Finder',
+    'Fixed the coloring issue for rows that was introduced in the last update.'
+  ],
+  'Turkerview': [
+    'Fixed the TO/TV hot-swap going on in HIT Finder.',
+    'Fixed perma-display of API notices for users who entered their API key.',
+    'Fixed language in TV HF announcement to be more clear MTS will be fine without TV.',
+    'Fixed return warnings',
+    'Fixed a bug w/ display of Connected! alert'
+  ]
+})
+
+changeLog.push({
   version: '2.6.0',
   date: 'Monday, Februrary 4, 2019',
   'General': [
