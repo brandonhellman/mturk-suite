@@ -79,7 +79,12 @@
     "bootstrap/js/*",
     "bootstrap/css/*",
     "fontawesome/webfonts/*",
-    "hit_tracker/hit_tracker.html"
+    "hit_tracker/hit_tracker.html",
+    "media/images/tv-mts-red.png",
+    "media/images/tv-mts-orange.png",
+    "media/images/tv-mts-green.png",
+    "media/images/tv-unrated.png",
+    "media/images/tv-white.png"
   ],
 
   "content_scripts": [
