@@ -226,7 +226,11 @@ async function initHitReview(){
 }
 
 let taskuserApiKey;
-let taskViewHeaders;
+let taskViewHeaders = new Headers([
+    [`X-VIEW-KEY`, `UNSET`],
+    [`X-APP-KEY`, `MTurk Suite`],
+    [`X-APP-VER`, chrome.runtime.getManifest().version] //SemVer
+]);
 
 function buildHeaders(userApiKey){
     taskViewHeaders = new Headers([

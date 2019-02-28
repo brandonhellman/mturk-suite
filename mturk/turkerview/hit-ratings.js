@@ -200,7 +200,11 @@ function hitDataPopover(button, hit, reward, status = `ok`) {
   
   
 let userApiKey;
-let ViewHeaders;
+let ViewHeaders = new Headers([
+  [`X-VIEW-KEY`, `UNSET`],
+  [`X-APP-KEY`, `MTurk Suite`],
+  [`X-APP-VER`, chrome.runtime.getManifest().version] //SemVer
+]);
 let HitData;
 
 chrome.storage.local.get([`options`], keys => {

@@ -334,7 +334,11 @@ async function initReturnReviews(){
 }
 
 let userApiKey;
-let ViewHeaders;
+let ViewHeaders = new Headers([
+    [`X-VIEW-KEY`, `UNSET`],
+    [`X-APP-KEY`, `MTurk Suite`],
+    [`X-APP-VER`, chrome.runtime.getManifest().version] //SemVer
+]);
 
 function buildHeaders(userApiKey){
     ViewHeaders = new Headers([
