@@ -230,7 +230,7 @@ async function handleTurkerview(rids) {
       span.tabIndex = 0;
 
       const icon = document.createElement(`img`);
-      icon.src = `https://turkerview.com/assets/images/tv-${turkerviewIcon(review)}.png`;
+      icon.src = chrome.extension.getURL(`media/images/tv-${turkerviewIcon(review)}.png`);
       icon.style.maxHeight = `16px`;
       span.appendChild(icon);
       el.appendChild(span);

@@ -137,7 +137,7 @@ const classMap = total_reports => total_reports == 0 ? 'text-muted' :
     total_reports < 3 ? 'text-warning' : 'text-danger';
 
 function buildReturnWarnings(json){
-    if (json['broken_total'] + json['underpaid_total'] + json['unpaid_screener_total'] + json['tos_total'] + json['writing_total'] + json['inquisit_total'] == 0) return;
+    if (json['broken_total'] + json['underpaid_total'] + json['unpaid_screener_total'] + json['tos_total'] + json['writing_total'] + json['downloads_total'] == 0) return;
 
     let highest_warning_class = 'text-danger';
     let x = Number(json['broken_total']) + Number(json['underpaid_total']) + Number(json['unpaid_screener_total']) + Number(json['tos_total']) + Number(json['writing_total']) + Number(json['downloads_total']);
@@ -334,7 +334,11 @@ async function initReturnReviews(){
 }
 
 let userApiKey;
-let ViewHeaders;
+let ViewHeaders = new Headers([
+    [`X-VIEW-KEY`, `UNSET`],
+    [`X-APP-KEY`, `MTurk Suite`],
+    [`X-APP-VER`, chrome.runtime.getManifest().version] //SemVer
+]);
 
 function buildHeaders(userApiKey){
     ViewHeaders = new Headers([

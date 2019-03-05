@@ -116,11 +116,11 @@ function buildAndAppend(json, assignableHitsCount){
     let file = taskHourlyTVClass(json.avg_hourly);
 
     document.querySelectorAll(`.work-pipeline-action`).forEach(el => {
-        el.insertAdjacentHTML(`afterbegin`, `<a class="btn btn-secondary tv-task-review-data" href="#" style="margin-right: 5px;"><img src="https://turkerview.com/assets/images/tv-${file}.png" style="max-height: 14px;"></img></a>`);
+        el.insertAdjacentHTML(`afterbegin`, `<a class="btn btn-secondary tv-task-review-data" href="#" style="margin-right: 5px;"><img src="${chrome.extension.getURL(`media/images/tv-${file}.png`)}" style="max-height: 14px;"></img></a>`);
     })
 
     document.querySelectorAll(`.task-project-title`).forEach(el => {
-        el.insertAdjacentHTML(`afterbegin`, `<div class="tv-task-review-data" style="display: inline-block; margin-right: 4px; cursor: pointer;"><img src="https://turkerview.com/assets/images/tv-${file}.png" style="max-height: 16px;"></img></div>`);
+        el.insertAdjacentHTML(`afterbegin`, `<div class="tv-task-review-data" style="display: inline-block; margin-right: 4px; cursor: pointer;"><img src="${chrome.extension.getURL(`media/images/tv-${file}.png`)}" style="max-height: 16px;"></img></div>`);
     })
 
     document.getElementById(`taskReviewDataModal`).addEventListener(`click`, function(){
@@ -226,7 +226,11 @@ async function initHitReview(){
 }
 
 let taskuserApiKey;
-let taskViewHeaders;
+let taskViewHeaders = new Headers([
+    [`X-VIEW-KEY`, `UNSET`],
+    [`X-APP-KEY`, `MTurk Suite`],
+    [`X-APP-VER`, chrome.runtime.getManifest().version] //SemVer
+]);
 
 function buildHeaders(userApiKey){
     taskViewHeaders = new Headers([

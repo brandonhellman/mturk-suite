@@ -104,7 +104,7 @@ function hitDataPopover(button, hit, reward, status = `ok`) {
         let temp_key = hit.requester_id.concat(hit.monetary_reward.amount_in_dollars.toFixed(2), hit.title);
 
         let hourly = json[temp_key] ? (3600/json[temp_key].avg_completion)*hit.monetary_reward.amount_in_dollars : null;
-        const hitButton = HTML`<span class="btn btn-sm text-primary" tabIndex="0" data-tvhit="${temp_key}" data-reward="${hit.monetary_reward.amount_in_dollars.toFixed(2)}"><img src="https://turkerview.com/assets/images/tv-${hitReviewsTVClass(hourly)}.png" style="max-height: 16px;"></img></span>`;
+        const hitButton = HTML`<span class="btn btn-sm text-primary" tabIndex="0" data-tvhit="${temp_key}" data-reward="${hit.monetary_reward.amount_in_dollars.toFixed(2)}"><img src="${chrome.extension.getURL(`media/images/tv-${hitReviewsTVClass(hourly)}.png`)}" style="max-height: 16px;"></img></span>`;
 
         row
           .querySelector(`.project-name-column`)
@@ -141,7 +141,7 @@ function hitDataPopover(button, hit, reward, status = `ok`) {
         let temp_key = hit.requester_id.concat(hit.monetary_reward.amount_in_dollars.toFixed(2), hit.title);
 
         let hourly = null;
-        const hitButton = HTML`<span class="btn btn-sm text-primary" tabIndex="0" data-tvhit="${temp_key}" data-reward="${hit.monetary_reward.amount_in_dollars.toFixed(2)}"><img src="https://turkerview.com/assets/images/tv-${hitReviewsTVClass(hourly)}.png" style="max-height: 16px;"></img></span>`;
+        const hitButton = HTML`<span class="btn btn-sm text-primary" tabIndex="0" data-tvhit="${temp_key}" data-reward="${hit.monetary_reward.amount_in_dollars.toFixed(2)}"><img src="${chrome.extension.getURL(`media/images/tv-${hitReviewsTVClass(hourly)}.png`)}" style="max-height: 16px;"></img></span>`;
 
         row
           .querySelector(`.project-name-column`)
@@ -200,7 +200,11 @@ function hitDataPopover(button, hit, reward, status = `ok`) {
   
   
 let userApiKey;
-let ViewHeaders;
+let ViewHeaders = new Headers([
+  [`X-VIEW-KEY`, `UNSET`],
+  [`X-APP-KEY`, `MTurk Suite`],
+  [`X-APP-VER`, chrome.runtime.getManifest().version] //SemVer
+]);
 let HitData;
 
 chrome.storage.local.get([`options`], keys => {

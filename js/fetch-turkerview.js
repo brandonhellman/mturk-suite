@@ -1,6 +1,10 @@
 // eslint-disable-next-line no-unused-vars
 let userApiKey;
-let ViewHeaders;
+let ViewHeaders = new Headers([
+  [`X-VIEW-KEY`, `UNSET`],
+  [`X-APP-KEY`, `MTurk Suite`],
+  [`X-APP-VER`, chrome.runtime.getManifest().version] //SemVer
+]);
 
 chrome.storage.local.get([`options`], keys => {
     userApiKey = (keys.options.turkerviewApiKey) ? keys.options.turkerviewApiKey : ``;

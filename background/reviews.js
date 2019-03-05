@@ -30,6 +30,18 @@ const fetchNeverFail = (url, options) =>
     fetchURL();
   });
 
+const fetchOrFail = (url, options) =>
+new Promise((resolve) => {
+  const fetchURL = () =>
+    fetch(url, options)
+      .then((response) => resolve(response))
+      .catch(() => {
+        //let it go
+      });
+
+  fetchURL();
+});
+
 const fetchTurkerview = async (rids) => {
   const storage = await new Promise((resolve) => chrome.storage.local.get([`options`], resolve));
 
@@ -39,7 +51,7 @@ const fetchTurkerview = async (rids) => {
     [`X-APP-VER`, chrome.runtime.getManifest().version],
   ]);
 
-  return fetchNeverFail(`https://view.turkerview.com/v1/requesters/?requester_ids=${rids}`, { headers });
+  return fetchOrFail(`https://view.turkerview.com/v1/requesters/?requester_ids=${rids}`, { headers });
 };
 const fetchTurkopticon = (rids) => fetchNeverFail(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${rids}`);
 
@@ -131,8 +143,9 @@ const handleDelete = (name) =>
   new Promise(async (resolve) => {
     const { db } = REVIEWS[name];
     const transaction = db.transaction([`requester`], `readwrite`);
-    transaction.deleteObjectStore(`requester`);
-    transaction.oncomplete = resolve;
+    const objectStore = transaction.objectStore(`requester`);
+    const objectStoreRequest = objectStore.clear();
+    objectStoreRequest.onsuccess = resolve;
   });
 
 const handleTurkerview = () =>

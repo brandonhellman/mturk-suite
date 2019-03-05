@@ -199,7 +199,7 @@ function finderProcess() {
       requesterTurkerViewReviews.dataset.key = hit.requester_id;
 
       const turkerviewIcon = document.createElement(`img`);
-      turkerviewIcon.src = `https://turkerview.com/assets/images/tv-white.png`;
+      turkerviewIcon.src = chrome.extension.getURL(`media/images/tv-white.png`);
       turkerviewIcon.style.maxHeight = `13px`;
       requesterTurkerViewReviews.appendChild(turkerviewIcon);
       requesterContainer.appendChild(requesterTurkerViewReviews);
