@@ -9,6 +9,19 @@ changeLog.push({
 })
 
 changeLog.push({
+  version: '2.6.6',
+  date: 'Tuesday, March 5, 2019',
+  'HIT Exporting': [
+    'Requester links will now work properly.'
+  ],
+  'Turkerview': [
+    'Endless call loop fixed.',
+    'Fixed return warning issue with Inquisit tasks.'
+  ]
+})
+
+
+changeLog.push({
   version: '2.6.5',
   date: 'Sunday, Februrary 24, 2019',
   'HIT Exporting': [
