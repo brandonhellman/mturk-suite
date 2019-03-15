@@ -9,6 +9,14 @@ changeLog.push({
 })
 
 changeLog.push({
+  version: '2.6.7',
+  date: 'Tuesday, March 5, 2019',
+  'Requester Reviews': [
+    'Fixed issue that caused reviews not to appear.'
+  ]
+})
+
+changeLog.push({
   version: '2.6.6',
   date: 'Tuesday, March 5, 2019',
   'HIT Exporting': [

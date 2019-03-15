@@ -138,7 +138,7 @@ const turkopticonHTML = (hit, review) => {
   url.searchParams.set(`requester[amzn_id]`, requester_id);
   url.searchParams.set(`requester[amzn_name]`, requester_name);
 
-  if (!turkopticon.attrs) {
+  if (!turkopticon || !turkopticon.attrs) {
     return HTML`<div class="col-xs-6" style="width: 100%; text-align: center;">
       <h2>
         <a class="text-primary" href="https://turkopticon.ucsd.edu/${requester_id}" target="_blank">Turkopticon</a>
@@ -181,7 +181,7 @@ const turkopticon2HTML = (hit, review) => {
   url.searchParams.set(`rid`, requester_id);
   url.searchParams.set(`name`, requester_name);
 
-  if (!turkopticon2.all) {
+  if (!turkopticon2 || !turkopticon2.all) {
     return HTML`<div class="col-xs-6" style="width: 100%; text-align: center;">
       <h2>
         <a class="text-primary" href="https://turkopticon.info/requesters/${requester_id}" target="_blank">Turkopticon 2</a>
