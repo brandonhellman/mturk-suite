@@ -181,21 +181,10 @@ function hitDataPopover(button, hit, reward, status = `ok`) {
         if (!hit_keys.includes(temp_key)) hit_keys.push(temp_key);
     });
 
-    fetch('https://view.turkerview.com/v1/hits/', {
-            method: 'POST',
-            headers: ViewHeaders,
-            body: JSON.stringify(hit_keys)
-        }).then(response => {
-            if (!response.ok) throw response;
+    const data = await MTS_sendMessage({ type: `GET_HITS_PREVIEW`, payload: hit_keys });
 
-            return response.json();
-        }).then(json => {
-            HitData = json;
-            hitButtons(json);
-        }).catch(ex => {
-            //console.log(ex);
-            if (ex.statusText == `invalidUserAuthKey`) hitButtonsException(ex.statusText);
-        });
+    HitData = data;
+    hitButtons(data);
   }
   
   

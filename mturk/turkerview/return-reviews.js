@@ -7,7 +7,7 @@ function closeReturnReviewDataModal(){
     document.querySelector(`body`).classList.remove(`modal-open`)
 }
 
-function retrieveReturnReviews(hit_set_id, assignable_hits_count){
+async function retrieveReturnReviews(hit_set_id, assignable_hits_count){
     let found_in_storage = false;
     let deadline_bool = false;
 
@@ -38,100 +38,87 @@ function retrieveReturnReviews(hit_set_id, assignable_hits_count){
 
     if (found_in_storage) return;
 
-    fetch(`https://view.turkerview.com/v2/returns/retrieve/?hit_set_id=${hit_set_id}`, {
-        method: 'GET',
-        cache: 'no-cache',
-        headers: ViewHeaders
-    }).then(response => {
-        if (!response.ok) throw response;
+    const data = await MTS_sendMessage({ type: `GET_RETURN_REVIEWS`, payload: hit_set_id });
 
-        return response.json();
-    }).then(data => {
-        console.log(data);
-        console.log(data.length);
-        console.log(data.reviews.length);
-        if (data.reviews.length === 0) return;
-        let reward = 0;
-        let total_time_in_ms = 0;
-        let underpaid_total = 0;
-        let broken_total = 0;
-        let unpaid_screener_total = 0;
-        let screened_time_total = 0;
-        let tos_total = 0;
-        let writing_total = 0;
-        let downloads_total = 0;
-        let em_total = 0;
-        let comments = [];
+    if (data.reviews.length === 0) return;
+    let reward = 0;
+    let total_time_in_ms = 0;
+    let underpaid_total = 0;
+    let broken_total = 0;
+    let unpaid_screener_total = 0;
+    let screened_time_total = 0;
+    let tos_total = 0;
+    let writing_total = 0;
+    let downloads_total = 0;
+    let em_total = 0;
+    let comments = [];
+    
+    for (i = 0; i < data.reviews.length; i++){
+        //let localUserIgnore = JSON.parse(localStorage.getItem('tv-return-ignore-list')) || [];
+        //if (localUserIgnore.includes(data[i].user_id)) continue;
+
+        reward = data.reviews[i].reward;
+        total_time_in_ms += data.reviews[i].elapsed_work_time;
+        underpaid_total += data.reviews[i].underpaid;
+        broken_total += data.reviews[i].broken;
+        unpaid_screener_total += data.reviews[i].unpaid_screener;
+        tos_total += data.reviews[i].tos;
+        writing_total += data.reviews[i].writing;
+        downloads_total += data.reviews[i].downloads;
+        em_total += data.reviews[i].extraordinary_measures;
+
+        let comment_prefix = '';
+        if (data.reviews[i].underpaid == 1){
+            let hourly = (3600/(data.reviews[i].elapsed_work_time/1000))*(parseFloat(reward)).toFixed(2);
+            comment_prefix = `[Marked Underpaid @ $${hourly.toFixed(2)}/hr]<br>`;
+        }
+
+        if (data.reviews[i].unpaid_screener == 1){
+            screened_time_total += data.reviews[i].elapsed_work_time;
+
+            let time_in_seconds = data.reviews[i].elapsed_work_time/1000;
+            let min = Math.floor(time_in_seconds/60);
+            let sec = (time_in_seconds%60).toFixed(0);
+            comment_prefix += `[Screened out @${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}]<br>`;
+        }
+
+        if (data.reviews[i].tos == 1) comment_prefix += `${tosMap.get(data.reviews[i].tos_type)}<br>`;
+        if (data.reviews[i].writing == 1) comment_prefix += `${writingMap.get(data.reviews[i].writing_type)}<br>`;
+        if (data.reviews[i].downloads == 1) comment_prefix += `${downloadsMap.get(data.reviews[i].downloads_type)}<br>`;
+        if (data.reviews[i].extraordinary_measures == 1) comment_prefix += `${emMap.get(data.reviews[i].em_type)}<br>`;
+
+        let comment_object = {
+            user_id: data.reviews[i].user_id,
+            username: data.reviews[i].username,
+            date: data.reviews[i].date,
+            tos_type: data.reviews[i].tos_type,
+            comment: comment_prefix + data.reviews[i].comment }
+        comments.push(comment_object);
         
-        for (i = 0; i < data.reviews.length; i++){
-            //let localUserIgnore = JSON.parse(localStorage.getItem('tv-return-ignore-list')) || [];
-            //if (localUserIgnore.includes(data[i].user_id)) continue;
+    }
 
-            reward = data.reviews[i].reward;
-            total_time_in_ms += data.reviews[i].elapsed_work_time;
-            underpaid_total += data.reviews[i].underpaid;
-            broken_total += data.reviews[i].broken;
-            unpaid_screener_total += data.reviews[i].unpaid_screener;
-            tos_total += data.reviews[i].tos;
-            writing_total += data.reviews[i].writing;
-            downloads_total += data.reviews[i].downloads;
-            em_total += data.reviews[i].extraordinary_measures;
+    let objectToStore = {
+        group_id: hit_set_id,
+        notice: data.notice,
+        date: moment.tz('America/Los_Angeles'),
+        reward: reward,
+        total_time_in_ms: total_time_in_ms,
+        underpaid_total: underpaid_total,
+        broken_total: broken_total,
+        unpaid_screener_total: unpaid_screener_total,
+        unpaid_screener_time: screened_time_total,
+        tos_total: tos_total,
+        writing_total: writing_total,
+        downloads_total: downloads_total,
+        em_total: em_total,
+        comments: comments
+    };
 
-            let comment_prefix = '';
-            if (data.reviews[i].underpaid == 1){
-                let hourly = (3600/(data.reviews[i].elapsed_work_time/1000))*(parseFloat(reward)).toFixed(2);
-                comment_prefix = `[Marked Underpaid @ $${hourly.toFixed(2)}/hr]<br>`;
-            }
+    buildReturnWarnings(objectToStore);
 
-            if (data.reviews[i].unpaid_screener == 1){
-                screened_time_total += data.reviews[i].elapsed_work_time;
-
-                let time_in_seconds = data.reviews[i].elapsed_work_time/1000;
-                let min = Math.floor(time_in_seconds/60);
-                let sec = (time_in_seconds%60).toFixed(0);
-                comment_prefix += `[Screened out @${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}]<br>`;
-            }
-
-            if (data.reviews[i].tos == 1) comment_prefix += `${tosMap.get(data.reviews[i].tos_type)}<br>`;
-            if (data.reviews[i].writing == 1) comment_prefix += `${writingMap.get(data.reviews[i].writing_type)}<br>`;
-            if (data.reviews[i].downloads == 1) comment_prefix += `${downloadsMap.get(data.reviews[i].downloads_type)}<br>`;
-            if (data.reviews[i].extraordinary_measures == 1) comment_prefix += `${emMap.get(data.reviews[i].em_type)}<br>`;
-
-            let comment_object = {
-                user_id: data.reviews[i].user_id,
-                username: data.reviews[i].username,
-                date: data.reviews[i].date,
-                tos_type: data.reviews[i].tos_type,
-                comment: comment_prefix + data.reviews[i].comment }
-            comments.push(comment_object);
-            
-        }
-
-        let objectToStore = {
-            group_id: hit_set_id,
-            notice: data.notice,
-            date: moment.tz('America/Los_Angeles'),
-            reward: reward,
-            total_time_in_ms: total_time_in_ms,
-            underpaid_total: underpaid_total,
-            broken_total: broken_total,
-            unpaid_screener_total: unpaid_screener_total,
-            unpaid_screener_time: screened_time_total,
-            tos_total: tos_total,
-            writing_total: writing_total,
-            downloads_total: downloads_total,
-            em_total: em_total,
-            comments: comments
-        };
-
-        buildReturnWarnings(objectToStore);
-
-        if (assignable_hits_count >= 10){
-            localStorage.setItem('tv-return-data-'+hit_set_id, JSON.stringify(objectToStore));
-        }
-    }).catch(ex => {
-        returnsApiExceptionHandler(ex);
-    });
+    if (assignable_hits_count >= 10){
+        localStorage.setItem('tv-return-data-'+hit_set_id, JSON.stringify(objectToStore));
+    }
 }
 const classMap = total_reports => total_reports == 0 ? 'text-muted' :
     total_reports < 3 ? 'text-warning' : 'text-danger';
@@ -313,7 +300,7 @@ function returnsApiExceptionHandler(exception){
 
 async function initReturnReviews(){
 
-    const tv_storage_check = localStorage.getItem(`tv-settings`) || null;
+    const tv_storage_check = localStorage.getItem(`ztv-settings`) || null;
 
     if (tv_storage_check){
         const tv_last_active = moment(JSON.parse(tv_storage_check).last_sync).tz('America/Los_Angeles');
