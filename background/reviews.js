@@ -24,23 +24,24 @@ const fetchNeverFail = (url, options) =>
       fetch(url, options)
         .then((response) => resolve(response))
         .catch(() => {
-          setTimeout(fetchURL, 250);
+          // setTimeout(fetchURL, 250);
+          resolve(null);
         });
 
     fetchURL();
   });
 
 const fetchOrFail = (url, options) =>
-new Promise((resolve) => {
-  const fetchURL = () =>
-    fetch(url, options)
-      .then((response) => resolve(response))
-      .catch(() => {
-        //let it go
-      });
+  new Promise((resolve) => {
+    const fetchURL = () =>
+      fetch(url, options)
+        .then((response) => resolve(response))
+        .catch(() => {
+          // let it go
+        });
 
-  fetchURL();
-});
+    fetchURL();
+  });
 
 const fetchTurkerview = async (rids) => {
   const storage = await new Promise((resolve) => chrome.storage.local.get([`options`], resolve));
@@ -168,16 +169,24 @@ const handleTurkerview = () =>
 const handleTurkopticon = () =>
   new Promise(async (resolve) => {
     const response = await fetchTurkopticon([...REVIEWS.turkopticon.ids]);
-    const json = await response.json();
-    await handleUpdate(json, `turkopticon`);
+
+    if (response) {
+      const json = await response.json();
+      await handleUpdate(json, `turkopticon`);
+    }
+
     resolve();
   });
 
 const handleTurkopticon2 = () =>
   new Promise(async (resolve) => {
     const response = await fetchTurkopticon2([...REVIEWS.turkopticon2.ids]);
-    const json = await response.json();
-    await handleUpdate(turkopticon2Transform(json.data), `turkopticon2`);
+
+    if (response) {
+      const json = await response.json();
+      await handleUpdate(turkopticon2Transform(json.data), `turkopticon2`);
+    }
+
     resolve();
   });
 
@@ -227,8 +236,8 @@ async function GET_TURKOPTICON({ payload }, sendResponse) {
       turkopticon2: turkopticon2[rid],
     };
 
-    const toPay = review.turkopticon.attrs ? review.turkopticon.attrs.pay : null;
-    const to2Pay = review.turkopticon2.all ? review.turkopticon2.all.hourly / 3 : null;
+    const toPay = review.turkopticon && review.turkopticon.attrs ? review.turkopticon.attrs.pay : null;
+    const to2Pay = review.turkopticon2 && review.turkopticon2.all ? review.turkopticon2.all.hourly / 3 : null;
 
     if (toPay || to2Pay) {
       review.average = [toPay, to2Pay]
