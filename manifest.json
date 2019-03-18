@@ -35,7 +35,8 @@
       "background/omnibox.js",
       "background/reviews.js",
       "background/web-request.js",
-      "js/fetch-turkerview.js"
+      "js/fetch-turkerview.js",
+      "background/turkerview.js"
     ],
     "persistent": true
   },

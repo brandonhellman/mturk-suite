@@ -156,7 +156,7 @@ function hideTaskReviewData(){
     document.querySelector(`body`).classList.remove(`modal-open`);
 }
 
-function getDetailedHitData(requester_id, reward, title, assignableHitsCount, hit_set_id){
+async function getDetailedHitData(requester_id, reward, title, assignableHitsCount, hit_set_id){
     const postData = {
         requester_id: requester_id,
         reward: reward,
@@ -186,28 +186,15 @@ function getDetailedHitData(requester_id, reward, title, assignableHitsCount, hi
 
     if (found_in_storage) return;
 
-    /* Nothing in cache we should just call TV's API */
-    fetch('https://view.turkerview.com/v1/hits/hit/', {
-        method: 'POST',
-        headers: taskViewHeaders,
-        body: JSON.stringify(postData)
-    }).then(response => {
-        if (!response.ok) throw response;
+    const data = await MTS_sendMessage({ type: `GET_HIT_STATS`, payload: postData });
 
-        return response.json();
-    }).then(json => {
-        buildAndAppend(json, assignableHitsCount);
+    buildAndAppend(data, assignableHitsCount);
 
-        if (assignableHitsCount > 10){
-            json['date'] = moment.tz('America/Los_Angeles');
-            json['hit_set_id'] = hit_set_id;
-            localStorage.setItem('tv-hit-review-'+hit_set_id, JSON.stringify(json));
-        }
-
-    }).catch(ex => {
-        console.log(ex);
-    });
-
+    if (assignableHitsCount > 10){
+        data['date'] = moment.tz('America/Los_Angeles');
+        data['hit_set_id'] = hit_set_id;
+        localStorage.setItem('tv-hit-review-'+hit_set_id, JSON.stringify(data));
+    }
 }
 
 async function initHitReview(){

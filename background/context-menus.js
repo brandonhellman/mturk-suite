@@ -125,3 +125,25 @@ chrome.contextMenus.create({
     }
   }
 });
+
+
+chrome.contextMenus.create({
+  title: `Copy Project Group Id`,
+  contexts: [`link`],
+  targetUrlPatterns: [`https://worker.mturk.com/projects/*/tasks*`],
+  onclick(info){
+    const match = info.linkUrl.match(/projects\/([A-Z0-9]+)\/tasks/);
+    const hitSetId = match ? match[1] : null;
+
+    if (hitSetId){
+      //MTS requests Clipboard permissions but still uses this workaround for HIT exports
+      //Keeping this method for consistency sake, tested in Chrome & works fine.
+      const textarea = document.createElement(`textarea`);
+      textarea.textContent = hitSetId;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand(`copy`);
+      document.body.removeChild(textarea);
+    }
+  }
+});
