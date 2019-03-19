@@ -49,7 +49,6 @@ async function GET_HIT_STATS({ payload }, sendResponse) {
     });
   }
 
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     switch (request.type) {
       case `GET_RETURN_REVIEWS`:

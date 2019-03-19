@@ -300,7 +300,7 @@ function returnsApiExceptionHandler(exception){
 
 async function initReturnReviews(){
 
-    const tv_storage_check = localStorage.getItem(`ztv-settings`) || null;
+    const tv_storage_check = localStorage.getItem(`tv-settings`) || null;
 
     if (tv_storage_check){
         const tv_last_active = moment(JSON.parse(tv_storage_check).last_sync).tz('America/Los_Angeles');
