@@ -9,6 +9,18 @@ changeLog.push({
 })
 
 changeLog.push({
+  version: '2.6.8',
+  date: 'Friday, March 22, 2019',
+  'General': [
+    'Another attempt to fix reviews not appearing by disabling TO2.',
+    'Workspace expander should now focus the iframe correctly.'
+  ],
+  'Turkerview': [
+    'Don\'t duplicate detailed HIT breakdown overlays if TVJS exists.'
+  ]
+})
+
+changeLog.push({
   version: '2.6.7',
   date: 'Tuesday, March 5, 2019',
   'Requester Reviews': [
