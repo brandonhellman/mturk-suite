@@ -222,18 +222,18 @@ async function GET_TURKERVIEW({ payload }, sendResponse) {
 
 async function GET_TURKOPTICON({ payload }, sendResponse) {
   await Promise.all([checkCache(payload, `turkopticon`), checkCache(payload, `turkopticon2`)]);
-  await Promise.all([updateCache(`turkopticon`), updateCache(`turkopticon2`)]);
+  // await Promise.all([updateCache(`turkopticon`), updateCache(`turkopticon2`)]);
 
   const [turkopticon, turkopticon2] = await Promise.all([
     getReviews(payload, `turkopticon`),
-    getReviews(payload, `turkopticon2`),
+    // getReviews(payload, `turkopticon2`),
   ]);
 
   const reviews = payload.reduce((acc, rid) => {
     const review = {
       average: 0,
       turkopticon: turkopticon[rid],
-      turkopticon2: turkopticon2[rid],
+      // turkopticon2: turkopticon2[rid],
     };
 
     const toPay = review.turkopticon && review.turkopticon.attrs ? review.turkopticon.attrs.pay : null;
