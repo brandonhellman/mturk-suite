@@ -3,6 +3,10 @@ async function workspaceExpander() {
     StorageGetKey(`options`),
     Enabled(`workspaceExpander`),
   ]);
+  
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
   const workspace = document.querySelector('#MainContent');
   const taskRow = document.querySelector('.task-row');
@@ -31,6 +35,7 @@ async function workspaceExpander() {
   }
 
   if (iframe) {
+    await sleep(500);
     iframe.style.height = `100%`;
     iframe.scrollIntoView();
     iframe.querySelector('iframe').focus();
