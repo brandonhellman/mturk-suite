@@ -198,6 +198,15 @@ async function getDetailedHitData(requester_id, reward, title, assignableHitsCou
 }
 
 async function initHitReview(){
+    const tv_storage_check = localStorage.getItem(`tv-settings`) || null;
+
+    if (tv_storage_check){
+        const tv_last_active = moment(JSON.parse(tv_storage_check).last_sync).tz('America/Los_Angeles');
+        const diff = moment().tz('America/Los_Angeles').diff(tv_last_active, 'hours')
+        // TVJS is still installed on this user's machine (most likely) - don't add a 2nd return review dialog, we'll have TVJS defer to MTS later
+        if (diff < 36) return;
+    }
+
     const [dom, props] = await Promise.all([
         ReactDOM(`ShowModal`),
         ReactProps(`ShowModal`)
