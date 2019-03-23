@@ -317,7 +317,7 @@ function markdownTemplate(hit) {
     const template = `> **Title:** [${hit.title}](https://worker.mturk.com/projects/${
       hit.hit_set_id
     }/tasks) | [Accept](https://worker.mturk.com/projects/${hit.hit_set_id}/tasks/accept_random)  
-      **Requester:** [${hit.requester_name}](https://worker.mturk.com/requesters${hit.requester_id}/projects) [${
+      **Requester:** [${hit.requester_name}](https://worker.mturk.com/requesters/${hit.requester_id}/projects) [${
       hit.requester_id
     }] [Contact](https://worker.mturk.com/contact_requester/hit_type_messages/new?hit_type_message[hit_type_id]=YOURMTURKHIT&hit_type_message[requester_id]=${
       hit.requester_id
