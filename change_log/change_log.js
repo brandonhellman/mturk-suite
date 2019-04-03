@@ -9,6 +9,16 @@ changeLog.push({
 })
 
 changeLog.push({
+  version: '2.6.9',
+  date: 'Wednesday, April 3, 2019',
+  'General': [
+    'Fix for Turkopticon?',
+    'Requester links for markdown exports have been fixed.'
+  ],
+})
+
+
+changeLog.push({
   version: '2.6.8',
   date: 'Friday, March 22, 2019',
   'General': [
