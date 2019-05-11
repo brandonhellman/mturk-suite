@@ -559,6 +559,8 @@ async function catcherRun(forcedId) {
             catcher.timeout = setTimeout(catcherRun, delay(), status === 429 ? id : undefined);
         } else if (err instanceof TypeError) {
           catcher.timeout = setTimeout(catcherRun, delay(), id);
+        } else {
+          catcher.timeout = setTimeout(catcherRun, delay(), id);
         }
     }
     else if (catcher.paused.status === false) {
