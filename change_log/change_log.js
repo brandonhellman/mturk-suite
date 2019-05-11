@@ -9,6 +9,14 @@ changeLog.push({
 })
 
 changeLog.push({
+  version: '2.6.10',
+  date: 'Friday, May 10, 2019',
+  'HIT Catcher': [
+    'Fixed the random freezing issue.'
+  ],
+})
+
+changeLog.push({
   version: '2.6.9',
   date: 'Wednesday, April 3, 2019',
   'General': [
