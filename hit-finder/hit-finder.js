@@ -293,6 +293,32 @@ function finderProcess() {
           : `N`;
       row.appendChild(masters);
 
+      const hitCatcher = document.createElement(`td`);
+      hitCatcher.className = `text-center w-1`;
+      row.appendChild(hitCatcher);
+
+      const hitCatcherContainer = document.createElement(`div`);
+      hitCatcherContainer.className = `btn-group`;
+      hitCatcher.appendChild(hitCatcherContainer);
+
+      const once = document.createElement(`button`);
+      once.type = `button`;
+      once.className = `btn btn-sm btn-primary px-2 py-0 hit-catcher`;
+      once.dataset.key = hit.hit_set_id;
+      once.dataset.name = `once`;
+      once.style.fontFamily = `"Lucida Console", Monaco, monospace`;
+      once.textContent = `O`;
+      hitCatcherContainer.appendChild(once);
+
+      const panda = document.createElement(`button`);
+      panda.type = `button`;
+      panda.className = `btn btn-sm btn-primary px-2 py-0 hit-catcher`;
+      panda.dataset.key = hit.hit_set_id;
+      panda.dataset.name = `panda`;
+      panda.style.fontFamily = `"Lucida Console", Monaco, monospace`;
+      panda.textContent = `P`;
+      hitCatcherContainer.appendChild(panda);
+
       const recentRow = toggleColumns(row.cloneNode(true), `recent`);
       recentRow.id = `recent-${hit.hit_set_id}`;
 
@@ -683,6 +709,7 @@ function toggleColumns() {
   element.children[4].style.display = storage.hitFinder[`display-${type}-column-available`] ? `` : `none`;
   element.children[5].style.display = storage.hitFinder[`display-${type}-column-reward`] ? `` : `none`;
   element.children[6].style.display = storage.hitFinder[`display-${type}-column-masters`] ? `` : `none`;
+  element.children[7].style.display = storage.hitFinder[`display-${type}-column-hit-catcher`] ? `` : `none`;
 
   return element;
 }
@@ -915,6 +942,32 @@ $(`[data-toggle="tooltip"]`).tooltip({
   delay: {
     show: 500,
   },
+});
+
+$(`body`).on(`click`, `.hit-catcher`, (event) => {
+  const key = event.target.dataset.key;
+  const once = event.target.dataset.name === `once` ? true : false;
+  const hit = finderDB[key];
+
+  chrome.runtime.sendMessage({
+    hitCatcher: {
+      id: key,
+      name: ``,
+      once: once,
+      sound: once,
+      project: {
+        requester_name: hit.requester_name,
+        requester_id: hit.requester_id,
+        title: hit.title,
+        hit_set_id: hit.hit_set_id,
+        monetary_reward: {
+          amount_in_dollars: hit.monetary_reward.amount_in_dollars
+        },
+        assignment_duration_in_seconds: hit.assignment_duration_in_seconds,
+        project_requirements: hit.project_requirements
+      }
+    }
+  });
 });
 
 $(`#block-list-add-modal`).on(`show.bs.modal`, (event) => {

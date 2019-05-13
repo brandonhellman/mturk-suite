@@ -101,6 +101,7 @@ chrome.storage.local.get(`hitFinder`, keys => {
         "display-recent-column-available": true,
         "display-recent-column-reward": true,
         "display-recent-column-masters": true,
+        "display-recent-column-hit-catcher": true,
 
         "display-logged-column-time": true,
         "display-logged-column-requester": true,
@@ -108,13 +109,15 @@ chrome.storage.local.get(`hitFinder`, keys => {
         "display-logged-column-available": true,
         "display-logged-column-reward": true,
         "display-logged-column-masters": true,
+        "display-logged-column-hit-catcher": true,
 
         "display-included-column-time": true,
         "display-included-column-requester": true,
         "display-included-column-title": true,
         "display-included-column-available": true,
         "display-included-column-reward": true,
-        "display-included-column-masters": true
+        "display-included-column-masters": true,
+        "display-included-column-hit-catcher": true
       }
     });
   }
