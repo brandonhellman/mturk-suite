@@ -306,7 +306,6 @@ function finderProcess() {
       once.className = `btn btn-sm btn-primary px-2 py-0 hit-catcher`;
       once.dataset.key = hit.hit_set_id;
       once.dataset.name = `once`;
-      once.style.fontFamily = `"Lucida Console", Monaco, monospace`;
       once.textContent = `O`;
       hitCatcherContainer.appendChild(once);
 
@@ -315,7 +314,6 @@ function finderProcess() {
       panda.className = `btn btn-sm btn-primary px-2 py-0 hit-catcher`;
       panda.dataset.key = hit.hit_set_id;
       panda.dataset.name = `panda`;
-      panda.style.fontFamily = `"Lucida Console", Monaco, monospace`;
       panda.textContent = `P`;
       hitCatcherContainer.appendChild(panda);
 
@@ -944,30 +942,56 @@ $(`[data-toggle="tooltip"]`).tooltip({
   },
 });
 
-$(`body`).on(`click`, `.hit-catcher`, (event) => {
-  const key = event.target.dataset.key;
-  const once = event.target.dataset.name === `once` ? true : false;
-  const hit = finderDB[key];
-
-  chrome.runtime.sendMessage({
-    hitCatcher: {
-      id: key,
-      name: ``,
-      once: once,
-      sound: once,
-      project: {
-        requester_name: hit.requester_name,
-        requester_id: hit.requester_id,
-        title: hit.title,
-        hit_set_id: hit.hit_set_id,
-        monetary_reward: {
-          amount_in_dollars: hit.monetary_reward.amount_in_dollars
-        },
-        assignment_duration_in_seconds: hit.assignment_duration_in_seconds,
-        project_requirements: hit.project_requirements
+$(`body`).on(`click`, `.hit-catcher`, async (event) => {
+  const opened = await new Promise(resolve =>
+    chrome.runtime.sendMessage({ hitCatcher: `open` }, (open) => {
+      const err = chrome.runtime.lastError;
+      if (err) {
+        alert(`Hit Catcher does not appear to be running.`);
+      } else {
+        resolve(open);
       }
+    })
+  );
+
+  if (opened) {
+    const key = event.target.dataset.key;
+    const once = event.target.dataset.name === `once` ? true : false;
+    const hit = finderDB[key];
+
+    chrome.runtime.sendMessage({
+      hitCatcher: {
+        id: key,
+        name: ``,
+        once: once,
+        sound: once,
+        project: {
+          requester_name: hit.requester_name,
+          requester_id: hit.requester_id,
+          title: hit.title,
+          hit_set_id: hit.hit_set_id,
+          monetary_reward: {
+            amount_in_dollars: hit.monetary_reward.amount_in_dollars
+          },
+          assignment_duration_in_seconds: hit.assignment_duration_in_seconds,
+          project_requirements: hit.project_requirements
+        }
+      }
+    });
+
+    const elem = once ? 0 : 1;
+
+    const includedRow = document.getElementById(`included-${hit.hit_set_id}`);
+    if (includedRow) {
+      includedRow.children[7].firstChild.children[elem].classList.add(`bg-secondary`);
     }
-  });
+
+    document.getElementById(`recent-${hit.hit_set_id}`).children[7]
+      .firstChild.children[elem].classList.add(`bg-secondary`);
+
+    document.getElementById(`logged-${hit.hit_set_id}`).children[7]
+      .firstChild.children[elem].classList.add(`bg-secondary`);
+  }
 });
 
 $(`#block-list-add-modal`).on(`show.bs.modal`, (event) => {
