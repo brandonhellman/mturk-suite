@@ -9,6 +9,14 @@ changeLog.push({
 })
 
 changeLog.push({
+  version: '2.6.11',
+  date: 'Wednesday, May 15, 2019',
+  'HIT Finder': [
+    'New buttons [O|P] added to send HITs directly to HIT Catcher.'
+  ],
+})
+
+changeLog.push({
   version: '2.6.10',
   date: 'Friday, May 10, 2019',
   'HIT Catcher': [
