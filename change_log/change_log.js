@@ -10,7 +10,7 @@ changeLog.push({
 
 changeLog.push({
   version: '2.6.12',
-  date: 'Friday, May 15, 2019',
+  date: 'Friday, May 17, 2019',
   'HIT Finder': [
     'New buttons [O|P] should now properly change color when clicked.'
   ],
