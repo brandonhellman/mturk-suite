@@ -9,6 +9,17 @@ changeLog.push({
 })
 
 changeLog.push({
+  version: '2.6.12',
+  date: 'Friday, May 15, 2019',
+  'HIT Finder': [
+    'New buttons [O|P] should now properly change color when clicked.'
+  ],
+  'General':[
+    'Added content script to listen to the new built in HIT Catcher buttons on HIT Notifier'
+  ]
+})
+
+changeLog.push({
   version: '2.6.11',
   date: 'Wednesday, May 15, 2019',
   'HIT Finder': [
