@@ -312,6 +312,13 @@
       "js": ["mturk/workspace-expander.js"],
       "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
       "run_at": "document_end"
+    },
+
+    {
+      "js": ["hitnotifier/listener.js"],
+      "matches": ["http://hitnotifier.com/*"],
+      "run_at": "document_end"
     }
+
   ]
 }
