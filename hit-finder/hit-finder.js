@@ -983,14 +983,17 @@ $(`body`).on(`click`, `.hit-catcher`, async (event) => {
 
     const includedRow = document.getElementById(`included-${hit.hit_set_id}`);
     if (includedRow) {
-      includedRow.children[7].firstChild.children[elem].classList.add(`bg-secondary`);
+      includedRow.children[7].firstChild.children[elem].classList
+        .replace(`btn-primary`, `btn-secondary`);
     }
 
-    document.getElementById(`recent-${hit.hit_set_id}`).children[7]
-      .firstChild.children[elem].classList.add(`bg-secondary`);
+    document.getElementById(`recent-${hit.hit_set_id}`)
+      .children[7].firstChild.children[elem].classList
+      .replace(`btn-primary`, `btn-secondary`);
 
-    document.getElementById(`logged-${hit.hit_set_id}`).children[7]
-      .firstChild.children[elem].classList.add(`bg-secondary`);
+    const loggedClassList = document.getElementById(`logged-${hit.hit_set_id}`)
+      .children[7].firstChild.children[elem].classList
+      .replace(`btn-primary`, `btn-secondary`);
   }
 });
 
