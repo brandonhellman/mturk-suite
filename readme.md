@@ -1,3 +1,7 @@
+## ⚠️⚠️⚠️ **WARNING** ⚠️⚠️⚠️
+
+The `master` branch is the rewrite the will become v3. You can find v2 (the version currently published for Chrome and Firefox) under the [v2 branch](https://github.com/Kadauchi/mturk-suite/tree/v2).
+
 # Full Documentation
 See the [Wiki](https://github.com/Kadauchi/mturk-suite/wiki) for full documentation.
 
