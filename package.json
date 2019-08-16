@@ -1,10 +1,12 @@
 {
   "name": "mturk-suite",
   "version": "1.0.0",
+  "description": "Enchances Mechanical Turk to increase your efficiency and earnings.",
+  "license": "ISC",
+  "dependencies": {
+    "webextension-scripts": "^0.3.4"
+  },
   "devDependencies": {
-    "eslint": "^5.12.1",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-config-prettier": "^4.0.0",
-    "eslint-plugin-import": "^2.16.0"
+    "prettier": "^1.18.2"
   }
 }
