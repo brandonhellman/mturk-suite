@@ -1,8 +1,12 @@
 {
   "name": "mturk-suite",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Enchances Mechanical Turk to increase your efficiency and earnings.",
   "license": "ISC",
+  "scripts": {
+    "start": "webextension-scripts start",
+    "build": "webextension-scripts build"
+  },
   "dependencies": {
     "webextension-scripts": "^0.4.2"
   },
