@@ -4,7 +4,7 @@
   "description": "Enchances Mechanical Turk to increase your efficiency and earnings.",
   "license": "ISC",
   "dependencies": {
-    "webextension-scripts": "^0.3.4"
+    "webextension-scripts": "^0.4.2"
   },
   "devDependencies": {
     "prettier": "^1.18.2"
