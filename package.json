@@ -8,7 +8,7 @@
     "build": "webextension-scripts build"
   },
   "dependencies": {
-    "webextension-scripts": "^0.4.2"
+    "webextension-scripts": "^0.4.3"
   },
   "devDependencies": {
     "prettier": "^1.18.2"
