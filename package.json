@@ -12,5 +12,8 @@
   },
   "devDependencies": {
     "prettier": "^1.18.2"
+  },
+  "eslintConfig": {
+    "extends": "eslint-config-webextension"
   }
 }
