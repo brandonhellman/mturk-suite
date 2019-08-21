@@ -2,43 +2,33 @@
 
 The `master` branch is the rewrite the will become v3. You can find v2 (the version currently published for Chrome and Firefox) under the [v2 branch](https://github.com/Kadauchi/mturk-suite/tree/v2).
 
-# Full Documentation
-See the [Wiki](https://github.com/Kadauchi/mturk-suite/wiki) for full documentation.
-
 ---
 
-# Issues & Improvements
-You can submit an issue or improvement request [here](https://github.com/Kadauchi/mturk-suite/issues).
+## Available Scripts
 
----
+In the project directory, you can run:
 
-# Installation
+### `npm run start`
 
-### Chrome
-https://chrome.google.com/webstore/detail/mturk-suite/iglbakfobmoijpbigmlfklckogbefnlf
+Compiles the extension into `./build/unpacked` to be that can be loaded into [Chrome](#load-into-chrome) or [Firefox](#load-into-firefox) for development.
 
-### Firefox
-https://addons.mozilla.org/en-US/firefox/addon/mturk-suite/
+The extension will automatically reload when you save changes.
 
-### Chrome - Unpacked
-**Install**
-1. Download https://github.com/Kadauchi/mturk-suite/archive/master.zip
-2. Extract `...Downloads\mturk-suite-master.zip`
-3. Open (opened automatically after extract in most cases) `...Downloads\mturk-suite-master`
-4. Rename `...Downloads\mturk-suite-master\mturk-suite-master` to `...Downloads\mturk-suite-master\mturk-suite`
-5. Move `...Downloads\mturk-suite-master\mturk-suite` to `...\Desktop\mturk-suite`
-6. Open a Chrome tab to `chrome://extensions/`
-7. On the tab `chrome://extensions/`, enable Developer mode by clicking the toggle in the top right
-8. Click `LOAD UNPACKED`
-9. Navigate to and select `...\Desktop\mturk-suite`
-9. Click Ok
+#### Load into Chrome
 
-**Update**
-1. Download https://github.com/Kadauchi/mturk-suite/archive/master.zip
-2. Extract `...Downloads\mturk-suite-master.zip`
-3. Open (opened automatically after extract in most cases) `...Downloads\mturk-suite-master`
-4. Rename `...Downloads\mturk-suite-master\mturk-suite-master` to `...Downloads\mturk-suite-master\mturk-suite`
-5. Move `...Downloads\mturk-suite-master\mturk-suite` to `...\Desktop\mturk-suite` and replace all
-6. Open a Chrome tab to `chrome://extensions/`
-7. On the tab `chrome://extensions/`
-8. Reload MTurk Suite
+1. Open Chrome
+2. Go to `chrome://extensions`
+3. Turn on `Developer mode`
+4. Click `Load unpacked`
+5. Select folder `./build/unpacked`
+
+#### Load into Firefox
+
+1. Open Firefox
+2. Go to `about:debugging`
+3. Click `Load Temporary Add-on...`
+4. Open `./build/unpacked/manifest.json`
+
+### `npm run build`
+
+Compiles the extension into `./build/unpacked` and then packages that into production ready zips at `./build/{target}-{version}.zip`.
