@@ -22,10 +22,23 @@
 
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content_script.ts"]
+      "js": ["scripts/confirmReturnHit.ts"],
+      "matches": ["https://worker.mturk.com/tasks*", "https://worker.mturk.com/projects/*/tasks/*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["scripts/getWorkerId.ts"],
+      "matches": ["https://worker.mturk.com/*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["scripts/rateLimitReloader.ts"],
+      "matches": ["https://worker.mturk.com/*"],
+      "run_at": "document_end"
     }
   ],
 
-  "permissions": ["<all_urls>"]
+  "permissions": ["https://worker.mturk.com/*"]
 }
