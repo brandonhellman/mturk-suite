@@ -1,6 +1,7 @@
 import { Store } from 'webext-redux';
-import { getReactProps, ReactPropsCopyText } from '../utils/getReactProps';
+
 import { mturkUpdate } from '../store/mturk/actions';
+import { getReactProps, ReactPropsCopyText } from '../utils/getReactProps';
 
 const store = new Store();
 
