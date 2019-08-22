@@ -15,6 +15,8 @@
     "default_popup": "pages/popup/index.html"
   },
 
+  "options_page": "pages/options/index.html",
+
   "background": {
     "scripts": ["background.ts"],
     "persistent": false
