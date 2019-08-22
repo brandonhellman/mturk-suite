@@ -34,6 +34,23 @@
     },
 
     {
+      "js": ["scripts/paginationLastPage.ts"],
+      "matches": [
+        "https://worker.mturk.com/",
+        "https://worker.mturk.com/?*",
+        "https://worker.mturk.com/projects",
+        "https://worker.mturk.com/projects/",
+        "https://worker.mturk.com/projects?*",
+        "https://worker.mturk.com/projects/?*",
+        "https://worker.mturk.com/tasks?*",
+        "https://worker.mturk.com/requesters/*",
+        "https://worker.mturk.com/status_details/*",
+        "https://worker.mturk.com/qualifications/*"
+      ],
+      "run_at": "document_end"
+    },
+
+    {
       "js": ["scripts/rateLimitReloader.ts"],
       "matches": ["https://worker.mturk.com/*"],
       "run_at": "document_end"

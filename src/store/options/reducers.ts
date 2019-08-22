@@ -5,6 +5,7 @@ import { OptionsState, OptionsActionTypes, OPTIONS_UPDATE_SCRIPTS } from './type
 const initialState: OptionsState = {
   scripts: {
     confirmReturnHit: true,
+    paginationLastPage: true,
     rateLimitReloader: true,
   },
 };
