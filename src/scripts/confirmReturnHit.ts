@@ -9,7 +9,7 @@ store.ready().then(() => {
 
   if (options.scripts.confirmReturnHit) {
     document.addEventListener('submit', (event) => {
-      const form = event.currentTarget as HTMLFormElement;
+      const form = event.target as HTMLFormElement;
 
       if (form.querySelector('[value="delete"]')) {
         event.preventDefault();
