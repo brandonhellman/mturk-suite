@@ -8,6 +8,11 @@
     "build": "webextension-scripts build"
   },
   "dependencies": {
+    "@types/react": "^16.9.2",
+    "@types/react-dom": "^16.9.0",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "typescript": "^3.5.3",
     "webextension-scripts": "^0.5.0"
   },
   "devDependencies": {
