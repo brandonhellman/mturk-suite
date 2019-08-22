@@ -2,11 +2,13 @@ import { applyMiddleware, createStore, combineReducers, Middleware } from 'redux
 import { createLogger } from 'redux-logger';
 import { wrapStore } from 'webext-redux';
 
+import { mturkReducer } from './mturk/reducers';
 import { optionsReducer } from './options/reducers';
 
 const logger = createLogger();
 
 const rootReducer = combineReducers({
+  mturk: mturkReducer,
   options: optionsReducer,
 });
 
