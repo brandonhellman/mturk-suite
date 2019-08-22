@@ -7,8 +7,6 @@ import { Store } from 'webext-redux';
 
 import { App } from './components/App';
 
-ReactDom.render(<App />, document.getElementById('root'));
-
 const store = new Store();
 
 store.ready().then(() => {
