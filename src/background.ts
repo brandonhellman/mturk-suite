@@ -1,1 +1,3 @@
-console.log('Hello from background.ts');
+import { configureStore } from './store';
+
+const store = configureStore();
