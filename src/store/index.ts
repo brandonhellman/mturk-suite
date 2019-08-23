@@ -19,3 +19,5 @@ export function configureStore(...middlewares: Middleware[]) {
   wrapStore(store);
   return store;
 }
+
+export type AppStore = ReturnType<typeof configureStore>;
