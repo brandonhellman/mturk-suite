@@ -1,14 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 
-import { TurkopticonIcon } from '../../components/TurkopticonIcon';
-import { ReviewButton } from '../components/ReviewButton';
+import { TurkerviewIcon } from '../../components/TurkerviewIcon';
+import { ReviewButton } from './ReviewButton';
 import { injectReviewPopover } from '../../utils/injectReviewPopover';
 
 interface Props {
   rid: string;
 }
 
-export function Turkopticon({ rid }: Props) {
+export function Turkerview({ rid }: Props) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export function Turkopticon({ rid }: Props) {
 
   return (
     <ReviewButton>
-      <TurkopticonIcon />
+      <TurkerviewIcon />
       <script ref={ref} />
     </ReviewButton>
   );

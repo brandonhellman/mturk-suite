@@ -3,8 +3,8 @@ import { useSelector } from 'react-redux';
 
 import { selectOptions } from '../../store/options/selectors';
 
-import { Turkerview } from '../containers/Turkerview';
-import { Turkopticon } from '../containers/Turkopticon';
+import { Turkerview } from './Turkerview';
+import { Turkopticon } from './Turkopticon';
 
 interface Props {
   rid: string;
