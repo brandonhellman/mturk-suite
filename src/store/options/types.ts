@@ -1,21 +1,24 @@
-export interface OptionsState {
+export const OptionsInitialState = {
   scripts: {
-    confirmReturnHit: boolean;
-    paginationLastPage: boolean;
-    rateLimitReloader: boolean;
-    turkerview: boolean;
-    turkopticon: boolean;
-  };
+    autoAcceptUnchecker: true,
+    confirmReturnHit: true,
+    hitExporter: true,
+    mtsBlockList: true,
+    mtsHitTracker: true,
+    paginationLastPage: true,
+    queueInfoEnhancer: true,
+    rateLimitReloader: true,
+    turkerview: true,
+    turkopticon: true,
+    workspaceExpander: true,
+  },
+};
+
+export type OptionsState = typeof OptionsInitialState;
+
+export interface OptionsScriptsToggleAction {
+  type: 'OPTIONS_SCRIPTS_TOGGLE';
+  payload: keyof OptionsState['scripts'];
 }
 
-export const OPTIONS_UPDATE_SCRIPTS = 'OPTIONS_UPDATE_SCRIPTS';
-
-export interface OptionsUpdateScriptsAction {
-  type: typeof OPTIONS_UPDATE_SCRIPTS;
-  payload: {
-    key: 'confirmReturnHit' | 'paginationLastPage' | 'rateLimitReloader' | 'turkerview' | 'turkopticon';
-    value: boolean;
-  };
-}
-
-export type OptionsActionTypes = OptionsUpdateScriptsAction;
+export type OptionsActionTypes = OptionsScriptsToggleAction;

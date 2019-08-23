@@ -1,8 +1,8 @@
-import { OptionsUpdateScriptsAction, OPTIONS_UPDATE_SCRIPTS } from './types';
+import { OptionsScriptsToggleAction } from './types';
 
-export function optionsUpdateScripts(payload: OptionsUpdateScriptsAction['payload']): OptionsUpdateScriptsAction {
+export function optionsUpdateScripts(payload: OptionsScriptsToggleAction['payload']): OptionsScriptsToggleAction {
   return {
-    type: OPTIONS_UPDATE_SCRIPTS,
+    type: 'OPTIONS_SCRIPTS_TOGGLE',
     payload,
   };
 }
