@@ -1,5 +1,5 @@
 import { configureStore } from '../../store';
-import { initContextMenus } from './initContextMenus';
+import { contextMenus } from './contextMenus';
 
 const store = configureStore();
-initContextMenus(store);
+contextMenus(store);
