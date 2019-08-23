@@ -1,14 +1,14 @@
 import React from 'react';
 
 interface Props {
-  rid: string;
+  requester_id: string;
 }
 
-export function TurkopticonPopover({ rid }: Props) {
+export function TurkopticonPopover({ requester_id }: Props) {
   return (
     <div>
       <h2 className="text-center">
-        <a className="text-primary" href={`https://turkopticon.ucsd.edu/${rid}`} target="_blank">
+        <a className="text-primary" href={`https://turkopticon.ucsd.edu/${requester_id}`} target="_blank">
           Turkopticon
         </a>
         <span className="text-muted">

@@ -29,8 +29,12 @@ store.ready().then(async () => {
       ReactDom.render(
         // @ts-ignore
         <Provider store={store}>
-          {options.scripts.turkerview && <Turkerview rid={hit.requester_id} rname={hit.requester_name} />}
-          {options.scripts.turkopticon && <Turkopticon rid={hit.requester_id} rname={hit.requester_name} />}
+          {options.scripts.turkerview && (
+            <Turkerview requester_id={hit.requester_id} requester_name={hit.requester_name} />
+          )}
+          {options.scripts.turkopticon && (
+            <Turkopticon requester_id={hit.requester_id} requester_name={hit.requester_name} />
+          )}
         </Provider>,
         react,
       );

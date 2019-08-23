@@ -1,20 +1,20 @@
 import React, { useEffect, useRef } from 'react';
 
 import { TurkopticonIcon } from '../../components/TurkopticonIcon';
-import { injectReviewPopover } from '../../utils/injectReviewPopover';
+import { injectPopover } from '../../utils/injectPopover';
 import { TurkopticonPopover } from '../containers/TurkopticonPopover';
 import { ReviewButton } from './ReviewButton';
 
 interface Props {
-  rid: string;
-  rname: string;
+  requester_id: string;
+  requester_name: string;
 }
 
-export function Turkopticon({ rid, rname }: Props) {
+export function Turkopticon({ requester_id, requester_name }: Props) {
   const ref = useRef(null);
 
   useEffect(() => {
-    injectReviewPopover(ref, rid, rname, <TurkopticonPopover rid={rid} />);
+    injectPopover(ref, `${requester_name} [${requester_id}]`, <TurkopticonPopover requester_id={requester_id} />);
   }, []);
 
   return (

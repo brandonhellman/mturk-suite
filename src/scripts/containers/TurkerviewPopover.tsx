@@ -1,14 +1,14 @@
 import React from 'react';
 
 interface Props {
-  rid: string;
+  requester_id: string;
 }
 
-export function TurkerviewPopover({ rid }: Props) {
+export function TurkerviewPopover({ requester_id }: Props) {
   return (
     <div>
       <h2 className="text-center">
-        <a className="text-primary" href={`https://turkerview.com/requesters/${rid}`} target="_blank">
+        <a className="text-primary" href={`https://turkerview.com/requesters/${requester_id}`} target="_blank">
           TurkerView
         </a>
         <span className="text-muted">

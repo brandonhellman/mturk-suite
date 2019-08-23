@@ -30,10 +30,10 @@ store.ready().then(async () => {
         // @ts-ignore
         <Provider store={store}>
           {options.scripts.turkerview && (
-            <Turkerview rid={hit.project.requester_id} rname={hit.project.requester_name} />
+            <Turkerview requester_id={hit.project.requester_id} requester_name={hit.project.requester_name} />
           )}
           {options.scripts.turkopticon && (
-            <Turkopticon rid={hit.project.requester_id} rname={hit.project.requester_name} />
+            <Turkopticon requester_id={hit.project.requester_id} requester_name={hit.project.requester_name} />
           )}
         </Provider>,
         react,
