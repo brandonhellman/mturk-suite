@@ -5,5 +5,5 @@ interface Props {
 }
 
 export function TurkopticonPopover({ rid }: Props) {
-  <div>{rid}</div>;
+  return <div>{rid}</div>;
 }

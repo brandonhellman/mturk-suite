@@ -5,5 +5,5 @@ interface Props {
 }
 
 export function TurkerviewPopover({ rid }: Props) {
-  <div>{rid}</div>;
+  return <div>{rid}</div>;
 }
