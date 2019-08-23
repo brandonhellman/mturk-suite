@@ -23,6 +23,12 @@
 
   "content_scripts": [
     {
+      "js": ["scripts/autoAcceptUnchecker.ts"],
+      "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
+      "run_at": "document_end"
+    },
+
+    {
       "js": ["scripts/confirmReturnHit.ts"],
       "matches": ["https://worker.mturk.com/tasks*", "https://worker.mturk.com/projects/*/tasks/*"],
       "run_at": "document_end"
