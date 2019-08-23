@@ -39,6 +39,18 @@ export function OptionsPane() {
         checked={options.scripts.rateLimitReloader}
         onChange={(event) => onChangeScripts(event, 'rateLimitReloader')}
       />
+
+      <Checkbox
+        label="Turkerview"
+        checked={options.scripts.turkerview}
+        onChange={(event) => onChangeScripts(event, 'turkerview')}
+      />
+
+      <Checkbox
+        label="Turkopticon"
+        checked={options.scripts.turkopticon}
+        onChange={(event) => onChangeScripts(event, 'turkopticon')}
+      />
     </Tab.Pane>
   );
 }

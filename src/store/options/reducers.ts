@@ -7,6 +7,8 @@ const initialState: OptionsState = {
     confirmReturnHit: true,
     paginationLastPage: true,
     rateLimitReloader: true,
+    turkerview: true,
+    turkopticon: true,
   },
 };
 
