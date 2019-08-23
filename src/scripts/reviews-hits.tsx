@@ -32,7 +32,7 @@ store.ready().then(async () => {
       ReactDom.render(
         // @ts-ignore
         <Provider store={store}>
-          <Review rid={hit.requester_id} />
+          <Review rid={hit.requester_id} rname={hit.requester_name} />
         </Provider>,
         react,
       );

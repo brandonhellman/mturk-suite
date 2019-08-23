@@ -8,15 +8,16 @@ import { Turkopticon } from './Turkopticon';
 
 interface Props {
   rid: string;
+  rname: string;
 }
 
-export function Review({ rid }: Props) {
+export function Review({ rid, rname }: Props) {
   const options = useSelector(selectOptions);
 
   return (
     <>
-      {options.scripts.turkerview && <Turkerview rid={rid} />}
-      {options.scripts.turkopticon && <Turkopticon rid={rid} />}
+      {options.scripts.turkerview && <Turkerview rid={rid} rname={rname}/>}
+      {options.scripts.turkopticon && <Turkopticon rid={rid} rname={rname} />}
     </>
   );
 }

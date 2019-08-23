@@ -6,13 +6,14 @@ import { injectReviewPopover } from '../../utils/injectReviewPopover';
 import { ReviewButton } from './ReviewButton';
 interface Props {
   rid: string;
+  rname: string;
 }
 
-export function Turkerview({ rid }: Props) {
+export function Turkerview({ rid, rname }: Props) {
   const ref = useRef(null);
 
   useEffect(() => {
-    injectReviewPopover(ref, rid, rid, <TurkerviewPopover rid={rid} />);
+    injectReviewPopover(ref, rid, rname, <TurkerviewPopover rid={rid} />);
   }, []);
 
   return (

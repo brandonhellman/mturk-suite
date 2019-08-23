@@ -7,13 +7,14 @@ import { ReviewButton } from './ReviewButton';
 
 interface Props {
   rid: string;
+  rname: string;
 }
 
-export function Turkopticon({ rid }: Props) {
+export function Turkopticon({ rid, rname }: Props) {
   const ref = useRef(null);
 
   useEffect(() => {
-    injectReviewPopover(ref, rid, rid, <TurkopticonPopover rid={rid} />);
+    injectReviewPopover(ref, rid, rname, <TurkopticonPopover rid={rid} />);
   }, []);
 
   return (
