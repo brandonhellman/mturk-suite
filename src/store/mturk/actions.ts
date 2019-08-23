@@ -1,8 +1,8 @@
-import { MturkUpdateAction, MTURK_UPDATE } from './types';
+import { MturkUpdateAction } from './types';
 
 export function mturkUpdate(payload: MturkUpdateAction['payload']): MturkUpdateAction {
   return {
-    type: MTURK_UPDATE,
+    type: 'MTURK_UPDATE',
     payload,
   };
 }
