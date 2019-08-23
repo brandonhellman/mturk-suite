@@ -11,7 +11,7 @@ export function injectReviewPopover(
     html: true,
     delay: { show: 100, hide: 400 },
     trigger: 'hover focus',
-    title: '${rid} [${rid}]',
+    title: '${rname} [${rid}]',
     content: '${ReactDOMServer.renderToString(content)}'
   });`;
   ref.current.replaceWith(script);
