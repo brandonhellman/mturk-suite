@@ -14,7 +14,7 @@ export function ReviewButton({ children }: Props) {
   }, [spanEl]);
 
   return (
-    <span ref={spanEl} className="btn btn-sm btn-default">
+    <span ref={spanEl} className="btn btn-sm btn-default" tabIndex={0}>
       {children}
     </span>
   );
