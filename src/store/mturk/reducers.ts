@@ -3,7 +3,7 @@ import produce from 'immer';
 import { MturkState, MturkActionTypes, MTURK_UPDATE } from './types';
 
 const initialState: MturkState = {
-  workerId: '',
+  workerId: 'Please visit worker.mturk.com',
 };
 
 export function mturkReducer(state = initialState, action: MturkActionTypes) {
