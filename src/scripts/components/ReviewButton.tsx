@@ -8,11 +8,9 @@ export function ReviewButton({ children }: Props) {
   const spanEl = useRef(null);
 
   useEffect(() => {
-    if (spanEl) {
-      spanEl.current.addEventListener('click', (event: Event) => {
-        event.stopImmediatePropagation();
-      });
-    }
+    spanEl.current.addEventListener('click', (event: Event) => {
+      event.stopImmediatePropagation();
+    });
   }, [spanEl]);
 
   return (
