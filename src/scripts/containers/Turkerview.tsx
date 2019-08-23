@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { TurkerviewIcon } from '../../components/TurkerviewIcon';
+import { ReviewButton } from '../components/ReviewButton';
 
 interface Props {
   rid: string;
@@ -8,8 +9,8 @@ interface Props {
 
 export function Turkerview({ rid }: Props) {
   return (
-    <span className="btn btn-sm btn-default">
+    <ReviewButton>
       <TurkerviewIcon />
-    </span>
+    </ReviewButton>
   );
 }

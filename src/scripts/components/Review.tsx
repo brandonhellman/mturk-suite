@@ -12,6 +12,7 @@ interface Props {
 
 export function Review({ rid }: Props) {
   const options = useSelector(selectOptions);
+
   return (
     <>
       {options.scripts.turkerview && <Turkerview rid={rid} />}
