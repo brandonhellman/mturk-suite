@@ -9,7 +9,6 @@ export function injectReviewPopover(
   const script = document.createElement('script');
   script.textContent = `$(document.currentScript).parent().popover({
     html: true,
-    delay: { show: 100, hide: 400 },
     trigger: 'hover focus',
     title: '${rname} [${rid}]',
     content: '${ReactDOMServer.renderToString(content)}'
