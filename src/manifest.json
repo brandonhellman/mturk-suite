@@ -99,7 +99,13 @@
     },
 
     {
-      "js": ["scripts/reviews-hits.tsx"],
+      "js": ["scripts/workspaceExpander.ts"],
+      "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["scripts/doms/HitSetTable.tsx"],
       "matches": [
         "https://worker.mturk.com/",
         "https://worker.mturk.com/?*",
@@ -113,20 +119,14 @@
     },
 
     {
-      "js": ["scripts/reviews-queue.tsx"],
-      "matches": ["https://worker.mturk.com/tasks*"],
-      "run_at": "document_end"
-    },
-
-    {
-      "js": ["scripts/reviews-status.tsx"],
+      "js": ["scripts/doms/HitStatusDetailsTable.tsx"],
       "matches": ["https://worker.mturk.com/status_details/*"],
       "run_at": "document_end"
     },
 
     {
-      "js": ["scripts/workspaceExpander.ts"],
-      "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
+      "js": ["scripts/doms/TaskQueueTable.tsx"],
+      "matches": ["https://worker.mturk.com/tasks*"],
       "run_at": "document_end"
     }
   ],

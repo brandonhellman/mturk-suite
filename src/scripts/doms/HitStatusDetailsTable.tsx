@@ -3,21 +3,17 @@ import ReactDom from 'react-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'webext-redux';
 
-import { selectOptions } from '../store/options/selectors';
-import { getReactEl } from '../utils/getReactEl';
-import { getReactProps, ReactPropsHitStatusDetailsTable } from '../utils/getReactProps';
+import { selectOptions } from '../../store/options/selectors';
+import { getReactEl } from '../../utils/getReactEl';
+import { getReactProps, ReactPropsHitStatusDetailsTable } from '../../utils/getReactProps';
 
-import { Review } from './components/Review';
+import { Turkerview } from '../components/Turkerview';
+import { Turkopticon } from '../components/Turkopticon';
 
 const store = new Store();
 
 store.ready().then(async () => {
   const options = selectOptions(store.getState());
-
-  if (!options.scripts.turkopticon && !options.scripts.turkerview) {
-    return;
-  }
-
   const el = await getReactEl('HitStatusDetailsTable');
   const props: ReactPropsHitStatusDetailsTable = await getReactProps('HitStatusDetailsTable');
 
@@ -33,7 +29,8 @@ store.ready().then(async () => {
       ReactDom.render(
         // @ts-ignore
         <Provider store={store}>
-          <Review rid={hit.requester_id} rname={hit.requester_name} />
+          {options.scripts.turkerview && <Turkerview rid={hit.requester_id} rname={hit.requester_name} />}
+          {options.scripts.turkopticon && <Turkopticon rid={hit.requester_id} rname={hit.requester_name} />}
         </Provider>,
         react,
       );

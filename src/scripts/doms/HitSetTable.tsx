@@ -3,36 +3,34 @@ import ReactDom from 'react-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'webext-redux';
 
-import { selectOptions } from '../store/options/selectors';
-import { getReactEl } from '../utils/getReactEl';
-import { getReactProps, ReactPropsHitSetTable } from '../utils/getReactProps';
+import { selectOptions } from '../../store/options/selectors';
+import { getReactEl } from '../../utils/getReactEl';
+import { getReactProps, ReactPropsHitSetTable } from '../../utils/getReactProps';
 
-import { Review } from './components/Review';
+import { Turkerview } from '../components/Turkerview';
+import { Turkopticon } from '../components/Turkopticon';
 
 const store = new Store();
 
 store.ready().then(async () => {
   const options = selectOptions(store.getState());
-
-  if (!options.scripts.turkopticon && !options.scripts.turkerview) {
-    return;
-  }
-
   const el = await getReactEl('HitSetTable');
   const props: ReactPropsHitSetTable = await getReactProps('HitSetTable');
 
   el.querySelectorAll('.table-row').forEach((row, i) => {
     const hit = props.bodyData[i];
 
-    row.querySelectorAll('.requester-column .expand-button').forEach((button: HTMLElement, j) => {
+    row.querySelectorAll('.requester-column .expand-button').forEach((button: HTMLElement) => {
       const react = document.createElement('span');
+
       button.style.display = 'none';
       button.parentElement.insertAdjacentElement('afterend', react);
 
       ReactDom.render(
         // @ts-ignore
         <Provider store={store}>
-          <Review rid={hit.requester_id} rname={hit.requester_name} />
+          {options.scripts.turkerview && <Turkerview rid={hit.requester_id} rname={hit.requester_name} />}
+          {options.scripts.turkopticon && <Turkopticon rid={hit.requester_id} rname={hit.requester_name} />}
         </Provider>,
         react,
       );
