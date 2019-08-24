@@ -3,17 +3,14 @@ import ReactDom from 'react-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'webext-redux';
 
-import { selectOptions } from '../../store/options/selectors';
 import { getReactEl } from '../../utils/getReactEl';
 import { getReactProps, ReactPropsHitStatusDetailsTable } from '../../utils/getReactProps';
 
-import { Turkerview } from '../components/Turkerview';
-import { Turkopticon } from '../components/Turkopticon';
+import { ReqScripts } from '../containers/ReqScripts';
 
 const store = new Store();
 
 store.ready().then(async () => {
-  const options = selectOptions(store.getState());
   const el = await getReactEl('HitStatusDetailsTable');
   const props: ReactPropsHitStatusDetailsTable = await getReactProps('HitStatusDetailsTable');
 
@@ -29,12 +26,7 @@ store.ready().then(async () => {
       ReactDom.render(
         // @ts-ignore
         <Provider store={store}>
-          {options.scripts.turkerview && (
-            <Turkerview requester_id={hit.requester_id} requester_name={hit.requester_name} />
-          )}
-          {options.scripts.turkopticon && (
-            <Turkopticon requester_id={hit.requester_id} requester_name={hit.requester_name} />
-          )}
+          <ReqScripts requester_id={hit.requester_id} requester_name={hit.requester_name} />
         </Provider>,
         react,
       );

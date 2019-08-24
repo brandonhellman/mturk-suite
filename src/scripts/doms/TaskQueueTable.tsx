@@ -3,19 +3,15 @@ import ReactDom from 'react-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'webext-redux';
 
-import { selectOptions } from '../../store/options/selectors';
 import { getReactEl } from '../../utils/getReactEl';
 import { getReactProps, ReactPropsTaskQueueTable } from '../../utils/getReactProps';
 
-import { HitExport } from '../components/HitExport';
-import { Turkerview } from '../components/Turkerview';
-import { TurkerviewHit } from '../components/TurkerviewHit';
-import { Turkopticon } from '../components/Turkopticon';
+import { HitScripts } from '../containers/HitScripts';
+import { ReqScripts } from '../containers/ReqScripts';
 
 const store = new Store();
 
 store.ready().then(async () => {
-  const options = selectOptions(store.getState());
   const el = await getReactEl('TaskQueueTable');
   const props: ReactPropsTaskQueueTable = await getReactProps('TaskQueueTable');
 
@@ -31,12 +27,7 @@ store.ready().then(async () => {
       ReactDom.render(
         // @ts-ignore
         <Provider store={store}>
-          {options.scripts.turkerview && (
-            <Turkerview requester_id={hit.project.requester_id} requester_name={hit.project.requester_name} />
-          )}
-          {options.scripts.turkopticon && (
-            <Turkopticon requester_id={hit.project.requester_id} requester_name={hit.project.requester_name} />
-          )}
+          <ReqScripts requester_id={hit.project.requester_id} requester_name={hit.project.requester_name} />
         </Provider>,
         react,
       );
@@ -52,8 +43,7 @@ store.ready().then(async () => {
       ReactDom.render(
         // @ts-ignore
         <Provider store={store}>
-          {options.scripts.turkerview && <TurkerviewHit />}
-          {options.scripts.hitExporter && <HitExport />}
+          <HitScripts />
         </Provider>,
         react,
       );
