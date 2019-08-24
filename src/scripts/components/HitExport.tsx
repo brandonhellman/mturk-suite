@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { HitExportIcon } from '../../components/HitExportIcon';
 import { HitExportPopover } from '../containers/HitExportPopover';
 import { injectPopover } from '../../utils/injectPopover';
-import { ReviewButton } from './ReviewButton';
+import { PopoverButton } from './PopoverButton';
 
 interface Props {}
 
@@ -15,9 +15,9 @@ export function HitExport({  }: Props) {
   }, []);
 
   return (
-    <ReviewButton>
+    <PopoverButton>
       <HitExportIcon />
       <script ref={ref} />
-    </ReviewButton>
+    </PopoverButton>
   );
 }

@@ -4,7 +4,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export function ReviewButton({ children }: Props) {
+export function PopoverButton({ children }: Props) {
   const spanEl = useRef(null);
 
   useEffect(() => {

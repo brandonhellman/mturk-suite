@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { TurkerviewIcon } from '../../components/TurkerviewIcon';
 import { TurkerviewHitPopover } from '../containers/TurkerviewHitPopover';
 import { injectPopover } from '../../utils/injectPopover';
-import { ReviewButton } from './ReviewButton';
+import { PopoverButton } from './PopoverButton';
 
 interface Props {}
 
@@ -15,9 +15,9 @@ export function TurkerviewHit({  }: Props) {
   }, []);
 
   return (
-    <ReviewButton>
+    <PopoverButton>
       <TurkerviewIcon />
       <script ref={ref} />
-    </ReviewButton>
+    </PopoverButton>
   );
 }

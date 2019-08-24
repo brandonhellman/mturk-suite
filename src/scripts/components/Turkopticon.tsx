@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { TurkopticonIcon } from '../../components/TurkopticonIcon';
 import { injectPopover } from '../../utils/injectPopover';
 import { TurkopticonPopover } from '../containers/TurkopticonPopover';
-import { ReviewButton } from './ReviewButton';
+import { PopoverButton } from './PopoverButton';
 
 interface Props {
   requester_id: string;
@@ -18,9 +18,9 @@ export function Turkopticon({ requester_id, requester_name }: Props) {
   }, []);
 
   return (
-    <ReviewButton>
+    <PopoverButton>
       <TurkopticonIcon />
       <script ref={ref} />
-    </ReviewButton>
+    </PopoverButton>
   );
 }
