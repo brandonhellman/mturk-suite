@@ -7,7 +7,9 @@ import { selectOptions } from '../../store/options/selectors';
 import { getReactEl } from '../../utils/getReactEl';
 import { getReactProps, ReactPropsHitSetTable } from '../../utils/getReactProps';
 
+import { HitExport } from '../components/HitExport';
 import { Turkerview } from '../components/Turkerview';
+import { TurkerviewHit } from '../components/TurkerviewHit';
 import { Turkopticon } from '../components/Turkopticon';
 
 const store = new Store();
@@ -35,6 +37,20 @@ store.ready().then(async () => {
           {options.scripts.turkopticon && (
             <Turkopticon requester_id={hit.requester_id} requester_name={hit.requester_name} />
           )}
+        </Provider>,
+        react,
+      );
+    });
+
+    row.querySelectorAll('.project-name-column, .p-r-sm.requester-column > span').forEach((element: HTMLElement) => {
+      const react = document.createElement('span');
+      element.insertAdjacentElement('afterbegin', react);
+
+      ReactDom.render(
+        // @ts-ignore
+        <Provider store={store}>
+          {options.scripts.turkerview && <TurkerviewHit />}
+          {options.scripts.hitExporter && <HitExport />}
         </Provider>,
         react,
       );
