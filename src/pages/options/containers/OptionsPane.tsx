@@ -21,6 +21,12 @@ export function OptionsPane() {
       />
 
       <Checkbox
+        label="Block List"
+        checked={options.scripts.blockList}
+        onChange={() => dispatch(optionsUpdateScripts('blockList'))}
+      />
+
+      <Checkbox
         label="Confirm Return Hit"
         checked={options.scripts.confirmReturnHit}
         onChange={() => dispatch(optionsUpdateScripts('confirmReturnHit'))}
@@ -30,12 +36,6 @@ export function OptionsPane() {
         label="Hit Exporter"
         checked={options.scripts.hitExporter}
         onChange={() => dispatch(optionsUpdateScripts('hitExporter'))}
-      />
-
-      <Checkbox
-        label="MTS Block List"
-        checked={options.scripts.mtsBlockList}
-        onChange={() => dispatch(optionsUpdateScripts('mtsBlockList'))}
       />
 
       <Checkbox

@@ -1,9 +1,9 @@
 export const OptionsInitialState = {
   scripts: {
     autoAcceptUnchecker: true,
+    blockList: true,
     confirmReturnHit: true,
     hitExporter: true,
-    mtsBlockList: true,
     mtsHitTracker: true,
     paginationLastPage: true,
     queueInfoEnhancer: true,

@@ -29,19 +29,7 @@
     },
 
     {
-      "js": ["scripts/confirmReturnHit.ts"],
-      "matches": ["https://worker.mturk.com/tasks*", "https://worker.mturk.com/projects/*/tasks/*"],
-      "run_at": "document_end"
-    },
-
-    {
-      "js": ["scripts/getWorkerId.ts"],
-      "matches": ["https://worker.mturk.com/*"],
-      "run_at": "document_end"
-    },
-
-    {
-      "js": ["scripts/mtsBlockList.ts"],
+      "js": ["scripts/blockList.tsx"],
       "matches": [
         "https://worker.mturk.com/",
         "https://worker.mturk.com/?*",
@@ -51,6 +39,18 @@
         "https://worker.mturk.com/projects/?*",
         "https://worker.mturk.com/requesters/*/projects*"
       ],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["scripts/confirmReturnHit.ts"],
+      "matches": ["https://worker.mturk.com/tasks*", "https://worker.mturk.com/projects/*/tasks/*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["scripts/getWorkerId.ts"],
+      "matches": ["https://worker.mturk.com/*"],
       "run_at": "document_end"
     },
 
