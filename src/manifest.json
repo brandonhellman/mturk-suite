@@ -41,21 +41,6 @@
     },
 
     {
-      "js": ["scripts/hitExporter.ts"],
-      "matches": [
-        "https://worker.mturk.com/",
-        "https://worker.mturk.com/?*",
-        "https://worker.mturk.com/projects",
-        "https://worker.mturk.com/projects/",
-        "https://worker.mturk.com/projects?*",
-        "https://worker.mturk.com/projects/?*",
-        "https://worker.mturk.com/tasks*",
-        "https://worker.mturk.com/requesters/*"
-      ],
-      "run_at": "document_end"
-    },
-
-    {
       "js": ["scripts/mtsBlockList.ts"],
       "matches": [
         "https://worker.mturk.com/",
