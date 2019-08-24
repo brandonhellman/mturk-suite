@@ -15,6 +15,6 @@ store.ready().then(async () => {
   const props: ReactPropsTaskQueueTable = await getReactProps('TaskQueueTable');
   const reward = props.bodyData.reduce((acc, task) => acc + task.project.monetary_reward.amount_in_dollars, 0);
 
-  const header = document.querySelector(`h1.m-b-0`);
+  const header = document.querySelector('h1.m-b-0');
   header.textContent = `${header.textContent.trim().slice(0, -1)} - $${reward.toFixed(2)})`;
 });
