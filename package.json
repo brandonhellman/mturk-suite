@@ -20,12 +20,12 @@
     "react": "^16.9.0",
     "react-bootstrap": "^1.0.0-beta.12",
     "react-dom": "^16.9.0",
-    "react-redux": "^7.1.0",
+    "react-redux": "^7.1.1",
     "redux": "^4.0.4",
     "redux-logger": "^3.0.6",
-    "typescript": "^3.5.3",
-    "webext-redux": "^2.1.2",
-    "webextension-scripts": "^0.5.3"
+    "typescript": "^3.6.4",
+    "webext-redux": "^2.1.4",
+    "webextension-scripts": "^0.5.4"
   },
   "devDependencies": {
     "prettier": "^1.18.2"
