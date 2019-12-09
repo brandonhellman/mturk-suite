@@ -1,5 +1,4 @@
 import React from 'react';
-import Tab from 'react-bootstrap/Tab';
 
 const versions = {
   '3.0.0': {
@@ -10,7 +9,7 @@ const versions = {
 
 export function ChangeLogPane() {
   return (
-    <Tab.Pane className="p-1" eventKey="change-log">
+    <div>
       {Object.entries(versions).map(([key, value]) => (
         <div key={key}>
           <h5>
@@ -23,6 +22,6 @@ export function ChangeLogPane() {
           </ul>
         </div>
       ))}
-    </Tab.Pane>
+    </div>
   );
 }
