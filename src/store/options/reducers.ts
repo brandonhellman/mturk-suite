@@ -8,6 +8,9 @@ export function optionsReducer(state = OptionsInitialState, action: OptionsActio
       case 'OPTIONS_SCRIPTS_TOGGLE':
         draftState.scripts[action.payload] = !draftState.scripts[action.payload];
         break;
+      case 'OPTIONS_THEMES_SET':
+        draftState.themes = { ...draftState.themes, ...action.payload };
+        break;
     }
   });
 }
