@@ -1,5 +1,3 @@
-import produce from 'immer';
-
 import { MturkState, MturkActionTypes } from './types';
 
 const initialState: MturkState = {
@@ -7,11 +5,10 @@ const initialState: MturkState = {
 };
 
 export function mturkReducer(state = initialState, action: MturkActionTypes) {
-  return produce(state, (draftState) => {
-    switch (action.type) {
-      case 'MTURK_UPDATE':
-        draftState[action.payload.key] = action.payload.value;
-        break;
-    }
-  });
+  switch (action.type) {
+    case 'MTURK_UPDATE':
+      return { ...state, ...action.payload };
+    default:
+      return state;
+  }
 }
