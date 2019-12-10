@@ -1,19 +1,17 @@
 import { Store } from 'webext-redux';
 
-import { selectOptions } from '../store/options/selectors';
+import { AppState } from '../store';
 import { getReactEl } from '../utils/getReactEl';
 
-const store = new Store();
+const store = new Store<AppState>();
 
 store.ready().then(async () => {
-  const options = selectOptions(store.getState());
-
-  if (!options.scripts.autoAcceptUnchecker) {
+  if (!store.getState().options.scripts.autoAcceptUnchecker) {
     return;
   }
 
   const el = await getReactEl('AutoAcceptCheckbox');
-  const checked: HTMLElement = el.querySelector('input:checked');
+  const checked = el.querySelector<HTMLInputElement>('input:checked');
 
   if (checked) {
     checked.click();
