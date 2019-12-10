@@ -1,8 +1,9 @@
 import { Store } from 'webext-redux';
 
+import { AppState } from '../store';
 import { selectOptions } from '../store/options/selectors';
 
-const store = new Store();
+const store = new Store<AppState>();
 
 store.ready().then(() => {
   const options = selectOptions(store.getState());

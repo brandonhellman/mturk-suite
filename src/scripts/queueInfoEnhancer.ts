@@ -1,9 +1,10 @@
 import { Store } from 'webext-redux';
 
+import { AppState } from '../store';
 import { selectOptions } from '../store/options/selectors';
 import { getReactProps, ReactPropsTaskQueueTable } from '../utils/getReactProps';
 
-const store = new Store();
+const store = new Store<AppState>();
 
 store.ready().then(async () => {
   const options = selectOptions(store.getState());

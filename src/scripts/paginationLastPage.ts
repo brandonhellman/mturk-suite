@@ -1,11 +1,12 @@
 import { Store } from 'webext-redux';
 
+import { AppState } from '../store';
 import { selectOptions } from '../store/options/selectors';
 import { getReactEl } from '../utils/getReactEl';
 import { getReactProps, ReactPropsPagination } from '../utils/getReactProps';
 import { htmlEscape } from '../utils/htmlEscape';
 
-const store = new Store();
+const store = new Store<AppState>();
 
 store.ready().then(async () => {
   const options = selectOptions(store.getState());
