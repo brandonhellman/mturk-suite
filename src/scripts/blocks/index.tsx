@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import { Store } from 'webext-redux';
 
 import { AppState } from '../../store';
+import { selectOptions } from '../../store/options/selectors';
 import { getReactEl } from '../../utils/getReactEl';
 import { getReactProps, ReactPropsHitSetTable } from '../../utils/getReactProps';
 
@@ -16,7 +17,9 @@ import BlocksQuickAddButtons from './BlocksQuickAddButtons';
 const store = new Store<AppState>();
 
 store.ready().then(async () => {
-  if (!store.getState().options.scripts.blocks) {
+  const options = selectOptions(store.getState());
+
+  if (!options.scripts.blocks) {
     return;
   }
 
