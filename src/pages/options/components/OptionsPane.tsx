@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { Checkbox } from '../../../components/Checkbox';
 import Select from '../../../components/Select';
-
 import { selectOptions } from '../../../store/options/selectors';
 import { optionsScriptsToggle, optionsThemesSet } from '../../../store/options/actions';
 
@@ -22,9 +21,9 @@ export function OptionsPane() {
       />
 
       <Checkbox
-        label="Block List"
-        checked={options.scripts.blockList}
-        onChange={() => dispatch(optionsScriptsToggle('blockList'))}
+        label="Blocks"
+        checked={options.scripts.blocks}
+        onChange={() => dispatch(optionsScriptsToggle('blocks'))}
       />
 
       <Checkbox

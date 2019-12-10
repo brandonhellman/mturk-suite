@@ -1,7 +1,7 @@
 export const OptionsInitialState = {
   scripts: {
     autoAcceptUnchecker: true,
-    blockList: true,
+    blocks: true,
     confirmReturnHit: true,
     hitExporter: true,
     mtsHitTracker: true,
@@ -21,7 +21,7 @@ export const OptionsInitialState = {
 export interface OptionsState {
   scripts: {
     autoAcceptUnchecker: boolean;
-    blockList: boolean;
+    blocks: boolean;
     confirmReturnHit: boolean;
     hitExporter: boolean;
     mtsHitTracker: boolean;

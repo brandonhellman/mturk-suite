@@ -29,7 +29,7 @@
     },
 
     {
-      "js": ["scripts/blockList.tsx"],
+      "js": ["scripts/blocks/index.tsx"],
       "matches": [
         "https://worker.mturk.com/",
         "https://worker.mturk.com/?*",

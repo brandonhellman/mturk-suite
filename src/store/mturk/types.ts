@@ -1,15 +1,14 @@
-export const MturkInitialState = {
+export const MturkInitialState: MturkState = {
   workerId: 'Please visit worker.mturk.com',
 };
 
-export type MturkState = typeof MturkInitialState;
+export interface MturkState {
+  workerId: string;
+}
 
 export interface MturkUpdateAction {
   type: 'MTURK_UPDATE';
-  payload: {
-    key: keyof MturkState;
-    value: string;
-  };
+  payload: Partial<MturkState>;
 }
 
 export type MturkActionTypes = MturkUpdateAction;
