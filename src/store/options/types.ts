@@ -1,10 +1,10 @@
-export const OptionsInitialState = {
+export const OptionsInitialState: OptionsState = {
   scripts: {
     autoAcceptUnchecker: true,
     blocks: true,
     confirmReturnHit: true,
     hitExporter: true,
-    mtsHitTracker: true,
+    hitTracker: true,
     paginationLastPage: true,
     queueInfoEnhancer: true,
     rateLimitReloader: true,
@@ -24,7 +24,7 @@ export interface OptionsState {
     blocks: boolean;
     confirmReturnHit: boolean;
     hitExporter: boolean;
-    mtsHitTracker: boolean;
+    hitTracker: boolean;
     paginationLastPage: boolean;
     queueInfoEnhancer: boolean;
     rateLimitReloader: boolean;

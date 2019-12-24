@@ -6,8 +6,8 @@ import { Store } from 'webext-redux';
 import { getReactEl } from '../../utils/getReactEl';
 import { getReactProps, ReactPropsHitSetTable } from '../../utils/getReactProps';
 
-import { HitScripts } from '../containers/HitScripts';
-import { ReqScripts } from '../containers/ReqScripts';
+import { HitScripts } from '../-containers/HitScripts';
+import { ReqScripts } from '../-containers/ReqScripts';
 
 const store = new Store();
 
