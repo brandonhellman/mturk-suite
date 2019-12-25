@@ -11,14 +11,14 @@ interface Props {
   variant?: 'green' | 'orange' | 'red' | 'unrated' | 'white';
 }
 
-export function TurkerviewIcon({ variant = 'unrated' }: Props) {
+export default function TurkerviewIcon({ variant = 'unrated' }: Props) {
   let img;
 
   switch (variant) {
     case 'green':
       img = tvgreen;
       break;
-    case 'orange': 
+    case 'orange':
       img = tvorange;
       break;
     case 'red':

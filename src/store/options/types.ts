@@ -3,11 +3,12 @@ export const OptionsInitialState: OptionsState = {
     autoAcceptUnchecker: true,
     blocks: true,
     confirmReturnHit: true,
-    hitExporter: true,
     hitTracker: true,
     paginationLastPage: true,
+    projectShare: true,
     queueInfoEnhancer: true,
     rateLimitReloader: true,
+    requesterInfo: true,
     turkerview: true,
     turkopticon: true,
     workspaceExpander: true,
@@ -23,11 +24,12 @@ export interface OptionsState {
     autoAcceptUnchecker: boolean;
     blocks: boolean;
     confirmReturnHit: boolean;
-    hitExporter: boolean;
     hitTracker: boolean;
     paginationLastPage: boolean;
+    projectShare: boolean
     queueInfoEnhancer: boolean;
     rateLimitReloader: boolean;
+    requesterInfo: boolean
     turkerview: boolean;
     turkopticon: boolean;
     workspaceExpander: boolean;

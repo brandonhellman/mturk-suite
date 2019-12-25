@@ -3,11 +3,14 @@ import ReactDom from 'react-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'webext-redux';
 
-import { getReactEl } from '../../utils/getReactEl';
-import { getReactProps, ReactPropsTaskQueueTable } from '../../utils/getReactProps';
+import { getReactEl } from '../utils/getReactEl';
+import { getReactProps, ReactPropsTaskQueueTable } from '../utils/getReactProps';
 
-import { HitScripts } from '../containers/HitScripts';
-import { ReqScripts } from '../containers/ReqScripts';
+import ProjectShare from './components/ProjectShare';
+import ProjetTurkerview from './components/ProjectTurkerview';
+import RequesterInfo from './components/RequesterInfo';
+import RequesterTurkerview from './components/RequesterTurkerview';
+import RequesterTurkopticon from './components/RequesterTurkopticion';
 
 const store = new Store();
 
@@ -16,18 +19,18 @@ store.ready().then(async () => {
   const props: ReactPropsTaskQueueTable = await getReactProps('TaskQueueTable');
 
   el.querySelectorAll('.table-row').forEach((row, i) => {
-    const hit = props.bodyData[i];
+    const project = props.bodyData[i].project;
 
-    row.querySelectorAll('.requester-column .expand-button').forEach((button: HTMLElement) => {
+    row.querySelectorAll<HTMLElement>('.requester-column .expand-button').forEach((button) => {
       const react = document.createElement('span');
 
       button.style.display = 'none';
       button.parentElement.insertAdjacentElement('afterend', react);
 
       ReactDom.render(
-        // @ts-ignore
         <Provider store={store}>
-          <ReqScripts requester_id={hit.project.requester_id} requester_name={hit.project.requester_name} />
+          <RequesterTurkerview requester_id={project.requester_id} />
+          <RequesterTurkopticon requester_id={project.requester_id} />
         </Provider>,
         react,
       );
@@ -37,13 +40,13 @@ store.ready().then(async () => {
       const react = document.createElement('span');
       element.insertAdjacentElement('afterbegin', react);
 
-      const button: HTMLElement = element.querySelector('.expand-button');
+      const button = element.querySelector<HTMLElement>('.expand-button');
       button.style.display = 'none';
 
       ReactDom.render(
-        // @ts-ignore
         <Provider store={store}>
-          <HitScripts />
+          <ProjetTurkerview hit_set_id={project.hit_set_id} />
+          <ProjectShare hit_set_id={project.hit_set_id} />
         </Provider>,
         react,
       );

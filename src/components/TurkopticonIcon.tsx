@@ -6,6 +6,6 @@ interface Props {
   variant?: 'success' | 'warning' | 'danger' | 'muted';
 }
 
-export function TurkopticonIcon({ variant = 'muted' }: Props) {
+export default function TurkopticonIcon({ variant = 'muted' }: Props) {
   return <FontAwesomeIcon className={`text-${variant}`} icon={faUser} />;
 }

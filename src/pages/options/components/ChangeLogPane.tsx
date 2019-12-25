@@ -7,7 +7,7 @@ const versions = {
   },
 };
 
-export function ChangeLogPane() {
+export default function ChangeLogPane() {
   return (
     <div>
       {Object.entries(versions).map(([key, value]) => (

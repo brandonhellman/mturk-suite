@@ -1,10 +1,11 @@
 import React from 'react';
 
-import { OptionsPane } from './OptionsPane';
-import { ChangeLogPane } from './ChangeLogPane';
 import Theme from '../../../components/Theme';
 
-export function App() {
+import OptionsPane from './OptionsPane';
+import ChangeLogPane from './ChangeLogPane';
+
+export default function App() {
   return (
     <Theme>
       <OptionsPane />

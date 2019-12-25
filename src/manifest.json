@@ -23,13 +23,13 @@
 
   "content_scripts": [
     {
-      "js": ["scripts/autoAcceptUnchecker.ts"],
+      "js": ["content_scripts/autoAcceptUnchecker.ts"],
       "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
       "run_at": "document_end"
     },
 
     {
-      "js": ["scripts/blocks/index.tsx"],
+      "js": ["content_scripts/blocks/index.tsx"],
       "matches": [
         "https://worker.mturk.com/",
         "https://worker.mturk.com/?*",
@@ -43,34 +43,19 @@
     },
 
     {
-      "js": ["scripts/confirmReturnHit.ts"],
+      "js": ["content_scripts/confirmReturnHit.ts"],
       "matches": ["https://worker.mturk.com/tasks*", "https://worker.mturk.com/projects/*/tasks/*"],
       "run_at": "document_end"
     },
 
     {
-      "js": ["scripts/getWorkerId.ts"],
+      "js": ["content_scripts/getWorkerId.ts"],
       "matches": ["https://worker.mturk.com/*"],
       "run_at": "document_end"
     },
 
     {
-      "js": ["scripts/hitExporter/index.tsx"],
-      "matches": [
-        "https://worker.mturk.com/",
-        "https://worker.mturk.com/?*",
-        "https://worker.mturk.com/projects",
-        "https://worker.mturk.com/projects/",
-        "https://worker.mturk.com/projects?*",
-        "https://worker.mturk.com/projects/?*",
-        "https://worker.mturk.com/requesters/*"
-      ],
-      "run_at": "document_end"
-    },
-
-    
-    {
-      "js": ["scripts/requesterInfo/index.tsx"],
+      "js": ["content_scripts/hitSetTable.tsx"],
       "matches": [
         "https://worker.mturk.com/",
         "https://worker.mturk.com/?*",
@@ -84,7 +69,13 @@
     },
 
     {
-      "js": ["scripts/paginationLastPage.ts"],
+      "js": ["content_scripts/hitStatusDetailsTable.tsx"],
+      "matches": ["https://worker.mturk.com/status_details/*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["content_scripts/paginationLastPage.ts"],
       "matches": [
         "https://worker.mturk.com/",
         "https://worker.mturk.com/?*",
@@ -101,19 +92,25 @@
     },
 
     {
-      "js": ["scripts/queueInfoEnhancer.ts"],
+      "js": ["content_scripts/queueInfoEnhancer.ts"],
       "matches": ["https://worker.mturk.com/tasks*"],
       "run_at": "document_end"
     },
 
     {
-      "js": ["scripts/rateLimitReloader.ts"],
+      "js": ["content_scripts/rateLimitReloader.ts"],
       "matches": ["https://worker.mturk.com/*"],
       "run_at": "document_end"
     },
 
     {
-      "js": ["scripts/workspaceExpander.ts"],
+      "js": ["content_scripts/taskQueueTable.tsx"],
+      "matches": ["https://worker.mturk.com/tasks*"],
+      "run_at": "document_end"
+    },
+
+    {
+      "js": ["content_scripts/workspaceExpander.ts"],
       "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
       "run_at": "document_end"
     }
