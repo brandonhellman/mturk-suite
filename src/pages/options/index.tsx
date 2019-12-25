@@ -3,16 +3,18 @@ import ReactDom from 'react-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'webext-redux';
 
-import { AppState } from '../../store';
+import Theme from '../../components/Theme';
 
 import App from './components/App';
 
-const store = new Store<AppState>();
+const store = new Store();
 
 store.ready().then(() => {
   ReactDom.render(
     <Provider store={store}>
-      <App />
+      <Theme>
+        <App />
+      </Theme>
     </Provider>,
     document.getElementById('root'),
   );
