@@ -3,9 +3,9 @@ chrome.contextMenus.create({
   contexts: [`browser_action`],
   onclick() {
     chrome.tabs.create({
-      url: chrome.runtime.getURL(`hit-finder/hit-finder.html`)
+      url: chrome.runtime.getURL(`hit-finder/hit-finder.html`),
     });
-  }
+  },
 });
 
 chrome.contextMenus.create({
@@ -13,9 +13,9 @@ chrome.contextMenus.create({
   contexts: [`browser_action`],
   onclick() {
     chrome.tabs.create({
-      url: chrome.runtime.getURL(`hit_catcher/hit_catcher.html`)
+      url: chrome.runtime.getURL(`hit_catcher/hit_catcher.html`),
     });
-  }
+  },
 });
 
 chrome.contextMenus.create({
@@ -23,14 +23,14 @@ chrome.contextMenus.create({
   contexts: [`browser_action`],
   onclick() {
     chrome.tabs.create({
-      url: chrome.runtime.getURL(`hit_tracker/hit_tracker.html`)
+      url: chrome.runtime.getURL(`hit_tracker/hit_tracker.html`),
     });
-  }
+  },
 });
 
 chrome.contextMenus.create({
   contexts: [`browser_action`],
-  type: `separator`
+  type: `separator`,
 });
 
 chrome.contextMenus.create({
@@ -38,7 +38,7 @@ chrome.contextMenus.create({
   contexts: [`browser_action`],
   onclick() {
     chrome.tabs.create({ url: `https://github.com/Kadauchi/mturk-suite/` });
-  }
+  },
 });
 
 chrome.contextMenus.create({
@@ -46,9 +46,9 @@ chrome.contextMenus.create({
   contexts: [`browser_action`],
   onclick() {
     chrome.tabs.create({
-      url: `https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VYB8NZTKRZBFS`
+      url: `https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VYB8NZTKRZBFS`,
     });
-  }
+  },
 });
 
 chrome.contextMenus.create({
@@ -63,31 +63,31 @@ chrome.contextMenus.create({
 
     chrome.tabs.executeScript(tab.id, {
       code,
-      frameId: info.frameId
+      frameId: info.frameId,
     });
-  }
+  },
 });
 
 chrome.contextMenus.create({
   title: `Contact Requester`,
   contexts: [`link`],
-  targetUrlPatterns: [`https://worker.mturk.com/requesters/*`],
+  targetUrlPatterns: [`https://workersandbox.mturk.com/requesters/*`],
   onclick(info) {
     const match = info.linkUrl.match(/([A-Z0-9]+)/);
     const requesterId = match ? match[1] : null;
 
     if (requesterId) {
       window.open(
-        `https://worker.mturk.com/contact_requester/hit_type_messages/new?hit_type_message[hit_type_id]=YOURMTURKHIT&hit_type_message[requester_id]=${requesterId}`
+        `https://workersandbox.mturk.com/contact_requester/hit_type_messages/new?hit_type_message[hit_type_id]=YOURMTURKHIT&hit_type_message[requester_id]=${requesterId}`,
       );
     }
-  }
+  },
 });
 
 chrome.contextMenus.create({
   title: `HIT Catcher - Once`,
   contexts: [`link`],
-  targetUrlPatterns: [`https://worker.mturk.com/projects/*/tasks*`],
+  targetUrlPatterns: [`https://workersandbox.mturk.com/projects/*/tasks*`],
   onclick(info) {
     const match = info.linkUrl.match(/projects\/([A-Z0-9]+)\/tasks/);
     const hitSetId = match ? match[1] : null;
@@ -98,17 +98,17 @@ chrome.contextMenus.create({
           id: hitSetId,
           name: ``,
           once: true,
-          sound: true
-        }
+          sound: true,
+        },
       });
     }
-  }
+  },
 });
 
 chrome.contextMenus.create({
   title: `HIT Catcher - Multiple`,
   contexts: [`link`],
-  targetUrlPatterns: [`https://worker.mturk.com/projects/*/tasks*`],
+  targetUrlPatterns: [`https://workersandbox.mturk.com/projects/*/tasks*`],
   onclick(info) {
     const match = info.linkUrl.match(/projects\/([A-Z0-9]+)\/tasks/);
     const hitSetId = match ? match[1] : null;
@@ -119,23 +119,22 @@ chrome.contextMenus.create({
           id: hitSetId,
           name: ``,
           once: false,
-          sound: false
-        }
+          sound: false,
+        },
       });
     }
-  }
+  },
 });
-
 
 chrome.contextMenus.create({
   title: `Copy Project Group Id`,
   contexts: [`link`],
-  targetUrlPatterns: [`https://worker.mturk.com/projects/*/tasks*`],
-  onclick(info){
+  targetUrlPatterns: [`https://workersandbox.mturk.com/projects/*/tasks*`],
+  onclick(info) {
     const match = info.linkUrl.match(/projects\/([A-Z0-9]+)\/tasks/);
     const hitSetId = match ? match[1] : null;
 
-    if (hitSetId){
+    if (hitSetId) {
       //MTS requests Clipboard permissions but still uses this workaround for HIT exports
       //Keeping this method for consistency sake, tested in Chrome & works fine.
       const textarea = document.createElement(`textarea`);
@@ -145,5 +144,5 @@ chrome.contextMenus.create({
       document.execCommand(`copy`);
       document.body.removeChild(textarea);
     }
-  }
+  },
 });
