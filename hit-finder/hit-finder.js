@@ -54,7 +54,7 @@ function finderToggle() {
 }
 
 function finderFetchURL() {
-  const url = new window.URL(`https://worker.mturk.com/`);
+  const url = new window.URL(`https://workersandbox.mturk.com/`);
   url.searchParams.append(`sort`, storage.hitFinder[`filter-sort`]);
   url.searchParams.append(`page_size`, storage.hitFinder[`filter-page-size`]);
   url.searchParams.append(`filters[masters]`, storage.hitFinder[`filter-masters`]);
@@ -98,7 +98,7 @@ async function finderFetch() {
       credentials: `include`,
     });
 
-    if (~response.url.indexOf(`https://worker.mturk.com`)) {
+    if (~response.url.indexOf(`https://workersandbox.mturk.com`)) {
       if (response.ok) {
         await finderProcess(await response.json());
       }
@@ -191,9 +191,7 @@ function finderProcess() {
       requester.appendChild(requesterContainer);
 
       const requesterTurkerViewReviews = document.createElement(`button`);
-      requesterTurkerViewReviews.className = `btn btn-sm btn-${
-        hit.requester_id
-      } btn-${requesterTVReviewClass} btn-turkerview`;
+      requesterTurkerViewReviews.className = `btn btn-sm btn-${hit.requester_id} btn-${requesterTVReviewClass} btn-turkerview`;
       requesterTurkerViewReviews.dataset.toggle = `modal`;
       requesterTurkerViewReviews.dataset.target = `#requester-review-modal`;
       requesterTurkerViewReviews.dataset.key = hit.requester_id;
@@ -225,7 +223,7 @@ function finderProcess() {
       requesterTracker.appendChild(requesterTrackerIcon);
 
       const requesterLink = document.createElement(`a`);
-      requesterLink.href = `https://worker.mturk.com/requesters/${hit.requester_id}/projects`;
+      requesterLink.href = `https://workersandbox.mturk.com/requesters/${hit.requester_id}/projects`;
       requesterLink.target = `_blank`;
       requesterLink.textContent = hit.requester_name;
       requesterContainer.appendChild(requesterLink);
@@ -259,7 +257,7 @@ function finderProcess() {
       titleTracker.appendChild(titleTrackerIcon);
 
       const titleLink = document.createElement(`a`);
-      titleLink.href = `https://worker.mturk.com/projects/${hit.hit_set_id}/tasks`;
+      titleLink.href = `https://workersandbox.mturk.com/projects/${hit.hit_set_id}/tasks`;
       titleLink.target = `_blank`;
       titleLink.textContent = hit.title;
       titleContainer.appendChild(titleLink);
@@ -274,7 +272,7 @@ function finderProcess() {
       row.appendChild(reward);
 
       const rewardLink = document.createElement(`a`);
-      rewardLink.href = `https://worker.mturk.com/projects/${hit.hit_set_id}/tasks/accept_random`;
+      rewardLink.href = `https://workersandbox.mturk.com/projects/${hit.hit_set_id}/tasks/accept_random`;
       rewardLink.target = `_blank`;
       rewardLink.textContent = toMoneyString(hit.monetary_reward.amount_in_dollars);
       reward.appendChild(rewardLink);
@@ -666,7 +664,7 @@ chrome.storage.local.get(`options`, (keys) => {
   if (options.turkerviewApiKey.length == 40 || options[`disable-tv-announcement`] || !options.turkerview)
     document.getElementById(`tv-finder-announce`).style.display = `none`;
 
-  document.getElementById(`view-api-save`).addEventListener(`click`, function() {
+  document.getElementById(`view-api-save`).addEventListener(`click`, function () {
     const temp_api_key = document.getElementById(`view-api-key`).value;
 
     if (temp_api_key.length == 40) {
@@ -679,7 +677,7 @@ chrome.storage.local.get(`options`, (keys) => {
     }
   });
 
-  document.getElementById(`disable-finder-tv-announcement`).addEventListener(`click`, function() {
+  document.getElementById(`disable-finder-tv-announcement`).addEventListener(`click`, function () {
     options[`disable-tv-announcement`] = true;
     chrome.storage.local.set({ options });
     $(`#turkerview-finder-announcement-modal`).modal(`toggle`);
@@ -722,9 +720,7 @@ function removeChildren() {
 
 function toMoneyString() {
   const [string] = arguments;
-  return `$${Number(string)
-    .toFixed(2)
-    .toLocaleString(`en-US`, { minimumFractionDigits: 2 })}`;
+  return `$${Number(string).toFixed(2).toLocaleString(`en-US`, { minimumFractionDigits: 2 })}`;
 }
 
 function toDurationString() {
@@ -749,10 +745,10 @@ function toDurationString() {
 
 chrome.notifications.onButtonClicked.addListener((id, btn) => {
   if (btn === 0) {
-    window.open(`https://worker.mturk.com/projects/${id}/tasks`);
+    window.open(`https://workersandbox.mturk.com/projects/${id}/tasks`);
   }
   if (btn === 1) {
-    window.open(`https://worker.mturk.com/projects/${id}/tasks/accept_random`);
+    window.open(`https://workersandbox.mturk.com/projects/${id}/tasks/accept_random`);
   }
 
   chrome.notifications.clear(id);
@@ -943,7 +939,7 @@ $(`[data-toggle="tooltip"]`).tooltip({
 });
 
 $(`body`).on(`click`, `.hit-catcher`, async (event) => {
-  const opened = await new Promise(resolve =>
+  const opened = await new Promise((resolve) =>
     chrome.runtime.sendMessage({ hitCatcher: `open` }, (open) => {
       const err = chrome.runtime.lastError;
       if (err) {
@@ -951,7 +947,7 @@ $(`body`).on(`click`, `.hit-catcher`, async (event) => {
       } else {
         resolve(open);
       }
-    })
+    }),
   );
 
   if (opened) {
@@ -971,29 +967,28 @@ $(`body`).on(`click`, `.hit-catcher`, async (event) => {
           title: hit.title,
           hit_set_id: hit.hit_set_id,
           monetary_reward: {
-            amount_in_dollars: hit.monetary_reward.amount_in_dollars
+            amount_in_dollars: hit.monetary_reward.amount_in_dollars,
           },
           assignment_duration_in_seconds: hit.assignment_duration_in_seconds,
-          project_requirements: hit.project_requirements
-        }
-      }
+          project_requirements: hit.project_requirements,
+        },
+      },
     });
 
     const elem = once ? 0 : 1;
 
     const includedRow = document.getElementById(`included-${hit.hit_set_id}`);
     if (includedRow) {
-      includedRow.children[7].firstChild.children[elem].classList
-        .replace(`btn-primary`, `btn-secondary`);
+      includedRow.children[7].firstChild.children[elem].classList.replace(`btn-primary`, `btn-secondary`);
     }
 
-    document.getElementById(`recent-${hit.hit_set_id}`)
-      .children[7].firstChild.children[elem].classList
-      .replace(`btn-primary`, `btn-secondary`);
+    document
+      .getElementById(`recent-${hit.hit_set_id}`)
+      .children[7].firstChild.children[elem].classList.replace(`btn-primary`, `btn-secondary`);
 
-    const loggedClassList = document.getElementById(`logged-${hit.hit_set_id}`)
-      .children[7].firstChild.children[elem].classList
-      .replace(`btn-primary`, `btn-secondary`);
+    const loggedClassList = document
+      .getElementById(`logged-${hit.hit_set_id}`)
+      .children[7].firstChild.children[elem].classList.replace(`btn-primary`, `btn-secondary`);
   }
 });
 
@@ -1113,9 +1108,8 @@ $(`#requester-review-modal`).on(`show.bs.modal`, async (event) => {
         tv.wages.average.class
       }">${toMoneyString(tv.wages.average.wage)}/hr</strong>`;
       document.getElementById(`review-turkerview-ratings-pay`).innerHTML =
-        `<span class="pull-right text-${tv.ratings.pay.class}">${tv.ratings.pay.text} <i class="fa ${
-          tv.ratings.pay.faicon
-        }"></i></span>` || `-`;
+        `<span class="pull-right text-${tv.ratings.pay.class}">${tv.ratings.pay.text} <i class="fa ${tv.ratings.pay.faicon}"></i></span>` ||
+        `-`;
       document.getElementById(`review-turkerview-ratings-fast`).innerHTML =
         `<span class="pull-right text-${tv.ratings.fast.class}">${tv.ratings.fast.text}</span>` || `-`;
       document.getElementById(`review-turkerview-ratings-comm`).innerHTML =

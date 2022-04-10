@@ -1,27 +1,25 @@
 const requestsDB = {};
 
 chrome.webRequest.onBeforeRequest.addListener(
-  details => {
-    const match = details.url.match(
-      /https:\/\/worker.mturk.com\/projects\/([A-Z0-9]+)\/tasks/
-    );
+  (details) => {
+    const match = details.url.match(/https:\/\/workersandbox.mturk.com\/projects\/([A-Z0-9]+)\/tasks/);
 
     if (match) {
       requestsDB[details.requestId] = {
         tabId: details.tabId,
-        hit_set_id: match[1]
+        hit_set_id: match[1],
       };
     }
   },
   {
-    urls: [`https://worker.mturk.com/projects/*/tasks*`],
-    types: [`main_frame`]
+    urls: [`https://workersandbox.mturk.com/projects/*/tasks*`],
+    types: [`main_frame`],
   },
-  [`requestBody`]
+  [`requestBody`],
 );
 
 chrome.webRequest.onCompleted.addListener(
-  async details => {
+  async (details) => {
     const request = requestsDB[details.requestId];
 
     let misses = 0;
@@ -32,43 +30,41 @@ chrome.webRequest.onCompleted.addListener(
       chrome.tabs.sendMessage(
         request.tabId,
         {
-          hitMissed: request.hit_set_id
+          hitMissed: request.hit_set_id,
         },
-        res => {
+        (res) => {
           if (!res && misses < 5) {
             setTimeout(missedHIT, 1000);
           }
-        }
+        },
       );
     }
 
     if (request) {
       const catcher = chrome.extension
         .getViews()
-        .map(o => o.location.pathname)
+        .map((o) => o.location.pathname)
         .includes(`/hit_catcher/hit_catcher.html`);
 
       if (
         catcher &&
-        details.url.indexOf(
-          `https://worker.mturk.com/projects/${request.hit_set_id}/tasks`
-        ) === -1
+        details.url.indexOf(`https://workersandbox.mturk.com/projects/${request.hit_set_id}/tasks`) === -1
       ) {
         setTimeout(missedHIT, 1000);
       }
     }
   },
   {
-    urls: [`https://worker.mturk.com/*`],
-    types: [`main_frame`]
+    urls: [`https://workersandbox.mturk.com/*`],
+    types: [`main_frame`],
   },
-  [`responseHeaders`]
+  [`responseHeaders`],
 );
 
 let filterParams = ``;
 
 chrome.webRequest.onCompleted.addListener(
-  details => {
+  (details) => {
     const url = new window.URL(details.url);
 
     if (!details.url.match(/format=json|\.json/)) {
@@ -80,26 +76,26 @@ chrome.webRequest.onCompleted.addListener(
     }
   },
   {
-    urls: [`https://worker.mturk.com/?*`, `https://worker.mturk.com/projects*`],
-    types: [`main_frame`]
+    urls: [`https://workersandbox.mturk.com/?*`, `https://workersandbox.mturk.com/projects*`],
+    types: [`main_frame`],
   },
-  [`responseHeaders`]
+  [`responseHeaders`],
 );
 
 chrome.webRequest.onBeforeRequest.addListener(
   // eslint-disable-next-line consistent-return
-  async details => {
+  async (details) => {
     const { rememberFilter } = await StorageGetKey(`options`);
 
     if (rememberFilter) {
       return {
-        redirectUrl: `${details.url}?${filterParams}`
+        redirectUrl: `${details.url}?${filterParams}`,
       };
     }
   },
   {
-    urls: [`https://worker.mturk.com/`, `https://worker.mturk.com/projects`],
-    types: [`main_frame`]
+    urls: [`https://workersandbox.mturk.com/`, `https://workersandbox.mturk.com/projects`],
+    types: [`main_frame`],
   },
-  [`blocking`]
+  [`blocking`],
 );

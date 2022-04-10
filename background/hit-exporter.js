@@ -47,9 +47,9 @@ function hitToQualifications(hit) {
   if (hit.project_requirements) {
     const quals = hit.project_requirements.map(qual).join(`; `) || `None`;
     return quals;
-  } 
-  
-  return `Not available from queue exports.`
+  }
+
+  return `Not available from queue exports.`;
 }
 
 function hitExporterNotification(title, body) {
@@ -83,9 +83,7 @@ function templateTurkerView(review) {
   const { ratings, wages, rejections, blocks } = review;
   const { pay, fast, comm } = ratings;
 
-  return `[Hrly=$${wages.average.wage}] [Pay=${pay.text}] [Approval=${fast.text}] [Comm=${
-    comm.text
-  }] [Rej=${rejections}] [Blk=${blocks}]`;
+  return `[Hrly=$${wages.average.wage}] [Pay=${pay.text}] [Approval=${fast.text}] [Comm=${comm.text}] [Rej=${rejections}] [Blk=${blocks}]`;
 }
 
 function templateTurkopticon(review) {
@@ -119,9 +117,9 @@ function shortTemplateURLs(hit) {
   addParam(`action`, `bulkshortener`);
   addParam(`title`, `MTurk`);
   addParam(`signature`, `39f6cf4959`);
-  addParam(`urls[]`, `https://worker.mturk.com/requesters/${requester_id}/projects`);
-  addParam(`urls[]`, `https://worker.mturk.com/projects/${hit_set_id}/tasks`);
-  addParam(`urls[]`, `https://worker.mturk.com/projects/${hit_set_id}/tasks/accept_random`);
+  addParam(`urls[]`, `https://workersandbox.mturk.com/requesters/${requester_id}/projects`);
+  addParam(`urls[]`, `https://workersandbox.mturk.com/projects/${hit_set_id}/tasks`);
+  addParam(`urls[]`, `https://workersandbox.mturk.com/projects/${hit_set_id}/tasks/accept_random`);
 
   return new Promise(async (resolve) => {
     const response = await window.fetch(url);
@@ -152,7 +150,7 @@ function shortTemplate(hit) {
       const template = `${masters}${requester_name} ${reqLink} • ${title} ${prevLink} • ${reward} • Accept: ${accLink} • ${hit_set_id}`;
       resolve(template);
     } catch (error) {
-      const template = `${masters}${requester_name} • ${title} • ${reward} • Preview: https://worker.mturk.com/projects/${hit_set_id}/tasks • Accept: https://worker.mturk.com/projects/${hit_set_id}/tasks/accept_random`;
+      const template = `${masters}${requester_name} • ${title} • ${reward} • Preview: https://workersandbox.mturk.com/projects/${hit_set_id}/tasks • Accept: https://workersandbox.mturk.com/projects/${hit_set_id}/tasks/accept_random`;
       resolve(template);
     }
   });
@@ -204,8 +202,8 @@ function plainTemplate(hit) {
     const duration = hit.assignment_duration_in_seconds;
     const qualifications = hitToQualifications(hit);
 
-    const template = `Title: ${title} • https://worker.mturk.com/projects/${hit_set_id}/tasks • https://worker.mturk.com/projects/${hit_set_id}/tasks/accept_random
-      Requester: ${requester_name} • https://worker.mturk.com/requesters/${requester_id}/projects
+    const template = `Title: ${title} • https://workersandbox.mturk.com/projects/${hit_set_id}/tasks • https://workersandbox.mturk.com/projects/${hit_set_id}/tasks/accept_random
+      Requester: ${requester_name} • https://workersandbox.mturk.com/requesters/${requester_id}/projects
       ${reviews}
       Reward: ${reward}
       Duration: ${moment.duration(duration, `seconds`).format()}
@@ -263,8 +261,8 @@ function bbCodeTemplate(hit) {
     const duration = hit.assignment_duration_in_seconds;
     const qualifications = hitToQualifications(hit);
 
-    const template = `[table][tr][td][b]Title:[/b] [url="https://worker.mturk.com/projects/${hit_set_id}/tasks"]${title}[/url] | [url="https://worker.mturk.com/projects/${hit_set_id}/tasks/accept_random"]Accept[/url]
-      [b]Requester:[/b] [url="https://worker.mturk.com/requesters/${requester_id}/projects"]${requester_name}[/url] [${requester_id}] [url="https://worker.mturk.com/contact_requester/hit_type_messages/new?hit_type_message[hit_type_id]=YOURMTURKHIT&hit_type_message[requester_id]=${requester_id}"]Contact[/url]
+    const template = `[table][tr][td][b]Title:[/b] [url="https://workersandbox.mturk.com/projects/${hit_set_id}/tasks"]${title}[/url] | [url="https://workersandbox.mturk.com/projects/${hit_set_id}/tasks/accept_random"]Accept[/url]
+      [b]Requester:[/b] [url="https://workersandbox.mturk.com/requesters/${requester_id}/projects"]${requester_name}[/url] [${requester_id}] [url="https://workersandbox.mturk.com/contact_requester/hit_type_messages/new?hit_type_message[hit_type_id]=YOURMTURKHIT&hit_type_message[requester_id]=${requester_id}"]Contact[/url]
       ${reviews}[b]Reward:[/b] ${reward}
       [b]Duration:[/b] ${moment.duration(duration, `seconds`).format()}
       [b]Available:[/b] ${assignable_hits_count}
@@ -314,23 +312,27 @@ function markdownTemplateReviews(hit) {
 
 function markdownTemplate(hit) {
   return new Promise(async (resolve) => {
-    const template = `> **Title:** [${hit.title}](https://worker.mturk.com/projects/${
+    const template = `> **Title:** [${hit.title}](https://workersandbox.mturk.com/projects/${
       hit.hit_set_id
-    }/tasks) | [Accept](https://worker.mturk.com/projects/${hit.hit_set_id}/tasks/accept_random)  
-      **Requester:** [${hit.requester_name}](https://worker.mturk.com/requesters/${hit.requester_id}/projects) [${
+    }/tasks) | [Accept](https://workersandbox.mturk.com/projects/${hit.hit_set_id}/tasks/accept_random)  
+      **Requester:** [${hit.requester_name}](https://workersandbox.mturk.com/requesters/${
       hit.requester_id
-    }] [Contact](https://worker.mturk.com/contact_requester/hit_type_messages/new?hit_type_message[hit_type_id]=YOURMTURKHIT&hit_type_message[requester_id]=${
+    }/projects) [${
+      hit.requester_id
+    }] [Contact](https://workersandbox.mturk.com/contact_requester/hit_type_messages/new?hit_type_message[hit_type_id]=YOURMTURKHIT&hit_type_message[requester_id]=${
       hit.requester_id
     })  
       ${await markdownTemplateReviews(hit)}**Reward:** $${hit.monetary_reward.amount_in_dollars}  
       **Duration:** ${moment.duration(hit.assignment_duration_in_seconds, `seconds`).format()}  
       **Available:** ${hit.assignable_hits_count}  
       **Description:** ${hit.description}  
-      **Qualifications:** ${hit.project_requirements
-        .map((o) =>
-          `${o.qualification_type.name} ${o.comparator} ${o.qualification_values.map((v) => v).join(`, `)}`.trim(),
-        )
-        .join(`; `) || `None`}`;
+      **Qualifications:** ${
+        hit.project_requirements
+          .map((o) =>
+            `${o.qualification_type.name} ${o.comparator} ${o.qualification_values.map((v) => v).join(`, `)}`.trim(),
+          )
+          .join(`; `) || `None`
+      }`;
     resolve(template);
   });
 }

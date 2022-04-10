@@ -63,17 +63,13 @@
     "*://*.mturk.com/*",
     "*://*.turkerview.com/*",
     "*://*.mturkcrowd.com/*",
-    "https://www.amazon.com/ap/signin?*openid.return_to=https://worker.mturk.com/projects/*/tasks/accept_random*"
+    "https://www.amazon.com/ap/signin?*openid.return_to=https://workersandbox.mturk.com/projects/*/tasks/accept_random*"
   ],
 
   "short_name": "MTS",
 
   "externally_connectable": {
-    "matches": [
-      "https://worker.mturk.com/*",
-      "https://forum.turkerview.com//*",
-      "https://www.mturkcrowd.com/*"
-    ]
+    "matches": ["https://workersandbox.mturk.com/*", "https://forum.turkerview.com//*", "https://www.mturkcrowd.com/*"]
   },
 
   "web_accessible_resources": [
@@ -97,37 +93,34 @@
         "js/tagged-template-literals.js",
         "mturk/globals/index.js"
       ],
-      "matches": ["https://worker.mturk.com/*"],
+      "matches": ["https://workersandbox.mturk.com/*"],
       "run_at": "document_start",
       "all_frames": true
     },
 
     {
       "js": ["mturk/auto-accept-unchecker.js"],
-      "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
+      "matches": ["https://workersandbox.mturk.com/projects/*/tasks/*"],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/block-list-on-mturk.js"],
       "matches": [
-        "https://worker.mturk.com/",
-        "https://worker.mturk.com/?*",
-        "https://worker.mturk.com/projects",
-        "https://worker.mturk.com/projects/",
-        "https://worker.mturk.com/projects?*",
-        "https://worker.mturk.com/projects/?*",
-        "https://worker.mturk.com/requesters/*/projects*"
+        "https://workersandbox.mturk.com/",
+        "https://workersandbox.mturk.com/?*",
+        "https://workersandbox.mturk.com/projects",
+        "https://workersandbox.mturk.com/projects/",
+        "https://workersandbox.mturk.com/projects?*",
+        "https://workersandbox.mturk.com/projects/?*",
+        "https://workersandbox.mturk.com/requesters/*/projects*"
       ],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/confirm-return-hit.js"],
-      "matches": [
-        "https://worker.mturk.com/tasks*",
-        "https://worker.mturk.com/projects/*/tasks/*"
-      ],
+      "matches": ["https://workersandbox.mturk.com/tasks*", "https://workersandbox.mturk.com/projects/*/tasks/*"],
       "run_at": "document_end"
     },
 
@@ -139,26 +132,26 @@
         "mturk/turkerview/return-reviews.js",
         "mturk/turkerview/hit-reviews.js"
       ],
-      "matches": ["https://worker.mturk.com/projects/*/tasks*"],
+      "matches": ["https://workersandbox.mturk.com/projects/*/tasks*"],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/context-menu-worker-id.js"],
-      "matches": ["https://worker.mturk.com/*"],
+      "matches": ["https://workersandbox.mturk.com/*"],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/hit-catcher-buttons.js"],
       "matches": [
-        "https://worker.mturk.com/",
-        "https://worker.mturk.com/?*",
-        "https://worker.mturk.com/projects",
-        "https://worker.mturk.com/projects/",
-        "https://worker.mturk.com/projects?*",
-        "https://worker.mturk.com/projects/?*",
-        "https://worker.mturk.com/tasks?*"
+        "https://workersandbox.mturk.com/",
+        "https://workersandbox.mturk.com/?*",
+        "https://workersandbox.mturk.com/projects",
+        "https://workersandbox.mturk.com/projects/",
+        "https://workersandbox.mturk.com/projects?*",
+        "https://workersandbox.mturk.com/projects/?*",
+        "https://workersandbox.mturk.com/tasks?*"
       ],
       "run_at": "document_end"
     },
@@ -166,54 +159,50 @@
     {
       "js": ["mturk/hit-catcher-buttons-missed.js"],
       "matches": [
-        "https://worker.mturk.com/",
-        "https://worker.mturk.com/?*",
-        "https://worker.mturk.com/projects",
-        "https://worker.mturk.com/projects/",
-        "https://worker.mturk.com/projects?*",
-        "https://worker.mturk.com/projects/?*",
-        "https://worker.mturk.com/tasks*",
-        "https://worker.mturk.com/requesters/*"
+        "https://workersandbox.mturk.com/",
+        "https://workersandbox.mturk.com/?*",
+        "https://workersandbox.mturk.com/projects",
+        "https://workersandbox.mturk.com/projects/",
+        "https://workersandbox.mturk.com/projects?*",
+        "https://workersandbox.mturk.com/projects/?*",
+        "https://workersandbox.mturk.com/tasks*",
+        "https://workersandbox.mturk.com/requesters/*"
       ],
       "run_at": "document_start"
     },
 
     {
       "js": ["mturk/hit-details-sticky.js"],
-      "matches": ["https://worker.mturk.com/projects/*/tasks*"],
+      "matches": ["https://workersandbox.mturk.com/projects/*/tasks*"],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/hit-exporter.js"],
       "matches": [
-        "https://worker.mturk.com/",
-        "https://worker.mturk.com/?*",
-        "https://worker.mturk.com/projects",
-        "https://worker.mturk.com/projects/",
-        "https://worker.mturk.com/projects?*",
-        "https://worker.mturk.com/projects/?*",
-        "https://worker.mturk.com/tasks*",
-        "https://worker.mturk.com/requesters/*"
+        "https://workersandbox.mturk.com/",
+        "https://workersandbox.mturk.com/?*",
+        "https://workersandbox.mturk.com/projects",
+        "https://workersandbox.mturk.com/projects/",
+        "https://workersandbox.mturk.com/projects?*",
+        "https://workersandbox.mturk.com/projects/?*",
+        "https://workersandbox.mturk.com/tasks*",
+        "https://workersandbox.mturk.com/requesters/*"
       ],
       "run_at": "document_end"
     },
 
     {
-      "js": [
-        "js/moment.js",
-        "js/moment-duration-format.js",
-        "mturk/turkerview/hit-ratings.js"
-      ],
+      "js": ["js/moment.js", "js/moment-duration-format.js", "mturk/turkerview/hit-ratings.js"],
       "matches": [
-        "https://worker.mturk.com/",
-        "https://worker.mturk.com/?*",
-        "https://worker.mturk.com/projects",
-        "https://worker.mturk.com/projects/",
-        "https://worker.mturk.com/projects?*",
-        "https://worker.mturk.com/projects/?*",
-        "https://worker.mturk.com/tasks*",
-        "https://worker.mturk.com/requesters/*"
+        "https://workersandbox.mturk.com/",
+        "https://workersandbox.mturk.com/?*",
+        "https://workersandbox.mturk.com/projects",
+        "https://workersandbox.mturk.com/projects/",
+        "https://workersandbox.mturk.com/projects?*",
+        "https://workersandbox.mturk.com/projects/?*",
+        "https://workersandbox.mturk.com/tasks*",
+        "https://workersandbox.mturk.com/requesters/*"
       ],
       "run_at": "document_end"
     },
@@ -221,96 +210,96 @@
     {
       "js": ["mturk/hit-tracker-display-counts.js"],
       "matches": [
-        "https://worker.mturk.com/",
-        "https://worker.mturk.com/?*",
-        "https://worker.mturk.com/projects",
-        "https://worker.mturk.com/projects/",
-        "https://worker.mturk.com/projects?*",
-        "https://worker.mturk.com/projects/?*",
-        "https://worker.mturk.com/tasks*",
-        "https://worker.mturk.com/requesters/*"
+        "https://workersandbox.mturk.com/",
+        "https://workersandbox.mturk.com/?*",
+        "https://workersandbox.mturk.com/projects",
+        "https://workersandbox.mturk.com/projects/",
+        "https://workersandbox.mturk.com/projects?*",
+        "https://workersandbox.mturk.com/projects/?*",
+        "https://workersandbox.mturk.com/tasks*",
+        "https://workersandbox.mturk.com/requesters/*"
       ],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/hit-tracker-display-earnings.js"],
-      "matches": ["https://worker.mturk.com/*"],
+      "matches": ["https://workersandbox.mturk.com/*"],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/hit-tracker-live-update-hit.js"],
-      "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
+      "matches": ["https://workersandbox.mturk.com/projects/*/tasks/*"],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/hit-tracker-live-update-queue.js"],
-      "matches": ["https://worker.mturk.com/tasks*"],
+      "matches": ["https://workersandbox.mturk.com/tasks*"],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/logged-in.js"],
-      "matches": ["https://worker.mturk.com/*"],
+      "matches": ["https://workersandbox.mturk.com/*"],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/pagination-last-page.js"],
       "matches": [
-        "https://worker.mturk.com/",
-        "https://worker.mturk.com/?*",
-        "https://worker.mturk.com/projects",
-        "https://worker.mturk.com/projects/",
-        "https://worker.mturk.com/projects?*",
-        "https://worker.mturk.com/projects/?*",
-        "https://worker.mturk.com/tasks?*",
-        "https://worker.mturk.com/requesters/*",
-        "https://worker.mturk.com/status_details/*",
-        "https://worker.mturk.com/qualifications/*"
+        "https://workersandbox.mturk.com/",
+        "https://workersandbox.mturk.com/?*",
+        "https://workersandbox.mturk.com/projects",
+        "https://workersandbox.mturk.com/projects/",
+        "https://workersandbox.mturk.com/projects?*",
+        "https://workersandbox.mturk.com/projects/?*",
+        "https://workersandbox.mturk.com/tasks?*",
+        "https://workersandbox.mturk.com/requesters/*",
+        "https://workersandbox.mturk.com/status_details/*",
+        "https://workersandbox.mturk.com/qualifications/*"
       ],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/queue-info-enhancer.js"],
-      "matches": ["https://worker.mturk.com/tasks*"],
+      "matches": ["https://workersandbox.mturk.com/tasks*"],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/rate-limit-reloader.js"],
-      "matches": ["https://worker.mturk.com/*"],
+      "matches": ["https://workersandbox.mturk.com/*"],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/reviews.js"],
       "matches": [
-        "https://worker.mturk.com/",
-        "https://worker.mturk.com/?*",
-        "https://worker.mturk.com/projects",
-        "https://worker.mturk.com/projects/",
-        "https://worker.mturk.com/projects?*",
-        "https://worker.mturk.com/projects/?*",
-        "https://worker.mturk.com/tasks*",
-        "https://worker.mturk.com/requesters/*",
-        "https://worker.mturk.com/status_details/*"
+        "https://workersandbox.mturk.com/",
+        "https://workersandbox.mturk.com/?*",
+        "https://workersandbox.mturk.com/projects",
+        "https://workersandbox.mturk.com/projects/",
+        "https://workersandbox.mturk.com/projects?*",
+        "https://workersandbox.mturk.com/projects/?*",
+        "https://workersandbox.mturk.com/tasks*",
+        "https://workersandbox.mturk.com/requesters/*",
+        "https://workersandbox.mturk.com/status_details/*"
       ],
       "run_at": "document_end"
     },
 
     {
       "js": ["mturk/theme.js"],
-      "matches": ["https://worker.mturk.com/*"],
+      "matches": ["https://workersandbox.mturk.com/*"],
       "run_at": "document_start"
     },
 
     {
       "js": ["mturk/workspace-expander.js"],
-      "matches": ["https://worker.mturk.com/projects/*/tasks/*"],
+      "matches": ["https://workersandbox.mturk.com/projects/*/tasks/*"],
       "run_at": "document_end"
     },
 
@@ -319,6 +308,5 @@
       "matches": ["http://hitnotifier.com/*"],
       "run_at": "document_end"
     }
-
   ]
 }
