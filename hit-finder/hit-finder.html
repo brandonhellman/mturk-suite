@@ -330,6 +330,13 @@
                                 <span class="custom-control-description">Pushbullet</span>
                             </label>
                         </div>
+                        <div class="col-6">
+                            <label class="custom-control custom-checkbox" style="cursor: help;" data-toggle="tooltip" title="Sends you a ntfy message if matched and enabled under options">
+                                <input type="checkbox" id="include-list-add-ntfy" class="custom-control-input">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">ntfy</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -396,6 +403,13 @@
                                 <input type="checkbox" id="include-list-edit-pushbullet" class="custom-control-input">
                                 <span class="custom-control-indicator"></span>
                                 <span class="custom-control-description">Pushbullet</span>
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <label class="custom-control custom-checkbox" style="cursor: help;" data-toggle="tooltip" title="Sends you a ntfy message if matched and enabled under options">
+                                <input type="checkbox" id="include-list-add-ntfy" class="custom-control-input">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">ntfy</span>
                             </label>
                         </div>
                     </div>
@@ -643,6 +657,24 @@
                                             Pushbullet Token
                                         </label>
                                         <input id="alert-pushbullet-token" type="text" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <label class="small mb-0" data-toggle="tooltip" style="cursor: help;" title="Send a message to ntfy when an include list match is found">
+                                            Ntfy State
+                                        </label>
+                                        <select id="alert-ntfy-state" class="custom-select w-100">
+                                            <option value="on">On</option>
+                                            <option value="off" selected>Off</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <label class="small mb-0" data-toggle="tooltip" style="cursor: help;" title="Your ntfy access token">
+                                            Ntfy Token
+                                        </label>
+                                        <input id="alert-ntfy-token" type="text" class="form-control">
                                     </div>
                                 </div>
 

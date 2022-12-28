@@ -89,7 +89,9 @@ const hitFinderDefaultSettings = {
   "alert-include-sound": `voice`,
   "alert-pushbullet-state": `off`,
   "alert-pushbullet-token": ``,
-
+  "alert-ntfy-state": `off`,
+  "alert-ntfy-token": ``,
+  
   "display-colored-rows": true,
 
   "display-recent-column-time": false,

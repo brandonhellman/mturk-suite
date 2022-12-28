@@ -6,6 +6,7 @@ const turkerviewDB = {};
 const turkopticonDB = {};
 const includeAlerted = [];
 const includePushbulleted = [];
+const includeNtfyed = []; // idk lol 
 
 let totalScans = 0;
 let pageRequestErrors = 0;
@@ -434,6 +435,7 @@ function includeListed(hit) {
 function includedAlert(il, hit) {
   const alerted = includeAlerted.includes(hit.hit_set_id);
   const pushbulleted = includePushbulleted.includes(hit.hit_set_id);
+  const ntfyed = includeNtfyed.includes(hit.hit_set_id)
 
   if (alerted) {
     return;
@@ -504,6 +506,22 @@ function includedAlert(il, hit) {
 
     setTimeout(() => {
       includePushbulleted.pop();
+    }, 900000);
+  }
+
+  if (il.ntfy && storage.hitFinder[`alert-ntfy-state`] === `on` && ntfyed === false) {
+    topic_url = "https://ntfy.sh/" + storage.hitFinder[`alert-ntfy-token`]
+    fetch(topic_url , {
+      method: 'POST', // PUT works too
+      body: `Title: ${hit.title}\nReq: ${hit.requester_name}\nReward: ${toMoneyString(
+        hit.monetary_reward.amount_in_dollars,
+      )}\nAvail: ${hit.assignable_hits_count}`
+    })
+
+    includeNtfyed.unshift(hit.hit_set_id);
+
+    setTimeout(() => {
+      includeNtfyed.pop();
     }, 900000);
   }
 
@@ -1028,6 +1046,7 @@ $(`#include-list-add-modal`).on(`show.bs.modal`, (event) => {
   document.getElementById(`include-list-add-alarm`).checked = false;
   document.getElementById(`include-list-add-notification`).checked = true;
   document.getElementById(`include-list-add-pushbullet`).checked = false;
+  document.getElementById(`include-list-add-ntfy`).checked = false;
 });
 
 $(`#include-list-edit-modal`).on(`show.bs.modal`, (event) => {
@@ -1041,6 +1060,7 @@ $(`#include-list-edit-modal`).on(`show.bs.modal`, (event) => {
   document.getElementById(`include-list-edit-alarm`).checked = item.alarm;
   document.getElementById(`include-list-edit-notification`).checked = item.notification;
   document.getElementById(`include-list-edit-pushbullet`).checked = item.pushbullet;
+  document.getElementById(`include-list-add-ntfy`).checked = false;
 
   document.getElementById(`include-list-edit-delete`).dataset.key = key;
 });
@@ -1334,6 +1354,7 @@ document.getElementById(`include-list-import`).addEventListener(`change`, async 
         sound: typeof item.sound === `boolean` ? item.sound : true,
         alarm: typeof item.alarm === `boolean` ? item.alarm : false,
         pushbullet: typeof item.pushbullet === `boolean` ? item.pushbullet : false,
+        ntfy: typeof item.ntfy === `boolean` ? item.ntfy : false,
         notification: typeof item.notification === `boolean` ? item.notification : true,
       };
     }
@@ -1359,6 +1380,7 @@ document.getElementById(`include-list-add-save`).addEventListener(`click`, (even
       alarm: document.getElementById(`include-list-add-alarm`).checked,
       notification: document.getElementById(`include-list-add-notification`).checked,
       pushbullet: document.getElementById(`include-list-add-pushbullet`).checked,
+      ntfy: document.getElementById(`include-list-add-ntfy`).checked,
     };
 
     includeListUpdate();
@@ -1378,6 +1400,7 @@ document.getElementById(`include-list-edit-save`).addEventListener(`click`, (eve
       alarm: document.getElementById(`include-list-edit-alarm`).checked,
       notification: document.getElementById(`include-list-edit-notification`).checked,
       pushbullet: document.getElementById(`include-list-edit-pushbullet`).checked,
+      ntfy: document.getElementById(`include-list-edit-ntfy`).checked,
     };
 
     includeListUpdate();
